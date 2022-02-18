@@ -101,7 +101,7 @@ BEGIN
     
 	-- Insert data completed
     INSERT INTO FPS_FingerPrint.Transaction(
-		Id
+		RawTransId
 		, CustId
 		, SubAccId
 		, LoginName
