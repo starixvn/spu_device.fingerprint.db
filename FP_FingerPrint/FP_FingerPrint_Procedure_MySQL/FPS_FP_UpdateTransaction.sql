@@ -21,7 +21,7 @@ BEGIN
 			- CALL FPS_FP_UpdateTransaction(ip_BatchSize);
 			
 	*/
-    DECLARE lv_retryTimes BIGINT DEFAULT 2;
+	DECLARE lv_retryTimes BIGINT DEFAULT 2;
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;  
@@ -89,7 +89,7 @@ BEGIN
     WHERE Status = 0 
     AND Retry < lv_retryTimes
     ORDER BY Id ASC
-    LIMIT ip_BatchSize;  
+    LIMIT ip_BatchSize;
     
     UPDATE Temp_Transaction trans
     LEFT JOIN FPS_FingerPrint.FingerPrint fp ON fp.SessionKey = trans.SessionKey
@@ -156,7 +156,7 @@ BEGIN
         tmp.status = IF(tmp.Retry < lv_retryTimes, 0, -1)
 	WHERE tmp.FingerPrintCode IS NULL;	
     
-    INSERT INTO FPS_FingerPrint.Transaction24(
+    INSERT INTO FPS_FingerPrint.TransactionN(
 		Id
 		, SessionKey
 		, ModifiedDate
@@ -167,7 +167,7 @@ BEGIN
         , lv_currentDate AS ModifiedDate
         , lv_currentDate AS CreatedDate
     FROM Temp_Transaction
-    WHERE status = -1;    
+    WHERE status = -1;       
 	-- End Processing data error
         
 	DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;
