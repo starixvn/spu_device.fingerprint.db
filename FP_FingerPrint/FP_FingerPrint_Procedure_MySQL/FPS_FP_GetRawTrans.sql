@@ -39,7 +39,7 @@ BEGIN
     , 	trans.Action
     ,	trans.Retry
     FROM FPS_FingerPrint.RawTransaction trans 
-    WHERE trans.Id > ip_Offset AND trans.Retry < ip_Retry LIMIT ip_BatchSize;
+    WHERE trans.Id >= ip_Offset AND trans.Retry < ip_Retry LIMIT ip_BatchSize;
     
 END$$
 DELIMITER ;

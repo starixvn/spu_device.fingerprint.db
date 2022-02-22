@@ -104,7 +104,7 @@ BEGIN
         , trans.retry = trans.retry + 1
         , trans.Url = IFNULL(trans.Url, fp.Url);
     
-	-- Insert data completed
+	/* Insert data completed */
     INSERT INTO FPS_FingerPrint.Transaction(
 		RawTransId
 		, CustId
@@ -188,7 +188,8 @@ BEGIN
     WHERE tmp.FingerPrintCode IS NOT NULL;
     
     DELETE FROM Temp_RawTransaction WHERE FingerPrintCode IS NOT NULL;
-    	   
+           
+	/* Process data incompleted */
     INSERT INTO FPS_FingerPrint.RawTransactionN(
 		SessionKey
         , RawTransId
@@ -202,15 +203,12 @@ BEGIN
     FROM Temp_RawTransaction tmp 
     WHERE tmp.FingerPrintCode IS NULL 
 		AND tmp.Retry >= ip_Retry;
-    
-    DELETE FROM Temp_RawTransaction WHERE FingerPrintCode IS NOT NULL AND Retry >= ip_Retry;
-    
+        
     UPDATE FPS_FingerPrint.RawTransaction rawTrans
 		INNER JOIN Temp_RawTransaction tmp ON tmp.Id = rawTrans.Id
     SET rawTrans.Retry = tmp.Retry,        
 		rawTrans.ModifiedDate = lv_currentDate        
-	WHERE tmp.FingerPrintCode IS NULL 
-		AND tmp.Retry < ip_Retry;
+	WHERE tmp.FingerPrintCode IS NULL;
         
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
 END$$

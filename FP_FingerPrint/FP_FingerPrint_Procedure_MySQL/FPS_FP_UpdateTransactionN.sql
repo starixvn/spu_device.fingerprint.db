@@ -8,7 +8,7 @@ CREATE DEFINER=`jonathan.vn`@`%` PROCEDURE `FPS_FP_UpdateTransactionN`(
     SQL SECURITY INVOKER
 BEGIN
 	/*
-		Created:	20220218@jonathan
+		Created:	20220221@Terry.Nguyen
 		Task :		
 		DB:			FPS_FingerPrint
 		Original:
@@ -18,93 +18,179 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_UpdateTransaction24(ip_BatchSize);
+			- CALL FPS_FP_UpdateTransactionN({});
 			
 	*/
+   
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
-    DECLARE lv_expiredDate DATETIME DEFAULT DATE_ADD(NOW(), INTERVAL -15 MINUTE);
     
-	DROP TEMPORARY TABLE IF EXISTS Temp_TransactionN;    
+	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;  
     
-    -- Move data fail to Transaction
-    UPDATE FPS_FingerPrint.TransactionN
-    SET Status = -1
-    WHERE CreatedDate < lv_expiredDate;
+    /* Create Temporary table */
+	CREATE TEMPORARY TABLE Temp_RawTransaction(
+		`Id` 				BIGINT SIGNED PRIMARY KEY,        
+		`SessionKey` 		VARCHAR(200) NOT NULL,
+		`CustId` 			BIGINT DEFAULT NULL,
+		`SubAccId` 			BIGINT DEFAULT NULL,
+		`LoginName` 		VARCHAR(100) DEFAULT NULL,
+		`SubscriberId` 		INT DEFAULT NULL,
+		`Transtime` 		DATETIME DEFAULT NULL,
+		`ClientIP` 			VARCHAR(45) DEFAULT NULL,
+		`UserAgent` 		VARCHAR(500) DEFAULT NULL,
+		`Url` 				VARCHAR(100) DEFAULT NULL,
+		`Action` 			VARCHAR(100) DEFAULT NULL,
+		`ModifiedDate` 		DATETIME DEFAULT NULL,
+		`CreatedDate` 		DATETIME DEFAULT NULL,
+		`TransKey` 			VARCHAR(200) DEFAULT NULL,
+		`Flagged` 			VARCHAR(50) DEFAULT NULL,		
+		`Retry` 			TINYINT DEFAULT '0',
+		`FingerPrintCode` 	VARCHAR(200) DEFAULT NULL,
+		`CookieId` 			BIGINT DEFAULT NULL,
+        INDEX Temp_RawTransaction_FingerPrintCode_Index (FingerPrintCode)
+    ) ENGINE = MEMORY;  
     
-    -- Get Data into Temp
-    CREATE TEMPORARY TABLE Temp_TransactionN (PRIMARY KEY Temp_TransactionN_PR (Id), INDEX Temp_TransactionN_Index (FingerPrintCode, SessionKey, Status))
-    SELECT trans.Id
-		, trans.Status
-		, fp.SessionKey
-		, fp.FingerPrintCode
-        , fp.CookieId
-        , fp.Flagged
-        , fp.Url
-    FROM FPS_FingerPrint.TransactionN trans
-    LEFT JOIN FPS_FingerPrint.FingerPrint fp ON fp.SessionKey = trans.SessionKey;
-        
-	-- Insert data completed
+   INSERT INTO Temp_RawTransaction(
+		Id
+        , SessionKey
+        , CustId
+        , SubAccId
+        , LoginName
+        , SubscriberId
+        , Transtime
+        , ClientIP
+        , UserAgent
+        , Url
+        , TransKey
+        , Retry
+        , Action
+	)
+	SELECT	rt.Id
+		,	rt.SessionKey
+		,	rt.CustId
+		,	rt.SubAccId
+		,	rt.LoginName
+		,	rt.SubscriberId
+		,	rt.Transtime
+		,	rt.ClientIP
+		,	rt.UserAgent
+		,	rt.Url	
+        ,	rt.TransKey	
+        ,	rt.Retry	
+        ,	rt.Action
+	FROM	JSON_TABLE(
+			ip_RawTransJson,
+			 "$[*]" COLUMNS(
+								Id						BIGINT			PATH "$.Id"       
+							,	SessionKey				VARCHAR(200) 	PATH "$.SessionKey"   
+							,	CustId					BIGINT 			PATH "$.CustId"
+							,	SubAccId				BIGINT			PATH "$.SubAccId"
+							,	LoginName				VARCHAR(100)	PATH "$.LoginName"
+							,	SubscriberId			INT 			PATH "$.SubscriberId"
+							,	Transtime				DATETIME	 	PATH "$.Transtime"
+                            ,	ClientIP				VARCHAR(45)		PATH "$.ClientIP"
+                            ,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
+							,	Url						VARCHAR(100) 	PATH "$.Url"
+							,	TransKey				VARCHAR(200) 	PATH "$.TransKey"
+                            ,	Retry					TINYINT			PATH "$.Retry"
+							,	Action					VARCHAR(100) 	PATH "$.Action"                           
+				)
+		   ) AS  rt;    
+    
+    UPDATE Temp_RawTransaction trans
+		INNER JOIN FPS_FingerPrint.FingerPrint fp ON fp.SessionKey = trans.SessionKey
+    SET trans.FingerPrintCode = fp.FingerPrintCode
+		, trans.CookieId = fp.CookieId
+		, trans.Flagged = fp.Flagged        
+        , trans.Url = IFNULL(trans.Url, fp.Url);
+    
+	/* Insert data completed */
     INSERT INTO FPS_FingerPrint.Transaction(
 		RawTransId
 		, CustId
 		, SubAccId
 		, LoginName
 		, SubscriberId
+		, FingerPrintCode
+		, CookieId
 		, Transtime
 		, ClientIP
 		, UserAgent
 		, Url
 		, Action
-		, TransKey
-		, CreatedDate
 		, ModifiedDate
-		, FingerPrintCode
-		, CookieId
+		, CreatedDate
+		, TransKey
 		, Flagged
 	)
-    SELECT rawTrans.Id
-		, rawTrans.CustId
-        , rawTrans.SubAccId
-        , rawTrans.LoginName
-        , rawTrans.SubscriberId
-        , rawTrans.Transtime
-        , rawTrans.ClientIP
-        , rawTrans.UserAgent
-        , IFNULL(rawTrans.Url, tmp.Url)
-        , rawTrans.Action
-        , rawTrans.TransKey
-        , rawTrans.CreatedDate
-        , lv_currentDate as ModifiedDate
+    SELECT tmp.Id
+		, tmp.CustId
+        , tmp.SubAccId
+        , tmp.LoginName
+        , tmp.SubscriberId
         , tmp.FingerPrintCode
 		, tmp.CookieId
+        , tmp.Transtime
+        , tmp.ClientIP
+        , tmp.UserAgent
+        , tmp.Url
+        , tmp.Action
+        , lv_currentDate as ModifiedDate
+        , tmp.CreatedDate
+        , tmp.TransKey
         , tmp.Flagged
-    FROM Temp_TransactionN tmp
-    INNER JOIN FPS_FingerPrint.RawTransaction rawTrans on rawTrans.Id = tmp.Id
-    WHERE tmp.FingerPrintCode IS NOT NULL
-    OR tmp.Status = -1;
-    
-    UPDATE FPS_FingerPrint.RawTransaction rawTrans
-    INNER JOIN Temp_TransactionN tmp on tmp.Id = rawTrans.Id
-    SET rawTrans.status = 1,
-		rawTrans.ModifiedDate = lv_currentDate
+    FROM Temp_RawTransaction tmp
+    WHERE tmp.FingerPrintCode IS NOT NULL;
+
+	INSERT INTO FPS_FingerPrint.RawTransactionCompleted(
+		Id, 
+        SessionKey, 
+        CustId, 
+        SubAccId, 
+        LoginName, 
+        SubscriberId, 
+        Transtime, 
+        ClientIP, 
+        UserAgent, 
+        Url, 
+        ModifiedDate, 
+        CreatedDate, 
+        TransKey, 
+        Retry, 
+        Action
+	)
+    SELECT trans.Id
+		, trans.SessionKey
+        , trans.CustId
+        , trans.SubAccId
+        , trans.LoginName
+        , trans.SubscriberId
+        , trans.Transtime
+        , trans.ClientIP
+        , trans.UserAgent
+        , trans.Url
+        , trans.ModifiedDate
+        , trans.CreatedDate
+        , trans.TransKey
+        , trans.Retry
+        , trans.Action
+    FROM FPS_FingerPrint.RawTransaction trans 
+		INNER JOIN Temp_RawTransaction tmp ON trans.Id = tmp.Id 
     WHERE tmp.FingerPrintCode IS NOT NULL;
     
     UPDATE FPS_FingerPrint.FingerPrint fp
-    INNER JOIN Temp_TransactionN tmp ON tmp.SessionKey = fp.SessionKey
+		INNER JOIN Temp_Transaction tmp ON tmp.SessionKey = fp.SessionKey
     SET fp.MergedStatus = 1;
-        
-    DELETE trans, tmp
-    FROM FPS_FingerPrint.TransactionN trans
-    INNER JOIN Temp_TransactionN tmp on tmp.Id = trans.Id
-    WHERE tmp.FingerPrintCode IS NOT NULL
-    OR tmp.Status = -1;  
     
-	-- Processing data error    
-    UPDATE FPS_FingerPrint.TransactionN trans
-    INNER JOIN Temp_TransactionN tmp ON tmp.Id = trans.Id
-    SET trans.ModifiedDate = lv_currentDate;
-  
-	DROP TEMPORARY TABLE IF EXISTS Temp_TransactionN;  
+    DELETE trans 
+    FROM FPS_FingerPrint.RawTransaction trans 
+		INNER JOIN Temp_RawTransaction tmp ON trans.Id = tmp.Id 
+    WHERE tmp.FingerPrintCode IS NOT NULL;
     
+    DELETE trans 
+    FROM FPS_FingerPrint.RawTransactionN trans
+		INNER JOIN Temp_RawTransaction tmp ON trans.Id = tmp.Id
+    WHERE tmp.FingerPrintCode IS NOT NULL;
+    
+	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
 END$$
 DELIMITER ;
