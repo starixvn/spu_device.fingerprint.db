@@ -46,7 +46,7 @@ BEGIN
 		`Retry` 			TINYINT DEFAULT '0',
 		`FingerPrintCode` 	VARCHAR(200) DEFAULT NULL,
 		`CookieId` 			BIGINT DEFAULT NULL,
-        INDEX Temp_Transaction_FingerPrintCode_Index (FingerPrintCode)
+        INDEX Temp_RawTransaction_FingerPrintCode_Index (FingerPrintCode)
     ) ENGINE = MEMORY;  
     
 	INSERT INTO Temp_RawTransaction(
@@ -179,7 +179,7 @@ BEGIN
     WHERE tmp.FingerPrintCode IS NOT NULL;
     
     UPDATE FPS_FingerPrint.FingerPrint fp
-		INNER JOIN Temp_Transaction tmp ON tmp.SessionKey = fp.SessionKey
+		INNER JOIN Temp_RawTransaction tmp ON tmp.SessionKey = fp.SessionKey
     SET fp.MergedStatus = 1;
     
     DELETE trans 
