@@ -34,4 +34,4 @@ BEGIN
 END$$
 DELIMITER ;
 
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_DeviceIdentify TO 'fpsService'@'%';
+GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_GetSubscriberInfoById TO 'fpsService'@'%';
