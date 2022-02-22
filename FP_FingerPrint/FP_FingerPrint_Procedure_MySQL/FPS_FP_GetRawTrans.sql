@@ -1,8 +1,8 @@
-/*<info serverAlias="xxxx" databaseType="2" executers="fpsService" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="xxxx" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FPS_FP_GetRawTrans`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_GetRawTrans`(
+CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_GetRawTrans`(
 		ip_BatchSize 	INT,
         ip_Offset		BIGINT,
         ip_Retry		INT
@@ -20,7 +20,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_GetRawTrans(100, 1234, 5);
+			- CALL FPS_FP_GetRawTrans(100, 1234);
 			
 	*/
 	   
@@ -39,9 +39,9 @@ BEGIN
     , 	trans.Action
     ,	trans.Retry
     FROM FPS_FingerPrint.RawTransaction trans 
-    WHERE trans.Id >= ip_Offset AND trans.Retry < ip_Retry LIMIT ip_BatchSize;
+    WHERE trans.Id > ip_Offset AND trans.Retry < ip_Retry LIMIT ip_BatchSize;
     
 END$$
 DELIMITER ;
 
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_GetRawTrans TO 'fpsService'@'%';
+GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_GetRawTrans TO 'fpsServiceAdmin'@'%';
