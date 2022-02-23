@@ -4,7 +4,9 @@ DELIMITER $$
 
 CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_Transaction_Update`(
 		ip_RawTransJson	LONGTEXT,
-        ip_Retry		INT
+        ip_Retry		INT,
+        ip_OffsetName	VARCHAR(100),
+        ip_Offsetvalue	BIGINT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -24,6 +26,13 @@ BEGIN
 	*/
    
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
+    DECLARE lv_offsetValue BIGINT;
+    
+    SELECT o.OffsetValue 
+    INTO lv_offsetValue
+    FROM FPS_FingerPrint.Offset o
+    WHERE o.OffsetName = ip_OffsetName
+    LIMIT 1;	
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;  
     
@@ -157,7 +166,11 @@ BEGIN
     SET rawTrans.Retry = tmp.Retry,        
 		rawTrans.ModifiedDate = lv_currentDate        
 	WHERE tmp.FingerPrintCode IS NULL;
-        
+    
+    UPDATE FPS_FingerPrint.Offset o
+    set o.OffsetValue = ip_Offsetvalue
+    WHERE o.OffsetName = ip_OffsetName;
+    
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
 END$$
 DELIMITER ;

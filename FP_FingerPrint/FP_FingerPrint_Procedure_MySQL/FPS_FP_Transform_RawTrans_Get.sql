@@ -4,7 +4,7 @@ DELIMITER $$
 
 CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTrans_Get`(
 		ip_BatchSize 	INT,
-        ip_Offset		BIGINT,
+        ip_OffsetName	VARCHAR(100),
         ip_Retry		INT
 )
     SQL SECURITY INVOKER
@@ -23,6 +23,13 @@ BEGIN
 			- CALL FPS_FP_GetRawTrans(100, 1234);
 			
 	*/
+    DECLARE lv_offsetValue BIGINT;
+    
+    SELECT o.OffsetValue 
+    INTO lv_offsetValue
+    FROM FPS_FingerPrint.Offset o
+    WHERE o.OffsetName = ip_OffsetName
+    LIMIT 1;	
 	   
     SELECT 
 		trans.Id
@@ -39,7 +46,7 @@ BEGIN
     , 	trans.Action
     ,	trans.Retry
     FROM FPS_FingerPrint.RawTransaction trans 
-    WHERE trans.Id >= ip_Offset AND trans.Retry < ip_Retry LIMIT ip_BatchSize;
+    WHERE trans.Id >= lv_offsetValue AND trans.Retry < ip_Retry LIMIT ip_BatchSize;
     
 END$$
 DELIMITER ;

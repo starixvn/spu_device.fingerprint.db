@@ -4,7 +4,7 @@ DELIMITER $$
 
 CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify_Get`(
 		ip_BatchSize 	INT,
-        ip_Offset		BIGINT
+        ip_OffsetName	VARCHAR(100)
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -19,11 +19,18 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_DeviceIdentify_Get(100);
+			- CALL FPS_FP_Transform_DeviceIdentify_Get(100, 'ABC');
 			
 	*/
     
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
+    DECLARE lv_offsetValue BIGINT;
+    
+    SELECT OffsetValue 
+    INTO lv_offsetValue
+    FROM FPS_FingerPrint.Offset o
+    WHERE OffsetName = ip_OffsetName
+    LIMIT 1;
     
 	SELECT trans.Id
 		, trans.FingerPrintCode
@@ -31,7 +38,9 @@ BEGIN
         , lv_currentDate
         , lv_currentDate
     FROM FPS_FingerPrint.Transaction trans
-    WHERE trans.Id > ip_Offset AND trans.DeviceId IS NULL    
+    WHERE trans.Id > lv_offsetValue 
+		AND trans.DeviceId IS NULL    
+	ORDER BY trans.Id
     LIMIT ip_BatchSize;  
 END$$
 DELIMITER ;

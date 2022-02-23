@@ -4,7 +4,7 @@ DELIMITER $$
 
 CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify`(		
         ip_TransJson	LONGTEXT,
-        ip_OffsetId		BIGINT
+        ip_OffsetName	VARCHAR(100)
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -25,8 +25,14 @@ BEGIN
     DECLARE lv_transId BIGINT DEFAULT 0;	
     DECLARE lv_deviceId BIGINT;
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
+    DECLARE lv_offsetValue BIGINT;
+    DECLARE lv_flag BOOLEAN DEFAULT TRUE;    
     
-    DECLARE lv_flag BOOLEAN DEFAULT TRUE;    	
+    SELECT OffsetValue 
+    INTO lv_offsetValue
+    FROM FPS_FingerPrint.Offset o
+    WHERE OffsetName = ip_OffsetName
+    LIMIT 1;	
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;    
     
@@ -42,7 +48,7 @@ BEGIN
         INDEX FingerPrintCode_Index (FingerPrintCode)
     ) ENGINE = MEMORY;
     
-    INSERT INTO Temp_Transactions(Id, FingerPrintCode, CookieId, DeviceId, IsRecovered, CreatedDate, ModifiedDate)
+    INSERT INTO Temp_Transaction(Id, FingerPrintCode, CookieId, DeviceId, IsRecovered, CreatedDate, ModifiedDate)
 	SELECT	rt.Id
 		,	rt.FingerPrintCode
 		,	rt.CookieId
@@ -183,7 +189,7 @@ BEGIN
     
     UPDATE FPS_FingerPrint.Offset off 
 		SET off.OffsetValue = @lv_MaxTransId 
-    WHERE off.Id = ip_OffsetId;
+    WHERE off.Id = lv_offsetValue;
     
 END$$
 DELIMITER ;
