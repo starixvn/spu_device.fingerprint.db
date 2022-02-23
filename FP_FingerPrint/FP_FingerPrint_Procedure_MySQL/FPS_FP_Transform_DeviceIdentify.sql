@@ -19,55 +19,82 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_DeviceIdentify(100);
+			- CALL FPS_FP_Transform_DeviceIdentify('[{"Id":2,"FingerPrintCode":"4c87b1360e6a1c77741180339a50355f","CookieId":68}]', 'DeviceIndetify');
 			
 	*/
     DECLARE lv_transId BIGINT DEFAULT 0;	
     DECLARE lv_deviceId BIGINT;
-    DECLARE lv_currentDate DATETIME DEFAULT NOW();
-    DECLARE lv_offsetValue BIGINT;
-    DECLARE lv_flag BOOLEAN DEFAULT TRUE;    
-    
-    SELECT OffsetValue 
-    INTO lv_offsetValue
-    FROM FPS_FingerPrint.Offset o
-    WHERE OffsetName = ip_OffsetName
-    LIMIT 1;	
+    DECLARE lv_currentDate DATETIME DEFAULT NOW();    
+    DECLARE lv_flag BOOLEAN DEFAULT TRUE;        	
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;    
     
 	CREATE TEMPORARY TABLE Temp_Transaction(
-		Id 					BIGINT SIGNED PRIMARY KEY,              
+		Id 					BIGINT SIGNED PRIMARY KEY,  
+        RawTransId			BIGINT,
+        CustId				BIGINT,
+        SubAccId			BIGINT,
+        LoginName			VARCHAR(100),
+        SubscriberId		INT,
         FingerPrintCode 	VARCHAR(200),
         CookieId			BIGINT,
         DeviceId			BIGINT,  
+        Transtime			DateTime,
+        ClientIP			VARCHAR(45),
+        UserAgent			VARCHAR(500),
+        Url					VARCHAR(100),
+        Action				VARCHAR(100),                
+		ModifiedDate		DATETIME,
+        CreatedDate			DATETIME,
+        TransKey			VARCHAR(200),
+        Flagged				VARCHAR(50),
         IsRecovered			BOOLEAN DEFAULT FALSE,
-		CreatedDate			DATETIME,
-        ModifiedDate		DATETIME,
         INDEX isRecoverd_Index (IsRecovered),
         INDEX FingerPrintCode_Index (FingerPrintCode)
     ) ENGINE = MEMORY;
     
-    INSERT INTO Temp_Transaction(Id, FingerPrintCode, CookieId, DeviceId, IsRecovered, CreatedDate, ModifiedDate)
+    INSERT INTO Temp_Transaction(Id, RawTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieId, Transtime, ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
 	SELECT	rt.Id
-		,	rt.FingerPrintCode
-		,	rt.CookieId
-		,	rt.DeviceId
-		,	rt.IsRecovered
-        ,	lv_currentDate
-		,	lv_currentDate		
+		,	rt.RawTransId
+        ,	rt.CustId
+        ,	rt.SubAccId
+        ,	rt.LoginName
+        ,	rt.SubscriberId
+        ,	rt.FingerPrintCode
+        ,	rt.CookieId
+        ,	rt.Transtime
+        ,	rt.ClientIP
+        ,	rt.UserAgent
+        ,	rt.Url
+        ,	rt.Action
+        ,	rt.ModifiedDate
+        ,	rt.CreatedDate
+        ,	rt.TransKey
+        ,	rt.Flagged       
 	FROM	JSON_TABLE(
 			ip_TransJson,
 			 "$[*]" COLUMNS(
 								Id						BIGINT			PATH "$.Id"       
-							,	FingerPrintCode			VARCHAR(200) 	PATH "$.FingerPrintCode"   
-							,	CookieId				BIGINT 			PATH "$.CookieId"
-							,	DeviceId				BIGINT			PATH "$.DeviceId"
-							,	IsRecovered				VARCHAR(100)	PATH "$.IsRecovered"							
+							,	RawTransId				BIGINT			PATH "$.RawTransId"
+                            ,	CustId					BIGINT			PATH "$.CustId"
+                            ,	SubAccId				BIGINT			PATH "$.SubAccId"
+                            ,	LoginName				VARCHAR(100)	PATH "$.LoginName"
+                            ,	SubscriberId			INT				PATH "$.SubscriberId"
+                            ,	FingerPrintCode			VARCHAR(200)	PATH "$.FingerPrintCode"
+                            ,	CookieId				BIGINT			PATH "$.CookieId"                            
+                            ,	Transtime				DATETIME		PATH "$.Transtime"
+                            ,	ClientIP				VARCHAR(45)		PATH "$.ClientIP"
+                            ,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
+                            ,	Url						VARCHAR(100)	PATH "$.Url"
+                            ,	Action					VARCHAR(100)	PATH "$.Action"
+                            ,	ModifiedDate			DATETIME		PATH "$.ModifiedDate"
+                            ,	CreatedDate				DATETIME		PATH "$.CreatedDate"
+                            ,	TransKey				VARCHAR(200)	PATH "$.TransKey"
+                            ,	Flagged					VARCHAR(50)		PATH "$.Flagged"
                                                    
 				)
 		   ) AS  rt;  
-    
+            
     WHILE(lv_flag) DO
 		BEGIN		
 			
@@ -153,37 +180,37 @@ BEGIN
         
     END WHILE;   
     
+   
     INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, RawTransId, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieId, DeviceId, Transtime,  ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
-    SELECT  trans.Id
-			, 	trans.RawTransId
-			, 	trans.CustId
-			, 	trans.SubAccId
-			, 	trans.LoginName
-			, 	trans.SubscriberId
-			, 	trans.FingerPrintCode
-			, 	trans.CookieId
+    SELECT  	tmp.Id
+			, 	tmp.RawTransId
+			, 	tmp.CustId
+			, 	tmp.SubAccId
+			, 	tmp.LoginName
+			, 	tmp.SubscriberId
+			, 	tmp.FingerPrintCode
+			, 	tmp.CookieId
 			, 	tmp.DeviceId
-			, 	trans.Transtime
-			, 	trans.ClientIP
-			, 	trans.UserAgent
-			, 	trans.Url
-			, 	trans.Action
+			, 	tmp.Transtime
+			, 	tmp.ClientIP
+			, 	tmp.UserAgent
+			, 	tmp.Url
+			, 	tmp.Action
 			, 	tmp.ModifiedDate
 			, 	lv_currentDate
-			, 	trans.TransKey
-			, 	trans.Flagged    
-		FROM FPS_FingerPrint.Transaction trans 
-		INNER JOIN Temp_Transaction tmp ON trans.Id = tmp.Id
+			, 	tmp.TransKey
+			, 	tmp.Flagged    
+		FROM Temp_Transaction tmp 		
 	WHERE tmp.IsRecovered = 1;
     
     DELETE trans FROM FPS_FingerPrint.Transaction trans
-    INNER JOIN Temp_Transaction tmp ON trans.Id = tmp.Id;
+		INNER JOIN Temp_Transaction tmp ON trans.Id = tmp.Id;
     
     SELECT MAX(tmp.Id) INTO @lv_MaxTransId FROM Temp_Transaction tmp;
     
     UPDATE FPS_FingerPrint.Offset off 
 		SET off.OffsetValue = @lv_MaxTransId 
-    WHERE off.Id = lv_offsetValue;
+    WHERE off.OffsetName = ip_OffsetName;
     
 END$$
 DELIMITER ;

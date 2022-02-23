@@ -23,11 +23,9 @@ BEGIN
 	*/
     DECLARE lv_offsetValue BIGINT;
     
-    SELECT o.OffsetValue 
-    INTO lv_offsetValue
-    FROM FPS_FingerPrint.Offset o
-    WHERE o.OffsetName = ip_OffsetName
-    LIMIT 1;	
+    SELECT off.OffsetValue INTO lv_offsetValue
+    FROM FPS_FingerPrint.Offset off
+    WHERE off.OffsetName = ip_OffsetName;	
    
     SELECT 
 		trans.Id

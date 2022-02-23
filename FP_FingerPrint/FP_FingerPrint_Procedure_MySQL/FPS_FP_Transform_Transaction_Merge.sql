@@ -92,7 +92,7 @@ BEGIN
 			ELSE 0 END)			
    , trans.TransKey
    , trans.IsMerged
-   FROM FPS_FingerPrint.Transaction trans WHERE trans.DeviceId Is Not NULL AND trans.IsMerged = 0 AND trans.TransKey Is not Null
+   FROM FPS_FingerPrint.TransactionCompleted trans WHERE trans.DeviceId Is Not NULL AND trans.IsMerged = 0 AND trans.TransKey Is not Null
    LIMIT ip_Size;
    
    INSERT INTO FPTesting.FP_RawTransaction(
@@ -291,7 +291,7 @@ BEGIN
    INNER JOIN Temp_Transactions_Old tmp ON transOld.TransID = tmp.TransID
    SET transOld.IsProcessed = 1;   
       
-   UPDATE FPS_FingerPrint.Transaction trans 
+   UPDATE FPS_FingerPrint.TransactionCompleted trans 
    INNER JOIN Temp_Transactions tmp ON trans.Id = tmp.Id
    SET trans.IsMerged = 1;
 END$$

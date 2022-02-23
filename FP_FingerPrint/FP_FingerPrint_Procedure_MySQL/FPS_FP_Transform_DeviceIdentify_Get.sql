@@ -23,22 +23,31 @@ BEGIN
 			
 	*/
     
-    DECLARE lv_currentDate DATETIME DEFAULT NOW();
     DECLARE lv_offsetValue BIGINT;
     
-    SELECT OffsetValue 
-    INTO lv_offsetValue
-    FROM FPS_FingerPrint.Offset o
-    WHERE OffsetName = ip_OffsetName
-    LIMIT 1;
+    SELECT off.OffsetValue INTO lv_offsetValue
+    FROM FPS_FingerPrint.Offset off
+    WHERE off.OffsetName = ip_OffsetName;
     
 	SELECT trans.Id
+		, trans.RawTransId
+        , trans.CustId
+        , trans.SubAccId
+        , trans.LoginName
+        , trans.SubscriberId        
 		, trans.FingerPrintCode
         , trans.CookieId
-        , lv_currentDate
-        , lv_currentDate
+        , trans.Transtime
+        , trans.ClientIP
+        , trans.UserAgent
+        , trans.Url
+        , trans.Action       
+        , trans.ModifiedDate
+        , trans.CreatedDate
+        , trans.TransKey
+        , trans.Flagged
     FROM FPS_FingerPrint.Transaction trans
-    WHERE trans.Id > lv_offsetValue 
+    WHERE trans.Id >= lv_offsetValue 
 		AND trans.DeviceId IS NULL    
 	ORDER BY trans.Id
     LIMIT ip_BatchSize;  
