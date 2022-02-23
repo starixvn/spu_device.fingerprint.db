@@ -153,12 +153,6 @@ BEGIN
         
     END WHILE;   
     
-    /*
-    UPDATE FPS_FingerPrint.Transaction trans INNER JOIN Temp_Transaction tmp ON trans.Id = tmp.Id
-    SET 
-		trans.DeviceId = tmp.DeviceId
-    WHERE tmp.IsRecovered = 1;*/
-    
     INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, RawTransId, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieId, DeviceId, Transtime,  ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
     SELECT  trans.Id
 			, 	trans.RawTransId

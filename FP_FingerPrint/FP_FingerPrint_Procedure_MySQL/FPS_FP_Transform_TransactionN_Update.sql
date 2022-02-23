@@ -24,14 +24,7 @@ BEGIN
 			
 	*/
    
-    DECLARE lv_currentDate DATETIME DEFAULT NOW();
-    DECLARE lv_offsetValue BIGINT;
-    
-    SELECT o.OffsetValue 
-    INTO lv_offsetValue
-    FROM FPS_FingerPrint.Offset o
-    WHERE o.OffsetName = ip_OffsetName
-    LIMIT 1;	
+    DECLARE lv_currentDate DATETIME DEFAULT NOW();   
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;  
     
@@ -164,9 +157,9 @@ BEGIN
     DELETE trans FROM FPS_FingerPrint.RawTransactionN trans
     INNER JOIN Temp_RawTransaction tmp ON trans.RawTransId = tmp.Id;
     
-    UPDATE FPS_FingerPrint.Offset o
-    set o.OffsetValue = ip_Offsetvalue
-    WHERE o.OffsetName = ip_OffsetName;
+    UPDATE FPS_FingerPrint.Offset off
+		SET off.OffsetValue = ip_Offsetvalue
+    WHERE off.OffsetName = ip_OffsetName;
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
 END$$
