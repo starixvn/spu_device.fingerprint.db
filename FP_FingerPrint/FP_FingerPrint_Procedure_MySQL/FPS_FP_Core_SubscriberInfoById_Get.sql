@@ -21,16 +21,10 @@ BEGIN
 			- CALL FPS_FP_GetSubscriberInfoById(2);
 			
 	*/
-    SELECT	ss.SubscriberId
-		,	sub.Name as SubscriberName
-        , 	sv.Id as DomainId
-        ,	sv.Domain as DomainName
-        , 	ss.IsActived
-        ,	ss.IsMain        
-    FROM   FPS_FingerPrint.SubscriberServer ss        
-    INNER JOIN FPS_FingerPrint.Subscribers sub ON sub.Id = ss.SubscriberId
-    INNER JOIN FPS_FingerPrint.HttpServers sv ON sv.Id = ss.HttpServerId
-    WHERE sub.Id = ip_SubscriberId; 
+     SELECT	sub.Id as SubscriberId
+		,	sub.Name as SubscriberName 
+    FROM   FPS_FingerPrint.Subscribers sub           
+    WHERE sub.Id = ip_SubscriberId and sub.Active = 1;
 END$$
 DELIMITER ;
 
