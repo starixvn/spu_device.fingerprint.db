@@ -35,7 +35,7 @@ BEGIN
     , 	trans.CustId
     , 	trans.SubAccId
     , 	trans.LoginName
-    , 	trans.SubAccId
+    , 	trans.SubscriberId
     , 	trans.Transtime
     , 	trans.ClientIP
     , 	trans.UserAgent
