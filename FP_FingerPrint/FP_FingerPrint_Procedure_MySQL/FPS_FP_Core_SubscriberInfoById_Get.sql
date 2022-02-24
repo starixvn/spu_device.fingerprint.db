@@ -24,7 +24,7 @@ BEGIN
      SELECT	sub.Id as SubscriberId
 		,	sub.Name as SubscriberName 
     FROM   FPS_FingerPrint.Subscribers sub           
-    WHERE sub.Id = ip_SubscriberId and sub.Active = 1;
+    WHERE sub.Id = ip_SubscriberId and sub.IsActive = 1;
 END$$
 DELIMITER ;
 
