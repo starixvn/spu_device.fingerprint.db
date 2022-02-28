@@ -4,8 +4,8 @@ DELIMITER $$
 
 CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_TransactionN_Update`(
 		ip_RawTransJson	LONGTEXT,
-        ip_OffsetName	VARCHAR(100),
-        ip_Offsetvalue	BIGINT
+        ip_OffsetId		INT,
+        ip_OffsetValue	BIGINT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -158,8 +158,8 @@ BEGIN
     INNER JOIN Temp_RawTransaction tmp ON trans.RawTransId = tmp.Id;
     
     UPDATE FPS_FingerPrint.Offset off
-		SET off.OffsetValue = ip_Offsetvalue
-    WHERE off.OffsetName = ip_OffsetName;
+		SET off.OffsetValue = ip_OffsetValue
+    WHERE off.Id = ip_OffsetId;
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
 END$$
