@@ -3,15 +3,16 @@ DROP PROCEDURE IF EXISTS `FPS_FP_Transform_DeviceIdentify`;
 DELIMITER $$
 
 CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify`(		
-        ip_TransJson	LONGTEXT,
-        ip_OffsetName	VARCHAR(100)
+		ip_GroupId		BIGINT UNSIGNED
+   ,    ip_TransJson	LONGTEXT
+	
 )
     SQL SECURITY INVOKER
 BEGIN
 	/*
 		Created:	20220218@Terry.Nguyen
 		Task :		
-		DB:			FPS_FingerPrint
+		DB:			FPS_FingerPrint_Review
 		Original:
 
 		Revisions:
@@ -19,200 +20,199 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_DeviceIdentify('[{"Id":2,"FingerPrintCode":"4c87b1360e6a1c77741180339a50355f","CookieId":68}]', 'DeviceIndetify');
+			CALL FPS_FP_Transform_DeviceIdentify(1,
+				'[	{"Id" : 1,"CreatedDate" : "2022-02-27 00:00:00","FingerPrintCode" : "100000009abcdefghijkrtgyuhn","CookieId" : 1},
+					{"Id" : 62,"CreatedDate" : "2022-02-27 00:00:00","FingerPrintCode" : "100000009abcdefghijkrtgyuhn","CookieId" : 1},
+					{"Id" : 73,"CreatedDate" : null,"FingerPrintCode" : "45e9c4defb87b8ae6406480e012b6c5b","CookieId" : 1}]');;
 			
 	*/
-    DECLARE lv_transId BIGINT DEFAULT 0;	
-    DECLARE lv_deviceId BIGINT;
-    DECLARE lv_currentDate DATETIME DEFAULT NOW();    
-    DECLARE lv_flag BOOLEAN DEFAULT TRUE;        	
     
-    DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;    
+    DECLARE lv_GroupDeviceId BIGINT UNSIGNED;
+    DECLARE lv_CreatedDate DATETIME(4);
     
-	CREATE TEMPORARY TABLE Temp_Transaction(
-		Id 					BIGINT SIGNED PRIMARY KEY,  
-        RawTransId			BIGINT,
-        CustId				BIGINT,
-        SubAccId			BIGINT,
-        LoginName			VARCHAR(100),
-        SubscriberId		INT,
-        FingerPrintCode 	VARCHAR(200),
-        CookieId			BIGINT,
-        DeviceId			BIGINT,  
-        Transtime			DateTime,
-        ClientIP			VARCHAR(45),
-        UserAgent			VARCHAR(500),
-        Url					VARCHAR(100),
-        Action				VARCHAR(100),                
-		ModifiedDate		DATETIME,
-        CreatedDate			DATETIME,
-        TransKey			VARCHAR(200),
-        Flagged				VARCHAR(50),
-        IsRecovered			BOOLEAN DEFAULT FALSE,
-        INDEX isRecoverd_Index (IsRecovered),
-        INDEX FingerPrintCode_Index (FingerPrintCode)
-    ) ENGINE = MEMORY;
+    DROP TEMPORARY TABLE IF EXISTS Temp_InputTrans;
+    CREATE TEMPORARY TABLE Temp_InputTrans(
+			Id				BIGINT UNSIGNED PRIMARY KEY
+		,	TransTime		DATETIME(4)
+		,	FingerPrintCode	VARCHAR(64)
+        ,	CookieId		BIGINT UNSIGNED
+        ,	DeviceID		BIGINT UNSIGNED
+        ,	RecoverType		TINYINT DEFAULT 0	#0 New, 1 By FingerPrintCode, 2 By Cookie
+        
+		,	INDEX IX_Temp_InputTrans_FingerPrintCode(FingerPrintCode)
+        ,	INDEX IX_Temp_InputTrans_CookieId(CookieId)
+    );    
     
-    INSERT INTO Temp_Transaction(Id, RawTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieId, Transtime, ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
-	SELECT	rt.Id
-		,	rt.RawTransId
-        ,	rt.CustId
-        ,	rt.SubAccId
-        ,	rt.LoginName
-        ,	rt.SubscriberId
-        ,	rt.FingerPrintCode
-        ,	rt.CookieId
-        ,	rt.Transtime
-        ,	rt.ClientIP
-        ,	rt.UserAgent
-        ,	rt.Url
-        ,	rt.Action
-        ,	rt.ModifiedDate
-        ,	rt.CreatedDate
-        ,	rt.TransKey
-        ,	rt.Flagged       
-	FROM	JSON_TABLE(
+	DROP TEMPORARY TABLE IF EXISTS Temp_NewTrans;
+    CREATE TEMPORARY TABLE Temp_NewTrans(
+			GroupId			BIGINT UNSIGNED PRIMARY KEY
+        ,	DeviceID		BIGINT UNSIGNED
+        ,	FingerPrintCode	VARCHAR(64)
+        ,	CookieId		BIGINT UNSIGNED
+    );
+
+	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);
+    
+    INSERT INTO Temp_InputTrans(Id, Transtime, FingerPrintCode, CookieId)
+	SELECT	tmpJs.Id
+		,	tmpJs.Transtime
+		,	tmpJs.FingerPrintCode
+        ,	tmpJs.CookieId
+    FROM JSON_TABLE(
 			ip_TransJson,
 			 "$[*]" COLUMNS(
-								Id						BIGINT			PATH "$.Id"       
-							,	RawTransId				BIGINT			PATH "$.RawTransId"
-                            ,	CustId					BIGINT			PATH "$.CustId"
-                            ,	SubAccId				BIGINT			PATH "$.SubAccId"
-                            ,	LoginName				VARCHAR(100)	PATH "$.LoginName"
-                            ,	SubscriberId			INT				PATH "$.SubscriberId"
-                            ,	FingerPrintCode			VARCHAR(200)	PATH "$.FingerPrintCode"
-                            ,	CookieId				BIGINT			PATH "$.CookieId"                            
-                            ,	Transtime				DATETIME		PATH "$.TransTime"
-                            ,	ClientIP				VARCHAR(45)		PATH "$.ClientIp"
-                            ,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
-                            ,	Url						VARCHAR(100)	PATH "$.Url"
-                            ,	Action					VARCHAR(100)	PATH "$.Action"
-                            ,	ModifiedDate			DATETIME		PATH "$.ModifiedDate"
-                            ,	CreatedDate				DATETIME		PATH "$.CreatedDate"
-                            ,	TransKey				VARCHAR(200)	PATH "$.TransKey"
-                            ,	Flagged					VARCHAR(50)		PATH "$.Flagged"
-                                                   
-				)
-		   ) AS  rt;  
-            
-    WHILE(lv_flag) DO
-		BEGIN		
-			
-            # Recover By FingerPrint =========================
-			UPDATE 	Temp_Transaction tmp 
-				INNER JOIN FPS_FingerPrint.DeviceFingerPrint df ON tmp.FingerPrintCode = df.FingerPrintCode                
-			SET 
-				tmp.DeviceId = df.DeviceId,
-                tmp.IsRecovered = 1            
-            WHERE tmp.IsRecovered = 0;
-            
-            INSERT INTO FPS_FingerPrint.DeviceFingerPrint(DeviceId, FingerPrintCode, CreatedDate, ModifiedDate)
-            SELECT DISTINCT tmp.DeviceId, tmp.FingerPrintCode, tmp.CreatedDate, tmp.ModifiedDate 
-				FROM Temp_Transaction tmp 
-                WHERE tmp.IsRecovered = 1
-                GROUP BY tmp.DeviceId, tmp.FingerPrintCode, tmp.CreatedDate, tmp.ModifiedDate
-            ON DUPLICATE KEY UPDATE ModifiedDate = lv_currentDate;
-            
-            INSERT INTO FPS_FingerPrint.DeviceCookie(DeviceId, CookieId, CreatedDate, ModifiedDate)
-			SELECT DISTINCT tmp.DeviceId, tmp.CookieId, tmp.CreatedDate, tmp.ModifiedDate 
-				FROM Temp_Transaction tmp                
-                WHERE tmp.IsRecovered = 1
-                GROUP BY tmp.DeviceId, tmp.CookieId, tmp.CreatedDate, tmp.ModifiedDate 
-            ON DUPLICATE KEY UPDATE ModifiedDate = lv_currentDate; 
-            #============================================
-            
-            # Recover By Cookie =========================
-            UPDATE 	Temp_Transaction tmp 				
-                INNER JOIN FPS_FingerPrint.DeviceCookie dc ON tmp.CookieId = dc.CookieId
-			SET 
-				tmp.DeviceId =  dc.DeviceId,
-                tmp.IsRecovered = 1            
-            WHERE tmp.IsRecovered = 0;           
-            
-            INSERT INTO FPS_FingerPrint.DeviceFingerPrint(DeviceId, FingerPrintCode, CreatedDate, ModifiedDate)
-            SELECT DISTINCT tmp.DeviceId, tmp.FingerPrintCode, tmp.CreatedDate, tmp.ModifiedDate 
-				FROM Temp_Transaction tmp 
-                WHERE tmp.IsRecovered = 1
-                GROUP BY tmp.DeviceId, tmp.FingerPrintCode, tmp.CreatedDate, tmp.ModifiedDate
-            ON DUPLICATE KEY UPDATE ModifiedDate = lv_currentDate;
-            
-            INSERT INTO FPS_FingerPrint.DeviceCookie(DeviceId, CookieId, CreatedDate, ModifiedDate)
-			SELECT DISTINCT tmp.DeviceId, tmp.CookieId, tmp.CreatedDate, tmp.ModifiedDate 
-				FROM Temp_Transaction tmp                
-                WHERE tmp.IsRecovered = 1
-                GROUP BY tmp.DeviceId, tmp.CookieId, tmp.CreatedDate, tmp.ModifiedDate 
-            ON DUPLICATE KEY UPDATE ModifiedDate = lv_currentDate; 
-            #============================================
-            
-            IF NOT EXISTS(SELECT 1 FROM Temp_Transaction tmp 
-								INNER JOIN FPS_FingerPrint.DeviceFingerPrint df ON tmp.FingerPrintCode = df.FingerPrintCode
-                                INNER JOIN FPS_FingerPrint.DeviceCookie dc ON tmp.CookieId = dc.CookieId
-						  WHERE tmp.IsRecovered = 0) THEN
-				BEGIN
-					SELECT Min(Id) INTO lv_transId FROM Temp_Transaction tmp WHERE tmp.IsRecovered = 0; 
-                    
-					INSERT INTO FPS_FingerPrint.Devices(CreatedDate, ModifiedDate) VALUE(lv_currentDate, lv_currentDate);
-                    
-					SELECT MAX(Id) INTO lv_DeviceId FROM FPS_FingerPrint.Devices;
-                    
-					UPDATE Temp_Transaction tmp 
-					SET 
-						tmp.DeviceId = lv_DeviceId,
-						tmp.IsRecovered = 1 
-					WHERE tmp.Id = lv_transId;
-                    
-                    INSERT INTO FPS_FingerPrint.DeviceFingerPrint(DeviceId, FingerPrintCode, CreatedDate, ModifiedDate)
-                    SELECT tmp.DeviceId, tmp.FingerPrintCode, tmp.CreatedDate, tmp.ModifiedDate  
-						FROM Temp_Transaction tmp 
-                        WHERE tmp.Id = lv_transId AND tmp.IsRecovered = 1 ;
-                    
-                    INSERT INTO FPS_FingerPrint.DeviceCookie(DeviceId, CookieId, CreatedDate, ModifiedDate)
-                    SELECT tmp.DeviceId, tmp.CookieId, tmp.CreatedDate, tmp.ModifiedDate 
-						FROM Temp_Transaction tmp 
-                        WHERE tmp.Id = lv_transId AND tmp.IsRecovered = 1 ;
-				END;
-            END IF;
-            
-            SELECT IF(COUNT(1) > 0, TRUE, FALSE) INTO lv_flag 
-				FROM Temp_Transaction temp 
-                WHERE temp.IsRecovered = 0 LIMIT 1;
-		END;
+								Id				BIGINT UNSIGNED	PATH "$.Id"
+							,	TransTime		DATETIME(4)		PATH "$.TransTime"
+							,	FingerPrintCode	VARCHAR(64)		PATH "$.FingerPrintCode"
+                            ,	CookieId		BIGINT			PATH "$.CookieId"
+                            ,	GroupId			BIGINT			PATH "$.GroupId")
+		) AS tmpJs;	
+
+    /*====RECOVER DEVICE: Get Exisitng By FingerPrintCode*/
+	UPDATE Temp_InputTrans AS tmpTs
+		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmpTs.FingerPrintCode = df.FingerPrintCode
+	SET 	tmpTs.RecoverType = 1
+		,	tmpTs.DeviceId = df.DeviceId;
+ 
+    /*====RECOVER DEVICE: Get Exisitng By Cookie*/    
+    UPDATE Temp_InputTrans AS tmpTs
+		INNER JOIN FPS_FingerPrint.DeviceCookie AS dc ON tmpTs.CookieId = dc.CookieId
+	SET 	tmpTs.RecoverType = tmpTs.RecoverType + 2
+		,	tmpTs.DeviceId = dc.DeviceId
+	WHERE	tmpTs.DeviceId IS NULL;
+
+    /*====RECOVER DEVICE: PROCESS FOR Group*/
+    IF (ip_GroupId != 0) THEN
+		SELECT 	DeviceID
+        INTO	lv_GroupDeviceId
+		FROM Temp_InputTrans AS tmpTs
+        WHERE tmpTs.DeviceId > 0 LIMIT 1;
         
-    END WHILE;   
+		UPDATE Temp_InputTrans AS tmpTs
+		SET tmpTs.DeviceId = lv_GroupDeviceId
+        WHERE tmpTs.DeviceId IS NULL;
+    END IF;
     
-   
-    INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, RawTransId, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieId, DeviceId, Transtime,  ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
-    SELECT  	tmp.Id
-			, 	tmp.RawTransId
-			, 	tmp.CustId
-			, 	tmp.SubAccId
-			, 	tmp.LoginName
-			, 	tmp.SubscriberId
-			, 	tmp.FingerPrintCode
-			, 	tmp.CookieId
-			, 	tmp.DeviceId
-			, 	tmp.Transtime
-			, 	tmp.ClientIP
-			, 	tmp.UserAgent
-			, 	tmp.Url
-			, 	tmp.Action
-			, 	tmp.ModifiedDate
-			, 	lv_currentDate
-			, 	tmp.TransKey
-			, 	tmp.Flagged    
-		FROM Temp_Transaction tmp 		
-	WHERE tmp.IsRecovered = 1;
+     /*====RECOVER DEVICE: Insert New FingerprintCode For Old Device*/     
+    INSERT INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId, CreatedDate, ModifiedDate)
+    SELECT	tmpIt.FingerPrintCode
+		,	tmpIt.DeviceId
+		,	lv_CreatedDate
+        ,	tmpIt.TransTime
+    FROM Temp_InputTrans AS tmpIt
+    WHERE tmpIt.RecoverType = 2
+    ON DUPLICATE KEY UPDATE ModifiedDate = tmpIt.TransTime;
     
-    DELETE trans FROM FPS_FingerPrint.Transaction trans
-		INNER JOIN Temp_Transaction tmp ON trans.Id = tmp.Id;
+    /*====RECOVER DEVICE: Insert New Cookie For Old Device*/
+    INSERT INTO FPS_FingerPrint.DeviceCookie(CookieId, DeviceId, CreatedDate, ModifiedDate)
+    SELECT	tmpIt.CookieId
+		,	tmpIt.DeviceId
+		,	lv_CreatedDate
+        ,	tmpIt.TransTime
+    FROM Temp_InputTrans AS tmpIt
+    WHERE tmpIt.RecoverType IN (1,3)
+    ON DUPLICATE KEY UPDATE ModifiedDate = tmpIt.TransTime;    
+
+    /*====RECOVER DEVICE: Update Modified Date Of Old Device*/
+    UPDATE FPS_FingerPrint.Device AS dv
+		INNER JOIN (SELECT	tmpIt.DeviceId
+						,	MAX(tmpIt.TransTime) AS TransTime
+					FROM Temp_InputTrans AS tmpIt WHERE DeviceId > 0
+                    GROUP BY tmpIt.DeviceId) AS tmpDv ON dv.Id = tmpDv.DeviceId
+	SET dv.ModifiedDate = tmpDv.TransTime;
     
-    SELECT MAX(tmp.Id) INTO @lv_MaxTransId FROM Temp_Transaction tmp;
+    /*====NEW DEVICE */
+    IF (ip_GroupId = 0) THEN    
+		        
+		INSERT IGNORE INTO FPS_FingerPrint.Device(FirstFingerprintCode, CreatedDate, ModifiedDate)
+		SELECT 	tmpIt.FingerprintCode
+			,	lv_CreatedDate
+			,	tmpIt.TransTime
+		FROM Temp_InputTrans AS tmpIt
+		WHERE tmpIt.DeviceId IS NULL;	
+        
+		UPDATE Temp_InputTrans AS tmpIt
+			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstFingerprintCode = tmpIt.FingerPrintCode
+		SET	tmpIt.DeviceId = dv.Id;
+        
+        INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId,  CreatedDate, ModifiedDate)
+        SELECT 	tmpIt.FingerprintCode
+			,	tmpIt.DeviceId
+			,	lv_CreatedDate
+			,	tmpIt.TransTime            
+		FROM Temp_InputTrans AS tmpIt;
+	
+		INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieId, DeviceId,  CreatedDate, ModifiedDate)
+        SELECT 	tmpIt.CookieId
+			,	tmpIt.DeviceId
+			,	lv_CreatedDate
+			,	tmpIt.TransTime            
+		FROM Temp_InputTrans AS tmpIt;
     
-    UPDATE FPS_FingerPrint.Offset off 
-		SET off.OffsetValue = @lv_MaxTransId 
-    WHERE off.OffsetName = ip_OffsetName;
-    
+    ELSE
+		INSERT IGNORE INTO FPS_FingerPrint.Device(FirstFingerprintCode, CreatedDate, ModifiedDate)
+		SELECT 	tmpIt.FingerprintCode
+			,	lv_CreatedDate
+			,	tmpIt.TransTime
+		FROM Temp_InputTrans AS tmpIt
+		WHERE tmpIt.Id = ip_GroupId;	
+        
+        UPDATE Temp_InputTrans AS tmpIt
+			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstFingerprintCode = tmpIt.FingerPrintCode
+		SET	tmpIt.DeviceId = dv.Id
+        WHERE tmpIt.Id = ip_GroupId;	
+        
+        SELECT tmpIt.DeviceID
+        INTO lv_GroupDeviceId
+        FROM Temp_InputTrans AS tmpIt
+		WHERE tmpIt.Id = ip_GroupId LIMIT 1;
+     
+        UPDATE Temp_InputTrans AS tmpIt
+        SET tmpIt.DeviceID = tmpIt.DeviceID
+        WHERE tmpIt.DeviceId IS NULL;
+        
+        INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId,  CreatedDate, ModifiedDate)
+        SELECT 	tmpIt.FingerprintCode
+			,	lv_GroupDeviceId AS DeviceId
+			,	lv_CreatedDate
+			,	tmpIt.TransTime            
+		FROM Temp_InputTrans AS tmpIt
+        WHERE tmpIt.Id != ip_GroupId;
+        
+		INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieId, DeviceId,  CreatedDate, ModifiedDate)
+        SELECT 	tmpIt.CookieId
+			,	lv_GroupDeviceId AS DeviceId
+			,	lv_CreatedDate
+			,	tmpIt.TransTime            
+		FROM Temp_InputTrans AS tmpIt
+        WHERE tmpIt.Id != ip_GroupId;
+        
+	END IF;
+
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, RawTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieId, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+    SELECT  	ts.Id
+			, 	ts.RawTransId
+            ,	ts.TransTime
+			, 	ts.CustId
+			, 	ts.SubAccId
+			, 	ts.LoginName
+			, 	ts.SubscriberId
+			, 	ts.FingerPrintCode
+			, 	ts.CookieId
+			, 	tmpIt.DeviceId
+			, 	ts.ClientIP
+			, 	ts.UserAgent
+			, 	ts.Url
+			, 	ts.Action
+			, 	lv_CreatedDate
+			, 	ts.TransKey
+			, 	ts.Flagged    
+	FROM Temp_InputTrans AS tmpIt		
+        INNER JOIN Transaction AS ts ON tmpIt.Id = ts.Id;   
+
+    DELETE ts
+    FROM FPS_FingerPrint.Transaction AS ts
+		INNER JOIN Temp_InputTrans AS tmpIt ON tmpIt.Id = ts.Id;   
+
 END$$
 DELIMITER ;
-
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_DeviceIdentify TO 'fpsServiceAdmin'@'%';
