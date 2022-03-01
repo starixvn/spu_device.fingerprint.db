@@ -18,12 +18,13 @@ BEGIN
 		Revisions:
             
 		Param's Explanation (filtered by):	
+			ip_GroupId: 0-Not a group, MinTransId If a Group;
 
 		Example:
 			CALL FPS_FP_Transform_DeviceIdentify(1,
-				'[	{"Id" : 1,"CreatedDate" : "2022-02-27 00:00:00","FingerPrintCode" : "100000009abcdefghijkrtgyuhn","CookieId" : 1},
-					{"Id" : 62,"CreatedDate" : "2022-02-27 00:00:00","FingerPrintCode" : "100000009abcdefghijkrtgyuhn","CookieId" : 1},
-					{"Id" : 73,"CreatedDate" : null,"FingerPrintCode" : "45e9c4defb87b8ae6406480e012b6c5b","CookieId" : 1}]');;
+				'[	{"Id" : 1,"TransTime" : "2022-02-27 00:00:00","FingerPrintCode" : "100000009abcdefghijkrtgyuhn","CookieId" : 1},
+					{"Id" : 62,"TransTime" : "2022-02-27 00:00:00","FingerPrintCode" : "100000009abcdefghijkrtgyuhn","CookieId" : 1},
+					{"Id" : 73,"TransTime" : null,"FingerPrintCode" : "45e9c4defb87b8ae6406480e012b6c5b","CookieId" : 1}]');;
 			
 	*/
     
@@ -64,8 +65,7 @@ BEGIN
 								Id				BIGINT UNSIGNED	PATH "$.Id"
 							,	TransTime		DATETIME(4)		PATH "$.TransTime"
 							,	FingerPrintCode	VARCHAR(64)		PATH "$.FingerPrintCode"
-                            ,	CookieId		BIGINT			PATH "$.CookieId"
-                            ,	GroupId			BIGINT			PATH "$.GroupId")
+                            ,	CookieId		BIGINT			PATH "$.CookieId")
 		) AS tmpJs;	
 
     /*====RECOVER DEVICE: Get Exisitng By FingerPrintCode*/
@@ -188,7 +188,7 @@ BEGIN
         WHERE tmpIt.Id != ip_GroupId;
         
 	END IF;
-
+	SELECT * FROM Temp_InputTrans AS tmpIt	;
 	INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, RawTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieId, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.Id
 			, 	ts.RawTransId
