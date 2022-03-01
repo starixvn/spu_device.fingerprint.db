@@ -5,7 +5,7 @@ DELIMITER $$
 CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_Transaction_ForceMerge`(
 		ip_TransTime 	DateTime,
         ip_Interval		INT,
-        ip_OffsetName	VARCHAR(100)
+        ip_OffsetId		INT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -148,28 +148,28 @@ BEGIN
     , 	URL_Old
     , 	Flagged_Old)
    (SELECT 
-    (CASE WHEN transNew.LoginName is null THEN rawOld.LoginName			
+    (CASE WHEN transNew.LoginName is null THEN transOld.LoginName			
 			ELSE transNew.LoginName END)	
-   , rawOld.SubscriberName
-   , (CASE WHEN transNew.TransTime is null THEN rawOld.TransTime			
+   , transOld.SubscriberName
+   , (CASE WHEN transNew.TransTime is null THEN transOld.TransTime			
 			ELSE transNew.TransTime END)
-   , (CASE WHEN transNew.TransTime is null THEN DATE(rawOld.TransTime)		
+   , (CASE WHEN transNew.TransTime is null THEN DATE(transOld.TransTime)		
 			ELSE DATE(transNew.TransTime) END)
-   , rawOld.DeviceCode
-   , rawOld.FingerprintCode
-   , rawOld.FingerprintMoreInfo
-   ,(CASE WHEN transNew.UserAgent is null THEN rawOld.UserAgent		
+   , transOld.DeviceCode
+   , transOld.FingerprintCode
+   , transOld.FingerprintMoreInfo
+   ,(CASE WHEN transNew.UserAgent is null THEN transOld.UserAgent		
 			ELSE transNew.UserAgent END)
    , transNew.ClientIP
-   , rawOld.IPID
-   , rawOld.PluginID
-   , (CASE WHEN transNew.URL is null THEN rawOld.URL		
+   , transOld.IPID
+   , transOld.PluginID
+   , (CASE WHEN transNew.URL is null THEN transOld.URL		
 			ELSE transNew.URL END)
-   , rawOld.Action
-   , rawOld.ActionResult
-   , rawOld.InvalidDevice
-   , rawOld.TransStatus
-   , rawOld.FPSTransID   
+   , transOld.Action
+   , transOld.ActionResult
+   , transOld.InvalidDevice
+   , transOld.TransStatus
+   , transOld.FPSTransID   
    , (CASE WHEN transNew.Flagged = 'human' THEN 1
 			WHEN transNew.Flagged = 'bot' THEN 2
 			ELSE 0 END)   
@@ -177,44 +177,44 @@ BEGIN
    , transNew.SubscriberId
    , transNew.CustId
    , transNew.SubAccId
-   , rawOld.LoginName
-   , rawOld.TransTime
-   , rawOld.IP
-   , rawOld.UserAgent
-   , rawOld.URL
-   , rawOld.Flagged
+   , transOld.LoginName
+   , transOld.TransTime
+   , transOld.IP
+   , transOld.UserAgent
+   , transOld.URL
+   , transOld.Flagged
    FROM Temp_Transactions transNew
    LEFT OUTER JOIN Temp_RawTransactions_Old transOld ON transNew.TransKey = transOld.TransKey
    UNION
    SELECT 
-    rawOld.LoginName
-   , rawOld.SubscriberName
-   , rawOld.TransTime
-   , DATE(rawOld.TransTime)
-   , rawOld.DeviceCode
-   , rawOld.FingerprintCode
-   , rawOld.FingerprintMoreInfo
-   , rawOld.UserAgent
-   , rawOld.IP
-   , rawOld.IPID
-   , rawOld.PluginID
-   , rawOld.URL
-   , rawOld.Action
-   , rawOld.ActionResult
-   , rawOld.InvalidDevice
-   , rawOld.TransStatus
-   , rawOld.FPSTransID   
-   , rawOld.Flagged   
+    transOld.LoginName
+   , transOld.SubscriberName
+   , transOld.TransTime
+   , DATE(transOld.TransTime)
+   , transOld.DeviceCode
+   , transOld.FingerprintCode
+   , transOld.FingerprintMoreInfo
+   , transOld.UserAgent
+   , transOld.IP
+   , transOld.IPID
+   , transOld.PluginID
+   , transOld.URL
+   , transOld.Action
+   , transOld.ActionResult
+   , transOld.InvalidDevice
+   , transOld.TransStatus
+   , transOld.FPSTransID   
+   , transOld.Flagged   
    , NULL
    , NULL
    , NULL
    , NULL
-   , rawOld.LoginName
-   , rawOld.TransTime
-   , rawOld.IP
-   , rawOld.UserAgent
-   , rawOld.URL
-   , rawOld.Flagged
+   , transOld.LoginName
+   , transOld.TransTime
+   , transOld.IP
+   , transOld.UserAgent
+   , transOld.URL
+   , transOld.Flagged
    FROM Temp_Transactions transNew
    RIGHT OUTER JOIN Temp_RawTransactions_Old transOld ON transNew.TransKey = transOld.TransKey
    WHERE transNew.TransKey IS NULL);
@@ -230,9 +230,9 @@ BEGIN
    DELETE trans FROM FPTesting.FP_RawTransaction_Old trans
 		INNER JOIN Temp_Transactions_Old tmp ON trans.TransID = tmp.TransID;       
     
-   UPDATE  FPS_FingerPrint.Offset 
-   SET OffsetValue = @lv_TransTime 
-   WHERE OffsetName = ip_OffsetName;
+   UPDATE  FPS_FingerPrint.Offset off
+   SET off.OffsetValue = @lv_TransTime 
+   WHERE off.Id = ip_OffsetId;
 END$$
 DELIMITER ;
 

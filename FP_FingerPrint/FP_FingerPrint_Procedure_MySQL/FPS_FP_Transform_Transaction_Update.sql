@@ -41,8 +41,7 @@ BEGIN
 		`ClientIP` 			VARCHAR(45) DEFAULT NULL,
 		`UserAgent` 		VARCHAR(500) DEFAULT NULL,
 		`Url` 				VARCHAR(100) DEFAULT NULL,
-		`Action` 			VARCHAR(100) DEFAULT NULL,
-		`ModifiedDate` 		DATETIME DEFAULT NULL,
+		`Action` 			VARCHAR(100) DEFAULT NULL,		
 		`CreatedDate` 		DATETIME DEFAULT NULL,
 		`TransKey` 			VARCHAR(200) DEFAULT NULL,
 		`Flagged` 			VARCHAR(50) DEFAULT NULL,		
@@ -106,8 +105,7 @@ BEGIN
 		, ClientIP
 		, UserAgent
 		, Url
-		, Action
-		, ModifiedDate
+		, Action		
 		, CreatedDate
 		, TransKey
 		, Flagged
@@ -123,8 +121,7 @@ BEGIN
         , ClientIP
         , UserAgent
         , Url
-        , Action
-        , lv_currentDate as ModifiedDate
+        , Action        
         , CreatedDate
         , TransKey
         , Flagged
@@ -147,8 +144,8 @@ BEGIN
     
     DELETE FROM Temp_RawTransaction WHERE FingerPrintCode IS NOT NULL;
     	   
-    INSERT INTO FPS_FingerPrint.RawTransactionN(SessionKey, RawTransId, ModifiedDate, CreatedDate)
-    SELECT tmp.SessionKey, tmp.Id, tmp.ModifiedDate, tmp.CreatedDate 
+    INSERT INTO FPS_FingerPrint.RawTransactionN(SessionKey, RawTransId, CreatedDate)
+    SELECT tmp.SessionKey, tmp.Id, tmp.CreatedDate 
     FROM Temp_RawTransaction tmp 
     WHERE tmp.FingerPrintCode IS NULL AND tmp.Retry >= ip_Retry;
     
@@ -156,8 +153,7 @@ BEGIN
     
     UPDATE FPS_FingerPrint.RawTransaction rawTrans
 		INNER JOIN Temp_RawTransaction tmp ON tmp.Id = rawTrans.Id
-		SET rawTrans.Retry = tmp.Retry,        
-			rawTrans.ModifiedDate = lv_currentDate        
+		SET rawTrans.Retry = tmp.Retry     
 	WHERE tmp.FingerPrintCode IS NULL;
     
     UPDATE FPS_FingerPrint.Offset off
