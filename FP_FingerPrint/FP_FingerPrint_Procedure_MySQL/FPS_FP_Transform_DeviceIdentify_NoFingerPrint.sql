@@ -31,7 +31,7 @@ BEGIN
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
     
-    INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, RawTransId, CustId , SubAccId, LoginName, SubscriberId, Transtime,  ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
+    INSERT INTO FPS_FingerPrint.TransactionDevice(Id, RawTransId, CustId , SubAccId, LoginName, SubscriberId, Transtime,  ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.Id
 			, 	ts.RawTransId
 			, 	ts.CustId
@@ -43,16 +43,15 @@ BEGIN
 			, 	ts.UserAgent
 			, 	ts.Url
 			, 	ts.Action
-			, 	ts.ModifiedDate
 			, 	CURRENT_TIMESTAMP(4)
 			, 	ts.TransKey
 			, 	ts.Flagged    
-	FROM Temp_Transaction AS tmpTs
+	FROM Temp_InputTrans AS tmpTs
 		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpTs.Id = ts.Id;
     
     DELETE ts 
     FROM FPS_FingerPrint.Transaction AS ts
-		INNER JOIN Temp_Transaction tmpTs ON tmpTs.Id = ts.Id;    
+		INNER JOIN Temp_InputTrans tmpTs ON tmpTs.Id = ts.Id;    
     
 END$$
 DELIMITER ;
