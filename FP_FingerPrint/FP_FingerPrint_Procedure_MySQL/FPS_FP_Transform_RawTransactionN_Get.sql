@@ -1,3 +1,5 @@
+/*<info serverAlias="xxxx" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_RawTransactionN_Get`;
 DELIMITER $$
 CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransactionN_Get`(
 		ip_BatchSize 	INT,
@@ -44,3 +46,5 @@ BEGIN
     
 END$$
 DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_RawTransactionN_Get TO 'fpsServiceAdmin'@'%';

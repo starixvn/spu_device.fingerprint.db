@@ -60,8 +60,6 @@ BEGIN
 				)
 		   ) AS  tmp; 
       
-    SELECT * FROM Temp_FingerPrint;
-    
     INSERT INTO FPS_FingerPrint.RawUserAgent (
 				Code
 				, Attributes

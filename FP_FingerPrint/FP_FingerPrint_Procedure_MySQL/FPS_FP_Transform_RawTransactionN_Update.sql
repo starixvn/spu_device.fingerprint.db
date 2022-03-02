@@ -1,4 +1,7 @@
+/*<info serverAlias="xxxx" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_RawTransactionN_Update`;
 DELIMITER $$
+
 CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransactionN_Update`(
 		ip_RawTransJson	LONGTEXT,
         ip_OffsetId		INT,
@@ -179,9 +182,21 @@ BEGIN
     FROM FPS_FingerPrint.RawTransaction trans 
     INNER JOIN Temp_RawTransaction2 tmp ON trans.Id = tmp.Id;
     
-    UPDATE FPS_FingerPrint.FingerPrint fp
-    INNER JOIN Temp_RawTransaction2 tmp ON tmp.SessionKey = fp.SessionKey
-    SET fp.MergedStatus = 1;
+    INSERT INTO FPS_FingerPrint.FingerPrintCompleted(Id, FingerPrintCode, UserAgentCode, CookieId, SubscriberId, SessionKey, Flagged, Url, CreatedDate)
+    SELECT fp.Id
+    ,	fp.FingerPrintCode
+    ,	fp.UserAgentCode
+    ,	fp.CookieId
+    ,	fp.SubscriberId
+    ,	fp.SessionKey
+    ,	fp.Flagged
+    ,	fp.Url
+    ,	fp.CreatedDate
+    FROM FPS_FingerPrint.FingerPrint fp
+		INNER JOIN Temp_RawTransaction2 tmp ON tmp.SessionKey = fp.SessionKey;
+    
+    DELETE fp FROM FPS_FingerPrint.FingerPrint fp
+			INNER JOIN Temp_RawTransaction2 tmp ON tmp.SessionKey = fp.SessionKey;   
     
     DELETE trans FROM FPS_FingerPrint.RawTransaction trans 
     INNER JOIN Temp_RawTransaction2 tmp ON trans.Id = tmp.Id;
@@ -197,3 +212,5 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction2;
 END$$
 DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_RawTransactionN_Update TO 'fpsServiceAdmin'@'%';

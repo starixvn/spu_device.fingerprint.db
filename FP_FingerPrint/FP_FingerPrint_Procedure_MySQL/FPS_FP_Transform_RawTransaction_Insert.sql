@@ -1,4 +1,7 @@
+/*<info serverAlias="xxxx" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_RawTransaction_Insert`;
 DELIMITER $$
+
 CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransaction_Insert`(
 		ip_Transaction LONGTEXT
 )
@@ -106,3 +109,5 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
 END$$
 DELIMITER ;
+
+GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_RawTransaction_Insert TO 'fpsServiceAdmin'@'%';
