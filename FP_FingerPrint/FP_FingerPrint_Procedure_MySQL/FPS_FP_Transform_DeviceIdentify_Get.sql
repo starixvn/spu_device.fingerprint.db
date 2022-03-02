@@ -4,6 +4,7 @@ DELIMITER $$
 
 CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify_Get`(
 		ip_BatchSize 	INT
+	,	ip_NoOfBatch	INT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -18,13 +19,15 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_DeviceIdentify_Get(1000);
+			- CALL FPS_FP_Transform_DeviceIdentify_Get_(100,10);
 			
 	*/
-    
+    DECLARE lv_Size INT;
     DECLARE lv_preFingerPrintCode VARCHAR(64);	
-    DECLARE lv_preCookieId BIGINT;	
-    DECLARE lv_groupId INT DEFAULT 0;	
+    DECLARE lv_preCookieId BIGINT UNSIGNED;	
+    DECLARE lv_groupId BIGINT UNSIGNED DEFAULT 0;
+	
+    SET lv_Size = ip_BatchSize * ip_NoOfBatch;
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;  
     CREATE TEMPORARY TABLE Temp_Transaction(
@@ -55,7 +58,7 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_TransGroup;        
 	CREATE TEMPORARY TABLE Temp_TransGroup(
 			Id 		BIGINT UNSIGNED PRIMARY KEY
-        ,	GroupId	INT        
+        ,	GroupId	BIGINT UNSIGNED           
     );
     
     INSERT INTO Temp_Transaction(Id, FingerPrintCode, CookieId,TransTime)
@@ -63,10 +66,10 @@ BEGIN
 		,	FingerPrintCode
         ,	CookieId
         ,	TransTime
-	FROM FPS_FingerPrint.Transaction AS ts
+    FROM FPS_FingerPrint.Transaction AS ts
     ORDER BY Id
-    LIMIT ip_BatchSize;
-
+    LIMIT lv_Size;
+	
     INSERT INTO Temp_Transaction2(Id, FingerPrintCode, CookieId)
     SELECT	Id
 		,	FingerPrintCode
@@ -132,20 +135,45 @@ BEGIN
     SET tmpTs.GroupId = tmpTs2.GroupId;
     
     #====RETURN 1: FingerPrintCode IS NOT NULL===========================
+    SET @rowNo = 0; 
+    SET @BatchNo = 1; 
+    SET @GroupId = (SELECT GroupID FROM Temp_Transaction AS tmpTs WHERE tmpTs.GroupId > 0 ORDER BY GroupId ASC LIMIT 1) ;
+    SET @packSize = ip_BatchSize;
+    
+    SELECT Id, GroupID INTO @preId, @preGroupId FROM Temp_Transaction AS tmpTs WHERE tmpTs.GroupId > 0 ORDER BY GroupId ASC LIMIT 1;
+    
+    #====RETURN 1: Group By (FingerPrintCode OR CookieId)*/
     SELECT	tmpTs.Id
 		,	tmpTs.Transtime
 		,	tmpTs.FingerPrintCode
         ,	tmpTs.CookieId
 		,	tmpTs.GroupId
+        ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @BatchNo := @BatchNo + 1 ELSE @BatchNo END) AS BatchNumber
+        ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
+        ,	(CASE WHEN GroupId !=  @preGroupId THEN @preGroupId:= GroupId ELSE @preGroupId  END) AS PreGroup
 	FROM Temp_Transaction AS tmpTs
-    WHERE tmpTs.FingerPrintCode IS NOT NULL
+    WHERE tmpTs.FingerPrintCode IS NOT NULL AND tmpTs.GroupId > 0
+    ORDER BY GroupId ASC;
+    
+    #====RETURN 2: Trans: NOT Group By (FingerPrintCode OR CookieId)*/
+    SET @rowNo = 0;
+    SET @BatchNo = @BatchNo + 1;  
+    SELECT	tmpTs.Id
+		,	tmpTs.Transtime
+		,	tmpTs.FingerPrintCode
+        ,	tmpTs.CookieId
+		,	tmpTs.GroupId
+        ,	(CASE WHEN @rowNo >= @packSize THEN @BatchNo := @BatchNo +1 ELSE @BatchNo END) AS BatchNumber
+        ,	(CASE WHEN @rowNo >= @packSize THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
+	FROM Temp_Transaction AS tmpTs
+    WHERE tmpTs.FingerPrintCode IS NOT NULL AND tmpTs.GroupId = 0
     ORDER BY GroupId ASC;    
     
-	#====RETURN 2: FingerPrintCode IS NULL===========================
+	#====RETURN 3: FingerPrintCode IS NULL===========================
     SELECT	tmpTs.Id
 	FROM Temp_Transaction AS tmpTs
-    WHERE tmpTs.FingerPrintCode IS NULL;    
-    
+    WHERE tmpTs.FingerPrintCode IS NULL;   
+
       
 END$$
 DELIMITER ;
