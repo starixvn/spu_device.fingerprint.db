@@ -19,7 +19,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_DeviceIdentify_Get_(100,10);
+			- CALL FPS_FP_Transform_DeviceIdentify_Get(100,10);
 			
 	*/
     DECLARE lv_Size INT;
