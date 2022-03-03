@@ -219,7 +219,7 @@ BEGIN
     
     DELETE tmpT2
     FROM Temp_RawTransaction2 AS tmpT2
-    WHERE tmpT2.FingerPrintCode IS NOT NULL AND Retry >= ip_Retry;
+    WHERE tmpT2.FingerPrintCode IS NULL AND Retry >= ip_Retry;
     
     UPDATE FPS_FingerPrint.RawTransaction rawTrans
 		INNER JOIN Temp_RawTransaction2 tmp ON tmp.Id = rawTrans.Id
