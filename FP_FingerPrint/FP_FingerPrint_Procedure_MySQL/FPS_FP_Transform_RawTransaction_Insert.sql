@@ -27,7 +27,7 @@ BEGIN
 			LoginName					VARCHAR(100) CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' NOT NULL	
 		,	SubscriberId				INT						NOT NULL
 		,	SessionKey					VARCHAR(200)	 		NOT NULL
-		,	TransTime					DATETIME	 			NULL		
+		,	TransTime					DATETIME(4)	 			NULL		
 		,	ClientIp					VARCHAR(45)				NULL		
 		,	UserAgent					VARCHAR(500)			NULL
 		,	Url							VARCHAR(100)			NULL
@@ -66,7 +66,7 @@ BEGIN
 					LoginName				VARCHAR(100)	PATH "$.LoginName"       
 				,	SubscriberId			INT 			PATH "$.SubscriberId"   
 				,	SessionKey				VARCHAR(200) 	PATH "$.SessionKey"
-				,	TransTime				DATETIME		PATH "$.TransTime"
+				,	TransTime				DATETIME(4)		PATH "$.TransTime"
 				,	ClientIp				VARCHAR(45)		PATH "$.ClientIp"
 				,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
 				,	Url						VARCHAR(100) 	PATH "$.Url"
