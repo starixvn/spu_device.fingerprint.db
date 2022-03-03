@@ -81,14 +81,14 @@ BEGIN
 		INNER JOIN (SELECT tmpTg.FingerPrintCode, Min(tmpTg.Id) AS GroupFp 
 					FROM Temp_Transaction tmpTg 
                     GROUP BY tmpTg.FingerPrintCode
-                    HAVING Count(1) > 1) AS tmp ON tmpTs.FingerPrintCode = tmp.FingerPrintCode
+                    HAVING COUNT(1) > 1) AS tmp ON tmpTs.FingerPrintCode = tmp.FingerPrintCode
 	SET tmpTs.GroupFp = tmp.GroupFp;
     
     UPDATE Temp_Transaction2 AS tmpTs
 		INNER JOIN (SELECT tmpTg.CookieCode, Min(tmpTg.Id) AS GroupCk 
 					FROM Temp_Transaction tmpTg 
                     GROUP BY tmpTg.CookieCode
-                    HAVING Count(1) > 1) AS tmp ON tmpTs.CookieCode = tmp.CookieCode
+                    HAVING COUNT(1) > 1) AS tmp ON tmpTs.CookieCode = tmp.CookieCode
 	SET tmpTs.GroupCk = tmp.GroupCk;
     
     DELETE tmpTs
