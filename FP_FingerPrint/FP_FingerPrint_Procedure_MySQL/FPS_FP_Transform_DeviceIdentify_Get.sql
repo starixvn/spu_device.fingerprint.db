@@ -24,7 +24,7 @@ BEGIN
 	*/
     DECLARE lv_Size INT;
     DECLARE lv_preFingerPrintCode VARCHAR(64);	
-    DECLARE lv_preCookieId BIGINT UNSIGNED;	
+    DECLARE lv_preCookieCode VARCHAR(64);	
     DECLARE lv_groupId BIGINT UNSIGNED DEFAULT 0;
 	
     SET lv_Size = ip_BatchSize * ip_NoOfBatch;
@@ -33,25 +33,25 @@ BEGIN
     CREATE TEMPORARY TABLE Temp_Transaction(
 			Id				BIGINT UNSIGNED PRIMARY KEY		
 		,	FingerPrintCode	VARCHAR(64)
-        ,	CookieId		BIGINT UNSIGNED
+        ,	CookieCode		VARCHAR(64)
         ,	Transtime		DATETIME(4)
         ,	GroupId			BIGINT UNSIGNED DEFAULT 0
         
         , 	INDEX IX_Temp_Transaction(FingerPrintCode)
-        ,	INDEX IX_Temp_Transaction_CookieId(CookieId)
+        ,	INDEX IX_Temp_Transaction_CookieCode(CookieCode)
     )ENGINE = MEMORY;
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transaction2;  
     CREATE TEMPORARY TABLE Temp_Transaction2(
 			Id				BIGINT UNSIGNED PRIMARY KEY
 		,	FingerPrintCode	VARCHAR(64)
-        ,	CookieId		BIGINT UNSIGNED
+        ,	CookieCode		VARCHAR(64)
         ,	GroupFp			BIGINT UNSIGNED DEFAULT 0
         ,	GroupCk			BIGINT UNSIGNED DEFAULT 0
         ,	GroupId			BIGINT UNSIGNED DEFAULT 0
         
         , 	INDEX IX_Temp_Transaction(FingerPrintCode)
-        ,	INDEX IX_Temp_Transaction_CookieId(CookieId)
+        ,	INDEX IX_Temp_Transaction_CookieCode(CookieCode)
         ,	INDEX IX_Temp_Transaction_GroupFp(GroupFp,GroupCk)
     )ENGINE = MEMORY;
     
@@ -61,19 +61,19 @@ BEGIN
         ,	GroupId	BIGINT UNSIGNED           
     );
     
-    INSERT INTO Temp_Transaction(Id, FingerPrintCode, CookieId,TransTime)
+    INSERT INTO Temp_Transaction(Id, FingerPrintCode, CookieCode,TransTime)
     SELECT	Id
 		,	FingerPrintCode
-        ,	CookieId
+        ,	CookieCode
         ,	TransTime
     FROM FPS_FingerPrint.Transaction AS ts
     ORDER BY Id
     LIMIT lv_Size;
 	
-    INSERT INTO Temp_Transaction2(Id, FingerPrintCode, CookieId)
+    INSERT INTO Temp_Transaction2(Id, FingerPrintCode, CookieCode)
     SELECT	Id
 		,	FingerPrintCode
-        ,	CookieId
+        ,	CookieCode
 	FROM Temp_Transaction AS tmpTs 
     WHERE tmpTs.FingerPrintCode IS NOT NULL;
     
@@ -85,18 +85,18 @@ BEGIN
 	SET tmpTs.GroupFp = tmp.GroupFp;
     
     UPDATE Temp_Transaction2 AS tmpTs
-		INNER JOIN (SELECT tmpTg.CookieId, Min(tmpTg.Id) AS GroupCk 
+		INNER JOIN (SELECT tmpTg.CookieCode, Min(tmpTg.Id) AS GroupCk 
 					FROM Temp_Transaction tmpTg 
-                    GROUP BY tmpTg.CookieId
-                    HAVING Count(1) > 1) AS tmp ON tmpTs.CookieId = tmp.CookieId
+                    GROUP BY tmpTg.CookieCode
+                    HAVING Count(1) > 1) AS tmp ON tmpTs.CookieCode = tmp.CookieCode
 	SET tmpTs.GroupCk = tmp.GroupCk;
     
     DELETE tmpTs
     FROM Temp_Transaction2 AS tmpTs
     WHERE GroupFp = 0 AND GroupCk = 0;    
     
-    SELECT tmpTs2.FingerPrintCode, tmpTs2.CookieId, tmpTs2.Id
-	INTO lv_preFingerPrintCode, lv_preCookieId, lv_groupId        
+    SELECT tmpTs2.FingerPrintCode, tmpTs2.CookieCode, tmpTs2.Id
+	INTO lv_preFingerPrintCode, lv_preCookieCode, lv_groupId        
 	FROM Temp_Transaction2 AS tmpTs2
 	WHERE tmpTs2.GroupId = 0
 	ORDER BY Id LIMIT 1;
@@ -107,11 +107,11 @@ BEGIN
         
 		INSERT INTO Temp_TransGroup(Id, GroupId)
 		WITH RECURSIVE CTE_Group AS ( 
-			SELECT lv_groupId AS Id, lv_preFingerPrintCode AS FingerPrintCode, lv_preCookieId AS CookieId
+			SELECT lv_groupId AS Id, lv_preFingerPrintCode AS FingerPrintCode, lv_preCookieCode AS CookieCode
 			UNION
-			SELECT tmpCa.Id, tmpCa.FingerPrintCode, tmpCa.CookieId
+			SELECT tmpCa.Id, tmpCa.FingerPrintCode, tmpCa.CookieCode
 			FROM Temp_Transaction2  AS tmpCa
-			  JOIN CTE_Group ON CTE_Group.FingerPrintCode = tmpCa.FingerPrintCode OR  CTE_Group.CookieId = tmpCa.CookieId
+			  JOIN CTE_Group ON CTE_Group.FingerPrintCode = tmpCa.FingerPrintCode OR  CTE_Group.CookieCode = tmpCa.CookieCode
 		) 
 		SELECT	CTE_Group.Id, lv_groupId 
 		FROM CTE_Group;	
@@ -122,8 +122,8 @@ BEGIN
         
         SET  lv_groupId   = 0;
         
-		SELECT tmpTs2.FingerPrintCode, tmpTs2.CookieId, tmpTs2.Id
-		INTO lv_preFingerPrintCode, lv_preCookieId, lv_groupId        
+		SELECT tmpTs2.FingerPrintCode, tmpTs2.CookieCode, tmpTs2.Id
+		INTO lv_preFingerPrintCode, lv_preCookieCode, lv_groupId        
 		FROM Temp_Transaction2 AS tmpTs2
         WHERE GroupId = 0
         ORDER BY Id LIMIT 1;        
@@ -142,11 +142,11 @@ BEGIN
     
     SELECT Id, GroupID INTO @preId, @preGroupId FROM Temp_Transaction AS tmpTs WHERE tmpTs.GroupId > 0 ORDER BY GroupId ASC LIMIT 1;
     
-    #====RETURN 1: Group By (FingerPrintCode OR CookieId)*/
+    #====RETURN 1: Group By (FingerPrintCode OR CookieCode)*/
     SELECT	tmpTs.Id
 		,	tmpTs.Transtime
 		,	tmpTs.FingerPrintCode
-        ,	tmpTs.CookieId
+        ,	tmpTs.CookieCode
 		,	tmpTs.GroupId
         ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @BatchNo := @BatchNo + 1 ELSE @BatchNo END) AS BatchNumber
         ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
@@ -155,13 +155,13 @@ BEGIN
     WHERE tmpTs.FingerPrintCode IS NOT NULL AND tmpTs.GroupId > 0
     ORDER BY GroupId ASC;
     
-    #====RETURN 2: Trans: NOT Group By (FingerPrintCode OR CookieId)*/
+    #====RETURN 2: Trans: NOT Group By (FingerPrintCode OR CookieCode)*/
     SET @rowNo = 0;
     SET @BatchNo = @BatchNo + 1;  
     SELECT	tmpTs.Id
 		,	tmpTs.Transtime
 		,	tmpTs.FingerPrintCode
-        ,	tmpTs.CookieId
+        ,	tmpTs.CookieCode
 		,	tmpTs.GroupId
         ,	(CASE WHEN @rowNo >= @packSize THEN @BatchNo := @BatchNo +1 ELSE @BatchNo END) AS BatchNumber
         ,	(CASE WHEN @rowNo >= @packSize THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
