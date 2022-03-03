@@ -18,7 +18,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_FingerPrint_Insert('[{"FingerPrintCode":"dddddd","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","UserAgentCode":"fdsafasfasf","UserAgentAttribute":"dddddd","CookieCode":"1","Flagged":"Human","Url":"fdsafdsaf"}]');
+			- CALL FPS_FP_Transform_FingerPrint_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","UserAgentCode":"fdsafasfasf","UserAgentAttribute":"dddddd","CookieCode":"cookief5d0e59645d09cfb56690a7b0916","Flagged":"Human","Url":"fdsafdsaf"}]');
 			
 	*/
     DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;    
@@ -29,7 +29,7 @@ BEGIN
 		,	Attribute					LONGTEXT	 	NULL		
 		,	UserAgentCode				VARCHAR(100)	NULL		
 		,	UserAgentAttribute			LONGTEXT		NULL
-		,	CookieCode 					BINARY(16)		NULL		
+		,	CookieCode 					VARCHAR(64)		NULL		
         ,	Flagged						VARCHAR(50)		NULL		
         ,	Url							VARCHAR(100)	NULL
 		
@@ -55,7 +55,7 @@ BEGIN
 							,	Attribute				LONGTEXT		PATH "$.Attribute"
 							,	UserAgentCode			VARCHAR(100)	PATH "$.UserAgentCode"
 							,	UserAgentAttribute		LONGTEXT		PATH "$.UserAgentAttribute"
-							,	CookieCode				BINARY(16) 		PATH "$.CookieCode"							
+							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"							
                             ,	Flagged					VARCHAR(50) 	PATH "$.Flagged"
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
 				)
