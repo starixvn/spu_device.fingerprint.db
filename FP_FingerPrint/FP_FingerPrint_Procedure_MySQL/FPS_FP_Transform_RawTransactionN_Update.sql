@@ -26,52 +26,54 @@ BEGIN
    
     DECLARE lv_currentDate DATETIME DEFAULT NOW();   
     
-	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;  
-    DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction2;
-    
 	-- Create Temporary table
+    DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction; 
 	CREATE TEMPORARY TABLE Temp_RawTransaction(
-		`Id` 				BIGINT SIGNED PRIMARY KEY,        
-		`SessionKey` 		VARCHAR(200) NOT NULL,
-		`CustId` 			BIGINT DEFAULT NULL,
-		`SubAccId` 			BIGINT DEFAULT NULL,
-		`LoginName` 		VARCHAR(100) DEFAULT NULL,
-		`SubscriberId` 		INT DEFAULT NULL,
-		`Transtime` 		DATETIME DEFAULT NULL,
-		`ClientIP` 			VARCHAR(45) DEFAULT NULL,
-		`UserAgent` 		VARCHAR(500) DEFAULT NULL,
-		`Url` 				VARCHAR(100) DEFAULT NULL,
-		`Action` 			VARCHAR(100) DEFAULT NULL,
-		`ModifiedDate` 		DATETIME DEFAULT NULL,
-		`CreatedDate` 		DATETIME DEFAULT NULL,
-		`TransKey` 			VARCHAR(200) DEFAULT NULL,
-		`Flagged` 			VARCHAR(50) DEFAULT NULL,		
-		`Retry` 			TINYINT DEFAULT '0',
-		`FingerPrintCode` 	VARCHAR(200) DEFAULT NULL,
-		`CookieId` 			BIGINT DEFAULT NULL,
-        INDEX Temp_RawTransaction_FingerPrintCode_Index (FingerPrintCode)
+			Id 				BIGINT UNSIGNED PRIMARY KEY    
+		,	SessionKey 		VARCHAR(200) NOT NULL
+		,	CustId 			BIGINT DEFAULT NULL
+		,	SubAccId 		BIGINT DEFAULT NULL
+		,	LoginName 		VARCHAR(100) DEFAULT NULL
+		,	SubscriberId 	INT DEFAULT NULL
+		,	Transtime 		DATETIME DEFAULT NULL
+		,	ClientIP 		VARCHAR(45) DEFAULT NULL
+		,	UserAgent 		VARCHAR(500) DEFAULT NULL
+		,	Url 			VARCHAR(100) DEFAULT NULL
+		,	Action 			VARCHAR(100) DEFAULT NULL
+		,	ModifiedDate 	DATETIME DEFAULT NULL
+		,	CreatedDate 	DATETIME DEFAULT NULL
+		,	TransKey 		VARCHAR(200) DEFAULT NULL
+		,	Flagged 		VARCHAR(50) DEFAULT NULL		
+		,	Retry 			TINYINT DEFAULT '0'
+		,	FingerPrintCode VARCHAR(200) DEFAULT NULL
+		,	CookieCode 		VARCHAR(64) DEFAULT NULL
+        
+        ,	INDEX IX_Temp_RawTransaction_FingerPrintCode(FingerPrintCode)
     );  
     
+    DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction2;
     CREATE TEMPORARY TABLE Temp_RawTransaction2(
-		`Id` 				BIGINT SIGNED PRIMARY KEY,        
-		`SessionKey` 		VARCHAR(200) NOT NULL,
-		`CustId` 			BIGINT DEFAULT NULL,
-		`SubAccId` 			BIGINT DEFAULT NULL,
-		`LoginName` 		VARCHAR(100) DEFAULT NULL,
-		`SubscriberId` 		INT DEFAULT NULL,
-		`Transtime` 		DATETIME DEFAULT NULL,
-		`ClientIP` 			VARCHAR(45) DEFAULT NULL,
-		`UserAgent` 		VARCHAR(500) DEFAULT NULL,
-		`Url` 				VARCHAR(100) DEFAULT NULL,
-		`Action` 			VARCHAR(100) DEFAULT NULL,
-		`ModifiedDate` 		DATETIME DEFAULT NULL,
-		`CreatedDate` 		DATETIME DEFAULT NULL,
-		`TransKey` 			VARCHAR(200) DEFAULT NULL,
-		`Flagged` 			VARCHAR(50) DEFAULT NULL,		
-		`Retry` 			TINYINT DEFAULT '0',
-		`FingerPrintCode` 	VARCHAR(200) DEFAULT NULL,
-		`CookieId` 			BIGINT DEFAULT NULL,
-        INDEX Temp_RawTransaction_FingerPrintCode_Index (FingerPrintCode)
+			Id 					BIGINT UNSIGNED PRIMARY KEY        
+		,	SessionKey 			VARCHAR(200) NOT NULL
+		,	CustId 				BIGINT DEFAULT NULL
+		,	SubAccId 			BIGINT DEFAULT NULL
+		,	LoginName 			VARCHAR(100) DEFAULT NULL
+		,	SubscriberId 		INT DEFAULT NULL
+		,	Transtime 			DATETIME DEFAULT NULL
+		,	ClientIP 			VARCHAR(45) DEFAULT NULL
+		,	UserAgent 			VARCHAR(500) DEFAULT NULL
+		,	Url 				VARCHAR(100) DEFAULT NULL
+		,	Action 				VARCHAR(100) DEFAULT NULL
+		,	ModifiedDate 		DATETIME DEFAULT NULL
+		,	CreatedDate 		DATETIME DEFAULT NULL
+		,	TransKey 			VARCHAR(200) DEFAULT NULL
+		,	Flagged 			VARCHAR(50) DEFAULT NULL		
+		,	Retry 				TINYINT DEFAULT 0
+		,	FingerPrintCode 	VARCHAR(200) DEFAULT NULL
+		,	CookieCode 			VARCHAR(64) DEFAULT NULL
+        
+        ,	INDEX IX_Temp_RawTransaction2_FingerPrintCode(FingerPrintCode)
+        ,	INDEX IX_Temp_RawTransaction2_SessionKey(SessionKey)
     );  
     
    INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action)
@@ -107,110 +109,91 @@ BEGIN
 				)
 		   ) AS  rt; 
            
-    INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieId, Flagged)
-    SELECT trans.Id
-    ,	trans.SessionKey
-    ,	trans.CustId
-    ,	trans.SubAccId
-    ,	trans.LoginName
-    ,	trans.SubscriberId
-    ,	trans.Transtime
-    ,	trans.ClientIP
-    ,	IFNULL(trans.Url, fp.Url)
-    ,	trans.TransKey
-    ,	trans.Retry
-    ,	trans.Action
-    ,	fp.FingerPrintCode
-    ,	fp.CookieId
-    ,	fp.Flagged
-    FROM Temp_RawTransaction trans
-		INNER JOIN FPS_FingerPrint.FingerPrint fp ON fp.SessionKey = trans.SessionKey;
+    INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieCode, Flagged)
+	SELECT	tmpRt.Id
+		,	tmpRt.SessionKey
+		,	tmpRt.CustId
+		,	tmpRt.SubAccId
+		,	tmpRt.LoginName
+		,	tmpRt.SubscriberId
+		,	tmpRt.Transtime
+		,	tmpRt.ClientIP
+		,	IFNULL(tmpRt.Url, fp.Url)
+		,	tmpRt.TransKey
+		,	tmpRt.Retry
+		,	tmpRt.Action
+		,	fp.FingerPrintCode
+		,	fp.CookieCode
+		,	fp.Flagged
+    FROM Temp_RawTransaction AS tmpRt
+		INNER JOIN FPS_FingerPrint.FingerPrint fp ON fp.SessionKey = tmpRt.SessionKey;
       
 	-- Insert data completed
-    INSERT INTO FPS_FingerPrint.Transaction(
-		RawTransId
-		, CustId
-		, SubAccId
-		, LoginName
-		, SubscriberId
-		, FingerPrintCode
-		, CookieId
-		, Transtime
-		, ClientIP
-		, UserAgent
-		, Url
-		, Action
-		, ModifiedDate
-		, CreatedDate
-		, TransKey
-		, Flagged
-	)
+    INSERT INTO FPS_FingerPrint.Transaction(RawTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, Transtime, ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
     SELECT Id
-		, CustId
-        , SubAccId
-        , LoginName
-        , SubscriberId
-        , FingerPrintCode
-		, CookieId
-        , Transtime
-        , ClientIP
-        , UserAgent
-        , Url
-        , Action
-        , lv_currentDate as ModifiedDate
-        , CreatedDate
-        , TransKey
-        , Flagged
-    FROM Temp_RawTransaction2;
+		,	tmpRt2.CustId
+        ,	tmpRt2.SubAccId
+        ,	tmpRt2.LoginName
+        ,	tmpRt2.SubscriberId
+        ,	tmpRt2.FingerPrintCode
+		,	tmpRt2.CookieCode
+        ,	tmpRt2.Transtime
+        ,	tmpRt2.ClientIP
+        ,	tmpRt2.UserAgent
+        ,	tmpRt2.Url
+        ,	tmpRt2.Action
+        ,	lv_currentDate AS ModifiedDate
+        ,	tmpRt2.CreatedDate
+        ,	tmpRt2.TransKey
+        ,	tmpRt2.Flagged
+    FROM Temp_RawTransaction2 AS tmpRt2;
 
 	INSERT INTO FPS_FingerPrint.RawTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
-    SELECT trans.Id
-    , 	trans.SessionKey
-    , 	trans.CustId
-    , 	trans.SubAccId
-    , 	trans.LoginName
-    , 	trans.SubscriberId
-    , 	trans.Transtime
-    , 	trans.ClientIP
-    , 	trans.UserAgent
-    , 	trans.Url
-    , 	trans.ModifiedDate
-    , 	trans.CreatedDate
-    , 	trans.TransKey
-    , 	trans.Retry
-    , 	trans.Action
-    FROM FPS_FingerPrint.RawTransaction trans 
-    INNER JOIN Temp_RawTransaction2 tmp ON trans.Id = tmp.Id;
+    SELECT ts.Id
+    , 	ts.SessionKey
+    , 	ts.CustId
+    , 	ts.SubAccId
+    , 	ts.LoginName
+    , 	ts.SubscriberId
+    , 	ts.Transtime
+    , 	ts.ClientIP
+    , 	ts.UserAgent
+    , 	ts.Url
+    , 	ts.ModifiedDate
+    , 	ts.CreatedDate
+    , 	ts.TransKey
+    , 	ts.Retry
+    , 	ts.Action
+    FROM FPS_FingerPrint.RawTransaction AS ts 
+		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON ts.Id = tmpRt2.Id;
     
-    INSERT INTO FPS_FingerPrint.FingerPrintCompleted(Id, FingerPrintCode, UserAgentCode, CookieId, SubscriberId, SessionKey, Flagged, Url, CreatedDate)
-    SELECT fp.Id
-    ,	fp.FingerPrintCode
-    ,	fp.UserAgentCode
-    ,	fp.CookieId
-    ,	fp.SubscriberId
-    ,	fp.SessionKey
-    ,	fp.Flagged
-    ,	fp.Url
-    ,	fp.CreatedDate
-    FROM FPS_FingerPrint.FingerPrint fp
-		INNER JOIN Temp_RawTransaction2 tmp ON tmp.SessionKey = fp.SessionKey;
+    INSERT INTO FPS_FingerPrint.FingerPrintCompleted(Id, FingerPrintCode, UserAgentCode, CookieCode, SubscriberId, SessionKey, Flagged, Url, CreatedDate)
+    SELECT 	fp.Id
+		,	fp.FingerPrintCode
+		,	fp.UserAgentCode
+		,	fp.CookieCode
+		,	fp.SubscriberId
+		,	fp.SessionKey
+		,	fp.Flagged
+		,	fp.Url
+		,	fp.CreatedDate
+    FROM FPS_FingerPrint.FingerPrint AS fp
+		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON tmpRt2.SessionKey = fp.SessionKey;
     
-    DELETE fp FROM FPS_FingerPrint.FingerPrint fp
-			INNER JOIN Temp_RawTransaction2 tmp ON tmp.SessionKey = fp.SessionKey;   
+    DELETE fp FROM FPS_FingerPrint.FingerPrint AS fp
+		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON tmpRt2.SessionKey = fp.SessionKey;   
     
-    DELETE trans FROM FPS_FingerPrint.RawTransaction trans 
-    INNER JOIN Temp_RawTransaction2 tmp ON trans.Id = tmp.Id;
+    DELETE rt 
+    FROM FPS_FingerPrint.RawTransaction AS rt 
+		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON rt.Id = tmpRt2.Id;
     
-    DELETE trans FROM FPS_FingerPrint.RawTransactionN trans
-    INNER JOIN Temp_RawTransaction2 tmp ON trans.RawTransId = tmp.Id;
+    DELETE rtn 
+    FROM FPS_FingerPrint.RawTransactionN AS rtn
+		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON rtn.RawTransId = tmpRt2.Id;
     
-    UPDATE FPS_FingerPrint.Offset off
-		SET off.OffsetValue = ip_OffsetValue
-    WHERE off.Id = ip_OffsetId;
-    
-	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
-    DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction2;
+    UPDATE FPS_FingerPrint.Offset AS fs
+	SET fs.OffsetValue = ip_OffsetValue
+    WHERE fs.Id = ip_OffsetId;
+
 END$$
 DELIMITER ;
-
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_RawTransactionN_Update TO 'fpsServiceAdmin'@'%';
