@@ -137,10 +137,15 @@ BEGIN
     #====RETURN 1: FingerPrintCode IS NOT NULL===========================
     SET @rowNo = 0; 
     SET @BatchNo = 1; 
-    SET @GroupId = (SELECT GroupID FROM Temp_Transaction AS tmpTs WHERE tmpTs.GroupId > 0 ORDER BY GroupId ASC LIMIT 1) ;
+    SET @GroupId = (SELECT tmpTs.GroupID FROM Temp_Transaction AS tmpTs WHERE tmpTs.GroupId > 0 ORDER BY tmpTs.GroupId ASC LIMIT 1) ;
     SET @packSize = ip_BatchSize;
     
-    SELECT Id, GroupID INTO @preId, @preGroupId FROM Temp_Transaction AS tmpTs WHERE tmpTs.GroupId > 0 ORDER BY GroupId ASC LIMIT 1;
+    SELECT tmpTs.Id, tmpTs.GroupID 
+    INTO @preId, @preGroupId 
+    FROM Temp_Transaction AS tmpTs 
+    WHERE tmpTs.GroupId > 0 
+    ORDER BY tmpTs.GroupId ASC 
+    LIMIT 1;
     
     #====RETURN 1: Group By (FingerPrintCode OR CookieCode)*/
     SELECT	tmpTs.Id
@@ -150,10 +155,10 @@ BEGIN
 		,	tmpTs.GroupId
         ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @BatchNo := @BatchNo + 1 ELSE @BatchNo END) AS BatchNumber
         ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
-        ,	(CASE WHEN GroupId !=  @preGroupId THEN @preGroupId:= GroupId ELSE @preGroupId  END) AS PreGroup
+        ,	(CASE WHEN tmpTs.GroupId !=  @preGroupId THEN @preGroupId:= tmpTs.GroupId ELSE @preGroupId  END) AS PreGroup
 	FROM Temp_Transaction AS tmpTs
     WHERE tmpTs.FingerPrintCode IS NOT NULL AND tmpTs.GroupId > 0
-    ORDER BY GroupId ASC;
+    ORDER BY tmpTs.GroupId ASC;
     
     #====RETURN 2: Trans: NOT Group By (FingerPrintCode OR CookieCode)*/
     SET @rowNo = 0;
@@ -167,7 +172,7 @@ BEGIN
         ,	(CASE WHEN @rowNo >= @packSize THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
 	FROM Temp_Transaction AS tmpTs
     WHERE tmpTs.FingerPrintCode IS NOT NULL AND tmpTs.GroupId = 0
-    ORDER BY GroupId ASC;    
+    ORDER BY tmpTs.GroupId ASC;    
     
 	#====RETURN 3: FingerPrintCode IS NULL===========================
     SELECT	tmpTs.Id
