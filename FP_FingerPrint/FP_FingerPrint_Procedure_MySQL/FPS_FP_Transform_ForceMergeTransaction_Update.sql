@@ -31,6 +31,17 @@ BEGIN
             , 	INDEX IX_Temp_Transactions_TransKey(TransKey)            
     );
     
+    INSERT INTO Temp_Transactions(Id, TransKey)
+	SELECT	rt.Id		
+        ,	rt.TransKey 
+	FROM	JSON_TABLE(
+			ip_TransJson,
+			 "$[*]" COLUMNS(
+								Id						BIGINT			PATH "$.Id"       
+							,	TransKey				VARCHAR(200) 	PATH "$.TransKey"                                                 
+				)
+		   ) AS  rt; 
+    
     CREATE TEMPORARY TABLE Temp_Transactions2(
 				Id					BIGINT
 		,		LoginName 			VARCHAR(100) 
@@ -124,12 +135,12 @@ BEGIN
 		,		transD.SubscriberId 		
 		,		transD.CustId 				
 		,		transD.SubAccId 			
-		,		transO.LoginName_Old 		
-		,		transO.TransTime_Old 		
-		,		transO.IP_Old 				
-		,		transO.UserAgent_Old 		
-		,		transO.URL_Old 			
-		,		transO.Flagged_Old
+		,		transO.LoginName 		
+		,		transO.TransTime		
+		,		transO.IP				
+		,		transO.UserAgent		
+		,		transO.URL 			
+		,		transO.Flagged
 	FROM Temp_Transactions tmp
 	INNER JOIN FPS_FingerPrint.TransactionDevice transD ON transD.Id = tmp.Id
     INNER JOIN FPTesting.FP_RawTransaction_Old transO ON tmp.TransKey = transO.TransKey;
@@ -172,7 +183,7 @@ BEGIN
    , 	tmp.FingerprintCode
    , 	tmp.FingerprintMoreInfo
    ,	tmp.UserAgent
-   , 	tmp.ClientIP
+   , 	tmp.IP
    , 	tmp.IPID
    , 	tmp.PluginID
    , 	tmp.URL
@@ -182,10 +193,10 @@ BEGIN
    , 	tmp.TransStatus
    , 	tmp.FPSTransID   
    , 	tmp.Flagged   
-   , 	tmp.DeviceId
+   , 	tmp.FPDeviceID
    , 	tmp.SubscriberId
    , 	tmp.CustId
-   , 	tmp.SubAccId
+   , 	tmp.CustSubID
    , 	tmp.LoginName
    , 	tmp.TransTime
    , 	tmp.IP
@@ -202,7 +213,7 @@ BEGIN
 	,	LoginName
 	,	SubscriberId
 	,	FingerPrintCode
-	,	CookieId
+	,	CookieCode
 	,	DeviceId
 	,	Transtime
 	,	ClientIP
@@ -220,7 +231,7 @@ BEGIN
 	,	transD.LoginName
 	,	transD.SubscriberId
 	,	transD.FingerPrintCode
-	,	transD.CookieId
+	,	transD.CookieCode
 	,	transD.DeviceId
 	,	transD.Transtime
 	,	transD.ClientIP
@@ -282,7 +293,7 @@ BEGIN
    , 	transD.TransTime
    ,	DATE(transD.TransTime)	
    , 	NULL
-   , 	NULLe
+   , 	NULL
    , 	NULL
    ,	transD.UserAgent
    , 	transD.ClientIP
@@ -292,7 +303,7 @@ BEGIN
    , 	transD.Action
    , 	NULL
    , 	NULL
-   , 	tmp.TransStatus
+   , 	0
    , 	NULL
    , 	transD.Flagged   
    , 	transD.DeviceId
@@ -316,7 +327,7 @@ BEGIN
 	,	LoginName
 	,	SubscriberId
 	,	FingerPrintCode
-	,	CookieId
+	,	CookieCode
 	,	DeviceId
 	,	Transtime
 	,	ClientIP
@@ -334,7 +345,7 @@ BEGIN
 	,	transD.LoginName
 	,	transD.SubscriberId
 	,	transD.FingerPrintCode
-	,	transD.CookieId
+	,	transD.CookieCode
 	,	transD.DeviceId
 	,	transD.Transtime
 	,	transD.ClientIP
