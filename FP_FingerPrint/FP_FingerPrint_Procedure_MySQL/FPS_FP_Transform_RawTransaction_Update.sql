@@ -39,7 +39,7 @@ BEGIN
 		,	SubAccId 			BIGINT DEFAULT NULL
 		,	LoginName 			VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 		INT DEFAULT NULL
-		,	Transtime 			DATETIME DEFAULT NULL
+		,	Transtime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
 		,	UserAgent 			VARCHAR(500) DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
@@ -62,7 +62,7 @@ BEGIN
 		,	SubAccId 			BIGINT DEFAULT NULL
 		,	LoginName 			VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 		INT DEFAULT NULL
-		,	Transtime 			DATETIME DEFAULT NULL
+		,	Transtime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
 		,	UserAgent 			VARCHAR(500) DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
@@ -100,7 +100,7 @@ BEGIN
 							,	SubAccId				BIGINT			PATH "$.SubAccId"
 							,	LoginName				VARCHAR(100)	PATH "$.LoginName"
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
-							,	Transtime				DATETIME	 	PATH "$.Transtime"
+							,	Transtime				DATETIME(4)	 	PATH "$.Transtime"
                             ,	ClientIP				VARCHAR(45)		PATH "$.ClientIP"
                             ,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
 							,	Url						VARCHAR(100) 	PATH "$.Url"
