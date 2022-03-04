@@ -164,5 +164,3 @@ BEGIN
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
 END$$
 DELIMITER ;
-
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_TransactionN_Update TO 'fpsServiceAdmin'@'%';
