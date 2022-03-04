@@ -35,7 +35,7 @@ BEGIN
 		,	SubAccId 		BIGINT DEFAULT NULL
 		,	LoginName 		VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 	INT DEFAULT NULL
-		,	Transtime 		DATETIME DEFAULT NULL
+		,	Transtime 		DATETIME(4) DEFAULT NULL
 		,	ClientIP 		VARCHAR(45) DEFAULT NULL
 		,	UserAgent 		VARCHAR(500) DEFAULT NULL
 		,	Url 			VARCHAR(100) DEFAULT NULL
@@ -59,7 +59,7 @@ BEGIN
 		,	SubAccId 			BIGINT DEFAULT NULL
 		,	LoginName 			VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 		INT DEFAULT NULL
-		,	Transtime 			DATETIME DEFAULT NULL
+		,	Transtime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
 		,	UserAgent 			VARCHAR(500) DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
@@ -99,7 +99,7 @@ BEGIN
 							,	SubAccId				BIGINT			PATH "$.SubAccId"
 							,	LoginName				VARCHAR(100)	PATH "$.LoginName"
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
-							,	Transtime				DATETIME	 	PATH "$.Transtime"
+							,	Transtime				DATETIME(4)	 	PATH "$.Transtime"
                             ,	ClientIP				VARCHAR(45)		PATH "$.ClientIP"
                             ,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
 							,	Url						VARCHAR(100) 	PATH "$.Url"
@@ -118,6 +118,7 @@ BEGIN
 		,	tmpRt.SubscriberId
 		,	tmpRt.Transtime
 		,	tmpRt.ClientIP
+		,	tmpRt.UserAgent
 		,	IFNULL(tmpRt.Url, fp.Url)
 		,	tmpRt.TransKey
 		,	tmpRt.Retry
@@ -126,10 +127,10 @@ BEGIN
 		,	fp.CookieCode
 		,	fp.Flagged
     FROM Temp_RawTransaction AS tmpRt
-		INNER JOIN FPS_FingerPrint.FingerPrint fp ON fp.SessionKey = tmpRt.SessionKey;
+		LEFT JOIN FPS_FingerPrint.FingerPrint fp ON fp.SessionKey = tmpRt.SessionKey;
       
 	-- Insert data completed
-    INSERT INTO FPS_FingerPrint.Transaction(RawTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, Transtime, ClientIP, UserAgent, Url, Action, ModifiedDate, CreatedDate, TransKey, Flagged)
+    INSERT INTO FPS_FingerPrint.Transaction(RawTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, Transtime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT Id
 		,	tmpRt2.CustId
         ,	tmpRt2.SubAccId
@@ -142,7 +143,6 @@ BEGIN
         ,	tmpRt2.UserAgent
         ,	tmpRt2.Url
         ,	tmpRt2.Action
-        ,	lv_currentDate AS ModifiedDate
         ,	tmpRt2.CreatedDate
         ,	tmpRt2.TransKey
         ,	tmpRt2.Flagged
