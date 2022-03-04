@@ -49,7 +49,7 @@ BEGIN
 		,	Flagged 			VARCHAR(50) DEFAULT NULL		
 		,	Retry 				TINYINT DEFAULT 0
 		,	FingerPrintCode 	VARCHAR(200) DEFAULT NULL
-		,	CookieCode 			BINARY(16) DEFAULT NULL
+		,	CookieCode 			VARCHAR(64) DEFAULT NULL
         
 		,	INDEX IX_Temp_RawTransaction_FingerPrintCode(FingerPrintCode)
         ,	INDEX IX_Temp_RawTransaction_SessionKey(SessionKey)
@@ -72,7 +72,7 @@ BEGIN
 		,	Flagged 			VARCHAR(50) DEFAULT NULL		
 		,	Retry 				TINYINT DEFAULT '0'
 		,	FingerPrintCode 	VARCHAR(200) DEFAULT NULL
-		,	CookieCode 			BINARY(16) DEFAULT NULL
+		,	CookieCode 			VARCHAR(64) DEFAULT NULL
         
         ,	INDEX Temp_RawTransaction_FingerPrintCode_Index (FingerPrintCode)
     );    
