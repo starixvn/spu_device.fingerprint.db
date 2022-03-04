@@ -217,14 +217,14 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpT2 
     WHERE tmpT2.FingerPrintCode IS NULL AND tmpT2.Retry >= ip_Retry;
     
-    DELETE tmpT2
-    FROM Temp_RawTransaction2 AS tmpT2
-    WHERE tmpT2.FingerPrintCode IS NULL AND Retry >= ip_Retry;
-    
     UPDATE FPS_FingerPrint.RawTransaction rawTrans
 		INNER JOIN Temp_RawTransaction2 tmp ON tmp.Id = rawTrans.Id
 		SET rawTrans.Retry = tmp.Retry     
 	WHERE tmp.FingerPrintCode IS NULL;
+    
+    DELETE tmpT2
+    FROM Temp_RawTransaction2 AS tmpT2
+    WHERE tmpT2.FingerPrintCode IS NULL AND Retry >= ip_Retry;
     
     UPDATE FPS_FingerPrint.Offset off
 		SET off.OffsetValue = ip_OffsetValue
