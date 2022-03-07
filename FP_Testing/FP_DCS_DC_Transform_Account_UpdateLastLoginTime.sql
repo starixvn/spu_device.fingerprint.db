@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_Account_UpdateLastLoginTime`;
 
 DELIMITER $$
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_Account_UpdateLastLoginTime`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_Account_UpdateLastLoginTime`(
 		IN BatchSize 	INT
 )
     SQL SECURITY INVOKER

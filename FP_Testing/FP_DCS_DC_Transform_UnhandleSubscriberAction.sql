@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_UnhandleSubscriberAction`;
 
 DELIMITER $$
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_UnhandleSubscriberAction`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_UnhandleSubscriberAction`(
         IN ip_FromTransID       BIGINT UNSIGNED
     ,   IN ip_ToTransID         BIGINT UNSIGNED
 )

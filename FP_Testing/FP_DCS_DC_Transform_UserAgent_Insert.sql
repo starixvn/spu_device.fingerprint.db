@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_UserAgent_Insert`;
 
 DELIMITER $$
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_UserAgent_Insert`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_UserAgent_Insert`(
         IN ip_FromTransID   BIGINT UNSIGNED
     ,   IN ip_ToTransID     BIGINT UNSIGNED
 )

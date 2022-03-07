@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_Device_Insert`;
 
 DELIMITER $$
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_Device_Insert`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_Device_Insert`(
     IN ip_TransJson LONGTEXT
 )
     SQL SECURITY INVOKER

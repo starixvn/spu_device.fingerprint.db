@@ -1,9 +1,9 @@
-/*<info serverAlias="FPSMain-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="1" isNested="1"></info>*/
+/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="1" isNested="1"></info>*/
 DROP FUNCTION IF EXISTS FP_DCS_DC_GetTransStatus_NotTransformed;
 
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` FUNCTION FP_DCS_DC_GetTransStatus_NotTransformed()
+CREATE DEFINER=`fpsOwner`@`%` FUNCTION FP_DCS_DC_GetTransStatus_NotTransformed()
 
 RETURNS TINYINT
 

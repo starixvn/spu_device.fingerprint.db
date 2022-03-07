@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_Transaction_Insert`;
 
 DELIMITER $$
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_Transaction_Insert`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_Transaction_Insert`(
         IN ip_FromTransID   BIGINT UNSIGNED
     ,   IN ip_ToTransID     BIGINT UNSIGNED
 )

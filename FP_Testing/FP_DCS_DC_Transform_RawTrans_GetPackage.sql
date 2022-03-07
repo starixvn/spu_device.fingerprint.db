@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_RawTrans_GetPackage`;
 
 DELIMITER $$
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_RawTrans_GetPackage` (
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_RawTrans_GetPackage` (
         IN ip_IsProcessed   TINYINT
     ,   IN ip_NoOfTickets   INT
     ,   IN ip_NoOfBatch     INT

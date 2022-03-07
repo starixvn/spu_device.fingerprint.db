@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_Device_GetPackage`;
 
 DELIMITER $$
-CREATE DEFINER=`dcsService`@`%` PROCEDURE `FP_DCS_DC_Transform_Device_GetPackage`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FP_DCS_DC_Transform_Device_GetPackage`(
         IN ip_NoOfTickets INT
     ,   IN ip_NoOfBatch INT
 )
