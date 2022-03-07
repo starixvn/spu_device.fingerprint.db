@@ -3,7 +3,7 @@ DROP FUNCTION IF EXISTS FP_DCS_DC_GetTransStatus_NotTransformed;
 
 DELIMITER $$
 
-CREATE DEFINER=`fpsOwner`@`%` FUNCTION FP_DCS_DC_GetTransStatus_NotTransformed()
+CREATE DEFINER=`FPSOwner`@`%` FUNCTION FP_DCS_DC_GetTransStatus_NotTransformed()
 
 RETURNS TINYINT
 
