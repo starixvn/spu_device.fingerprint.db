@@ -1,4 +1,4 @@
-/*<info serverAlias="CTSMain-FPTesting" databaseType="2" executers="ctsServiceAdmin" isFunction="1" isNested="1"></info>*/
+/*<info serverAlias="FPSMain-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="1" isNested="1"></info>*/
 DROP FUNCTION IF EXISTS FP_DCS_DC_GetTransStatus_NotTransformed;
 
 DELIMITER $$

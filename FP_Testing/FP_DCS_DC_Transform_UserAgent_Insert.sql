@@ -1,4 +1,4 @@
-/*<info serverAlias="CTSMain-FPTesting" databaseType="2" executers="ctsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_UserAgent_Insert`;
 
 DELIMITER $$
