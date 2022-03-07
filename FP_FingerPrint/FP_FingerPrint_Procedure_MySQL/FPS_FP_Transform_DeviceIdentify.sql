@@ -15,6 +15,7 @@ BEGIN
 		Original:
 
 		Revisions:
+			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
             
 		Param's Explanation (filtered by):	
 			ip_GroupType: 0- Not a group, 1- Trans Group(the same FingerPrintCode or Cookie);
