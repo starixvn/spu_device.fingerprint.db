@@ -2,9 +2,9 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Core_Offset_UpdateOffsetValue`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Core_Offset_UpdateOffsetValue`(
-		ip_OffsetName 	VARCHAR(100),
-        ip_OffsetValue	BIGINT
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Core_Offset_UpdateOffsetValue`(
+		ip_OffsetName 	VARCHAR(100)
+	,	ip_OffsetValue	BIGINT
 )
     SQL SECURITY INVOKER
 BEGIN

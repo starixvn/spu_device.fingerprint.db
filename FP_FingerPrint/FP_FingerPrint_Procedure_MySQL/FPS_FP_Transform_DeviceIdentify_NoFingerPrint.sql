@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_DeviceIdentify_NoFingerPrint`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify_NoFingerPrint`(		
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify_NoFingerPrint`(		
         ip_TransList	LONGTEXT
 )
     SQL SECURITY INVOKER
@@ -14,6 +14,7 @@ BEGIN
 		Original:
 
 		Revisions:
+			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
             
 		Param's Explanation (filtered by):	
 

@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Core_SubscriberInfoById_Get`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Core_SubscriberInfoById_Get`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Core_SubscriberInfoById_Get`(
 		ip_SubscriberId INT
 )
     SQL SECURITY INVOKER
@@ -22,10 +22,11 @@ BEGIN
 			- CALL FPS_FP_GetSubscriberInfoById(2);
 			
 	*/
-     SELECT	sub.Id as SubscriberId
-		,	sub.Name as SubscriberName 
-    FROM   FPS_FingerPrint.Subscribers sub           
-    WHERE sub.Id = ip_SubscriberId and sub.IsActive = 1;
+     SELECT	sub.Id AS SubscriberId
+		,	sub.Name AS SubscriberName 
+    FROM   FPS_FingerPrint.Subscribers AS sub           
+    WHERE sub.Id = ip_SubscriberId 
+		AND sub.IsActive = 1;
 END$$
 DELIMITER ;
 

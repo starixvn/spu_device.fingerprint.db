@@ -2,9 +2,9 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_MergeTransaction_Get`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_MergeTransaction_Get`(
-		ip_Size INT,
-        ip_Retry INT
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_MergeTransaction_Get`(
+		ip_Size		INT
+	,   ip_Retry	INT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -24,8 +24,9 @@ BEGIN
 			
 	*/
     
-    SELECT trans.Id, trans.TransKey 
-    FROM FPS_FingerPrint.TransactionDevice trans 
+    SELECT	trans.Id
+		,	trans.TransKey 
+    FROM FPS_FingerPrint.TransactionDevice AS trans 
 	WHERE trans.Retry = ip_Retry
     LIMIT ip_Size;
    

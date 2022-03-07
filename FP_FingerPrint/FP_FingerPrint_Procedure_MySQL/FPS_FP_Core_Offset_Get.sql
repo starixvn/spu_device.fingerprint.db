@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Core_Offset_Get`;
 DELIMITER $$
 
-CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Core_Offset_Get`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Core_Offset_Get`(
 		ip_OffsetName VARCHAR(100)
 )
     SQL SECURITY INVOKER
@@ -23,8 +23,10 @@ BEGIN
 			
 	*/
    
-    SELECT off.Id, off.OffsetName, off.OffsetValue 
-    FROM FPS_FingerPrint.Offset off 
+    SELECT	off.Id
+		,	off.OffsetName
+		,	off.OffsetValue 
+    FROM FPS_FingerPrint.Offset AS off 
     WHERE off.OffsetName = ip_OffsetName;
     
 END$$

@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_RawTransaction_Insert`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransaction_Insert`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransaction_Insert`(
 		ip_Transaction LONGTEXT
 )
     SQL SECURITY INVOKER
@@ -39,17 +39,17 @@ BEGIN
     );     
     
     INSERT INTO Temp_Transactions(
-		LoginName
-        , SubscriberId
-        , SessionKey
-        , TransTime
-        , ClientIp
-        , UserAgent
-        , Url
-        , Action
-        , TransKey
-        , CustId
-        , SubAccId)
+			LoginName
+        ,	SubscriberId
+        ,	SessionKey
+        ,	TransTime
+        ,	ClientIp
+        ,	UserAgent
+        ,	Url
+        ,	Action
+        ,	TransKey
+        ,	CustId
+        ,	SubAccId)
 	SELECT	tmp.LoginName
 		,	tmp.SubscriberId
 		,	tmp.SessionKey
@@ -105,7 +105,7 @@ BEGIN
                     ,	tmp.TransKey
                     ,	tmp.CustId
                     ,	tmp.SubAccId
-	FROM Temp_Transactions tmp; 
+	FROM Temp_Transactions AS tmp; 
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
 END$$

@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_FingerPrint_Insert`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_FingerPrint_Insert`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_FingerPrint_Insert`(
 		ip_FingerPrint LONGTEXT
 )
     SQL SECURITY INVOKER

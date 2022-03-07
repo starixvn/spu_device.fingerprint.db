@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_DeviceIdentify`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify`(		
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_DeviceIdentify`(		
 		ip_GroupType	TINYINT
    ,    ip_TransJson	LONGTEXT	
 )
@@ -35,8 +35,8 @@ BEGIN
 					]');
 	*/
     
-    DECLARE lv_GroupDeviceId BIGINT UNSIGNED;
-    DECLARE lv_CreatedDate DATETIME(4);
+    DECLARE lv_GroupDeviceId	BIGINT UNSIGNED;
+    DECLARE lv_CreatedDate		DATETIME(4);
     
     DROP TEMPORARY TABLE IF EXISTS Temp_InputTrans;
     CREATE TEMPORARY TABLE Temp_InputTrans(

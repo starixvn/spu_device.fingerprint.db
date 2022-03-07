@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Core_SubscriberList_Get`;
 DELIMITER $$
 
-CREATE DEFINER=`ctsOwner`@`%` PROCEDURE `FPS_FP_Core_SubscriberList_Get`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Core_SubscriberList_Get`(
 )
     SQL SECURITY INVOKER
 BEGIN

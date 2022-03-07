@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_RawTransaction_Update`;
 DELIMITER $$
 
-CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransaction_Update`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransaction_Update`(
 		ip_RawTransJson	LONGTEXT
     ,	ip_Retry		INT
     ,   ip_OffsetId		INT
@@ -203,7 +203,7 @@ BEGIN
     DELETE fp FROM FPS_FingerPrint.FingerPrint AS fp
 		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON tmpT2.SessionKey = fp.SessionKey;   
     
-    DELETE rt FROM FPS_FingerPrint.RawTransaction rt 
+    DELETE rt FROM FPS_FingerPrint.RawTransaction AS rt 
 		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON rt.Id = tmpT2.Id 
     WHERE tmpT2.FingerPrintCode IS NOT NULL;
     
@@ -218,7 +218,7 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpT2 
     WHERE tmpT2.FingerPrintCode IS NULL AND tmpT2.Retry >= ip_Retry;
     
-    UPDATE FPS_FingerPrint.RawTransaction rawTrans
+    UPDATE FPS_FingerPrint.RawTransaction AS rawTrans
 		INNER JOIN Temp_RawTransaction2 tmp ON tmp.Id = rawTrans.Id
 		SET rawTrans.Retry = tmp.Retry     
 	WHERE tmp.FingerPrintCode IS NULL;
@@ -227,7 +227,7 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpT2
     WHERE tmpT2.FingerPrintCode IS NULL AND Retry >= ip_Retry;
     
-    UPDATE FPS_FingerPrint.Offset off
+    UPDATE FPS_FingerPrint.Offset AS off
 		SET off.OffsetValue = ip_OffsetValue
     WHERE off.Id = ip_OffsetId;
 
