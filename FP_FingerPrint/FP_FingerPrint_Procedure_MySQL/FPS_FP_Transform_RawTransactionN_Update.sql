@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_RawTransactionN_Update`;
 DELIMITER $$
 
-CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransactionN_Update`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransactionN_Update`(
 			ip_RawTransJson	LONGTEXT
 	,       ip_OffsetId		INT
 	,       ip_OffsetValue	BIGINT

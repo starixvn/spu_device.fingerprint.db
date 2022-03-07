@@ -2,7 +2,7 @@
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_RawTransactionN_Get`;
 
 DELIMITER $$
-CREATE DEFINER=`FPSOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransactionN_Get`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_RawTransactionN_Get`(
 		    ip_BatchSize 	INT
     ,       ip_OffsetId		INT
 )
