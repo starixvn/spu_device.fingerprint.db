@@ -146,8 +146,6 @@ BEGIN
 	INNER JOIN FPS_FingerPrint.TransactionDevice transD ON transD.Id = tmp.Id
     INNER JOIN FPTesting.FP_RawTransaction_Old transO ON tmp.TransKey = transO.TransKey;
     
-    select * from Temp_Transactions2;
-    
     INSERT INTO FPTesting.FP_RawTransaction(
 		LoginName
     , 	SubscriberName
