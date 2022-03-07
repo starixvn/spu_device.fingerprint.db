@@ -370,5 +370,3 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions2; 
 END$$
 DELIMITER ;
-
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_ForceMergeTransaction_Update TO 'fpsServiceAdmin'@'%';

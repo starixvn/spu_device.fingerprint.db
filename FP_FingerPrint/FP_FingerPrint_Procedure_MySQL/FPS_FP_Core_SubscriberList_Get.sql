@@ -27,5 +27,3 @@ BEGIN
     
 END$$
 DELIMITER ;
-
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Core_SubscriberList_Get TO 'fpsService'@'%';

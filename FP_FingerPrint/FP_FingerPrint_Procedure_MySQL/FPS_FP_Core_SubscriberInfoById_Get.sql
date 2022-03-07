@@ -29,5 +29,3 @@ BEGIN
 		AND sub.IsActive = 1;
 END$$
 DELIMITER ;
-
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Core_SubscriberInfoById_Get TO 'fpsService'@'%';
