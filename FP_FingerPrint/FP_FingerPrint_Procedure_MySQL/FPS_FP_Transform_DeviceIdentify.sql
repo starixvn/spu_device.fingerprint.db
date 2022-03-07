@@ -61,9 +61,20 @@ BEGIN
         ,	CookieCode		VARCHAR(64)
         ,	DeviceID		BIGINT UNSIGNED
      );
+     
+     DROP TEMPORARY TABLE IF EXISTS Temp_ExistingFingerPrintCode;
+     CREATE TEMPORARY TABLE Temp_ExistingFingerPrintCode(
+        	Id				BIGINT UNSIGNED PRIMARY KEY
+		,   DeviceID		BIGINT UNSIGNED
+     );
+     
+     DROP TEMPORARY TABLE IF EXISTS Temp_ExistingCookieCode;
+     CREATE TEMPORARY TABLE Temp_ExistingCookieCode(
+        	Id				BIGINT UNSIGNED PRIMARY KEY
+        ,   DeviceID		BIGINT UNSIGNED
+     );     
 
-	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);
-    
+	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);    
     
     INSERT INTO Temp_InputTrans(Id, Transtime, FingerPrintCode, CookieCode, GroupId)
 	SELECT	tmpJs.Id
@@ -82,16 +93,29 @@ BEGIN
 		) AS tmpJs;	
 
     /*====RECOVER DEVICE: Get Exisitng By FingerPrintCode*/
-	UPDATE Temp_InputTrans AS tmpTs
-		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmpTs.FingerPrintCode = df.FingerPrintCode
-	SET 	tmpTs.RecoverType = 1
-		,	tmpTs.DeviceId = df.DeviceId;
-        
-    /*====RECOVER DEVICE: Get Exisitng By Cookie*/    
+    
+	INSERT INTO Temp_ExistingFingerPrintCode(Id, DeviceID)
+    SELECT	tmpTs.Id
+		,	df.DeviceId
+    FROM Temp_InputTrans AS tmpTs
+		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmpTs.FingerPrintCode = df.FingerPrintCode;
+    
     UPDATE Temp_InputTrans AS tmpTs
-		INNER JOIN FPS_FingerPrint.DeviceCookie AS dc ON tmpTs.CookieCode = dc.CookieCode
+		INNER JOIN Temp_ExistingFingerPrintCode AS tmpEf ON tmpTs.Id = tmpEf.Id
+	SET 	tmpTs.RecoverType = 1
+		,	tmpTs.DeviceId = tmpEf.DeviceId;
+    
+    /*====RECOVER DEVICE: Get Exisitng By Cookie*/    
+	INSERT INTO Temp_ExistingCookieCode(Id, DeviceID)
+    SELECT	tmpTs.Id
+		,	dc.DeviceId
+    FROM Temp_InputTrans AS tmpTs
+		INNER JOIN FPS_FingerPrint.DeviceCookie AS dc ON tmpTs.CookieCode = dc.CookieCode;
+    
+    UPDATE Temp_InputTrans AS tmpTs
+		INNER JOIN Temp_ExistingCookieCode AS tmpEc ON tmpTs.Id = tmpEc.Id
 	SET 	tmpTs.RecoverType = tmpTs.RecoverType + 2
-		,	tmpTs.DeviceId = dc.DeviceId;
+		,	tmpTs.DeviceId = tmpEc.DeviceId;
         
     /*====RECOVER DEVICE: PROCESS FOR Group*/
     IF (ip_GroupType != 0) THEN
@@ -113,14 +137,13 @@ BEGIN
     END IF;
     
      /*====RECOVER DEVICE: Insert New FingerprintCode For Old Device*/     
-    INSERT INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId, CreatedDate, ModifiedDate)
     SELECT	tmpIt.FingerPrintCode
 		,	tmpIt.DeviceId
 		,	lv_CreatedDate
         ,	tmpIt.Transtime
     FROM Temp_InputTrans AS tmpIt
-    WHERE tmpIt.RecoverType = 2 
-    ON DUPLICATE KEY UPDATE ModifiedDate = tmpIt.Transtime;
+    WHERE tmpIt.RecoverType = 2;
     
     /*====RECOVER DEVICE: Insert New Cookie For Old Device*/
     INSERT INTO FPS_FingerPrint.DeviceCookie(CookieCode, DeviceId, CreatedDate, ModifiedDate)
@@ -203,7 +226,33 @@ BEGIN
         ON DUPLICATE KEY UPDATE ModifiedDate = tmpIt.Transtime; 
         
 	END IF;
-	
+    
+    /****UPDATE ModifiedDate*****/
+    UPDATE FPS_FingerPrint.Device AS dv
+		INNER JOIN(	SELECT	tmpIt.DeviceId
+						,	MAX(tmpIt.Transtime) AS MaxTransTime
+					FROM Temp_InputTrans AS tmpIt
+                    GROUP BY tmpIt.DeviceId
+                    HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.DeviceId = dv.Id
+	SET dv.ModifiedDate = tmpGd.MaxTransTime;
+    
+    UPDATE FPS_FingerPrint.DeviceFingerPrint AS dv
+		INNER JOIN(	SELECT	tmpIt.FingerPrintCode
+						,	MAX(tmpIt.Transtime) AS MaxTransTime
+					FROM Temp_InputTrans AS tmpIt
+                    GROUP BY tmpIt.FingerPrintCode
+                    HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.FingerPrintCode = dv.FingerPrintCode
+	SET dv.ModifiedDate = tmpGd.MaxTransTime;
+    
+    UPDATE FPS_FingerPrint.DeviceCookie AS dv
+		INNER JOIN(	SELECT	tmpIt.CookieCode
+						,	MAX(tmpIt.Transtime) AS MaxTransTime
+					FROM Temp_InputTrans AS tmpIt
+                    GROUP BY tmpIt.CookieCode
+                    HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.CookieCode = dv.CookieCode
+	SET dv.ModifiedDate = tmpGd.MaxTransTime;
+    
+	/*****UPDATE Trans******************/
 	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(Id, RawTransId, Transtime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.Id
 			, 	ts.RawTransId
