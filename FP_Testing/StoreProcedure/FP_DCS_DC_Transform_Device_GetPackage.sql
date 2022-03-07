@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPSTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_Device_GetPackage`;
 
 DELIMITER $$
@@ -11,7 +11,7 @@ BEGIN
 	/*
 	    Created: 20200908@Bobby.Nguyen
 	    Task : Get List TransID to process Device Transform
-	    DB: FPTesting
+	    DB: FPSTesting
 	    Original:
 
 	    Revisions:
@@ -22,7 +22,7 @@ BEGIN
 	    Param's Explanation (filtered by):
         
         Example:
-        CALL FPTesting.FP_DCS_DC_Transform_Device_GetPackage(10,2);
+        CALL FPSTesting.FP_DCS_DC_Transform_Device_GetPackage(10,2);
 	*/
 	
 	DECLARE		lv_TotalRecord		INT UNSIGNED DEFAULT 0;
@@ -45,7 +45,7 @@ BEGIN
 	SET lv_TotalRecord 	    = ip_NoOfTickets*ip_NoOfBatch;
     SET lv_GroupLookup 	    = 'DCS_Device_Transform';
     SET lv_KeyLookup 		= 'MinTransId';
-    SET lv_FromTransID 	    = IFNULL((SELECT CAST(VValue AS UNSIGNED) FROM FPTesting.FP_SystemSetting WHERE VGroup=lv_GroupLookup AND VName=lv_KeyLookup), 0);
+    SET lv_FromTransID 	    = IFNULL((SELECT CAST(VValue AS UNSIGNED) FROM FPSTesting.FP_SystemSetting WHERE VGroup=lv_GroupLookup AND VName=lv_KeyLookup), 0);
     
 
 	SET @RowId = 0;
@@ -58,7 +58,7 @@ BEGIN
 		    ,   ts.TransID
             ,   ts.CreatedDate
 		    ,   ceil(@RowId/ip_NoOfTickets) AS BatchID
-		FROM FPTesting.FP_Transaction AS ts
+		FROM FPSTesting.FP_Transaction AS ts
 		WHERE ts.TransId >= lv_FromTransID
 		LIMIT lv_TotalRecord
     ) AS t;
@@ -66,7 +66,7 @@ BEGIN
     SET lv_FromTransID = IFNULL((SELECT MIN(TransID) FROM Temp_Trans), lv_FromTransID); 
     SET lv_FromCreatedDate = IFNULL((SELECT MIN(CreatedDate) FROM Temp_Trans), date_add(CURRENT_TIMESTAMP(), INTERVAL -2 WEEK));
 
-    INSERT INTO FPTesting.FP_SystemSetting (VGroup, VName, VValue, UpdatedTime)
+    INSERT INTO FPSTesting.FP_SystemSetting (VGroup, VName, VValue, UpdatedTime)
     SELECT VGroup, VName, VValue, UpdatedTime
     FROM (
         SELECT lv_GroupLookup AS VGroup
