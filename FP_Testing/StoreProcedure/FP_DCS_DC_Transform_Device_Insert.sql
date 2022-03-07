@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPSTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_Device_Insert`;
 
 DELIMITER $$
@@ -10,7 +10,7 @@ BEGIN
 	/*
 	    Created: 20220106@CaseyHuynh
 	    Task : Transform Device Info
-	    DB: FPTesting
+	    DB: FPSTesting
 	    Original:
 		 
 	    Revisions:
@@ -32,7 +32,7 @@ BEGIN
 	DECLARE err_message varchar(255) DEFAULT '';
     DECLARE info_no int DEFAULT 0;
     DECLARE info_message varchar(255) DEFAULT '';
-	DECLARE sch_name varchar(128) DEFAULT 'FPTesting';
+	DECLARE sch_name varchar(128) DEFAULT 'FPSTesting';
     DECLARE tab_name varchar(128) DEFAULT '';
     DECLARE col_name varchar(128) DEFAULT '';
     DECLARE sp_name varchar(128) DEFAULT 'FP_DCS_DC_Transform_Device_Insert';
@@ -84,8 +84,8 @@ BEGIN
         SELECT step_name, start_time, diff_time, stats
         FROM CTE_Stats;
         
-        SET sch_name = IF(LENGTH(sch_name) > 0, sch_name, 'FPTesting');
-        INSERT INTO FPTesting.FP_dba_SP_PerformanceStats (sch_name, sp_name, step_id, step_name, start_time, diff_time, stats, call_time, end_time)
+        SET sch_name = IF(LENGTH(sch_name) > 0, sch_name, 'FPSTesting');
+        INSERT INTO FPSTesting.FP_dba_SP_PerformanceStats (sch_name, sp_name, step_id, step_name, start_time, diff_time, stats, call_time, end_time)
         SELECT sch_name, sp_name, step_id, step_name, start_time, diff_time, stats, call_time, CURRENT_TIMESTAMP(4) as end_time
 		FROM Temp_PerformanceStats;
 	END;
@@ -149,7 +149,7 @@ BEGIN
 		, TransTime
 		,  (CASE WHEN tmpTrans.FingerprintCode IS NULL THEN NULL ELSE tmpTrans.FingerprintCode END) AS FingerprintCode
         ,	tmpTrans.FPDeviceID
-	FROM FPTesting.FP_Transaction AS tmpTrans
+	FROM FPSTesting.FP_Transaction AS tmpTrans
 	INNER JOIN CTE_Trans t ON tmpTrans.TransId = t.TransId
     ORDER BY t.TransId ASC;
 
@@ -184,7 +184,7 @@ BEGIN
     WITH CTE_DeviceCode AS (SELECT DISTINCT DeviceCode FROM Temp_Transaction)
     SELECT dc.DeviceID, dc.DeviceCode, dc.DeviceCodeID
     FROM CTE_DeviceCode tts
-    INNER JOIN FPTesting.FP_DeviceCode dc ON dc.DeviceCode = tts.DeviceCode;
+    INNER JOIN FPSTesting.FP_DeviceCode dc ON dc.DeviceCode = tts.DeviceCode;
 
     GET DIAGNOSTICS rowCount = ROW_COUNT;
     INSERT INTO Temp_PerformanceStats(step_name, start_time, diff_time, stats)
@@ -216,11 +216,11 @@ BEGIN
     FROM CTE_Assosiation tts,
     LATERAL (
 		SELECT ass.DeviceID
-        FROM FPTesting.FP_Association AS ass
-        INNER JOIN	FPTesting.FP_DeviceFingerprint AS df 
+        FROM FPSTesting.FP_Association AS ass
+        INNER JOIN	FPSTesting.FP_DeviceFingerprint AS df 
 			ON ass.DeviceID = df.DeviceID
         WHERE ass.AccountID = tts.AccountID
-			AND FPTesting.FP_DCS_DC_IsListsMatchByItem(';',tts.FingerprintCode, df.FingerprintCode) = 1
+			AND FPSTesting.FP_DCS_DC_IsListsMatchByItem(';',tts.FingerprintCode, df.FingerprintCode) = 1
 		ORDER BY ass.DeviceID ASC
         LIMIT 1
     ) AS rc;
@@ -261,7 +261,7 @@ BEGIN
 			AND rb.TransId > ts.TransId
 			AND (
 				rb.DeviceCode = ts.DeviceCode #--> exists from incoming deviceid
-				OR (rb.DeviceCode <> ts.DeviceCode	AND FPTesting.FP_DCS_DC_IsListsMatchByItem(';',ts.FingerprintCode, rb.FingerprintCode) = 1) #--> recover from incoming deviceid
+				OR (rb.DeviceCode <> ts.DeviceCode	AND FPSTesting.FP_DCS_DC_IsListsMatchByItem(';',ts.FingerprintCode, rb.FingerprintCode) = 1) #--> recover from incoming deviceid
 			)
 		ORDER BY ts.TransId ASC
         LIMIT 1
@@ -278,7 +278,7 @@ BEGIN
     SET insertionTime = CURRENT_TIMESTAMP(4);
     # INSERT new Devices
     SET start_time = CURRENT_TIMESTAMP(4);
-    INSERT IGNORE INTO FPTesting.FP_Device(FirstDeviceCode, UserAgentKey, FirstTransID, CreatedTime, CreatedDate, InsertTime)
+    INSERT IGNORE INTO FPSTesting.FP_Device(FirstDeviceCode, UserAgentKey, FirstTransID, CreatedTime, CreatedDate, InsertTime)
     SELECT 	tts.DeviceCode
 		, tts.UserAgentKey
 		, MIN(tts.TransID) AS FirstTransID
@@ -301,7 +301,7 @@ BEGIN
     # INSERT new DeviceCode
     SET start_time = CURRENT_TIMESTAMP(4);
     # NEW code - new DeviceID
-    INSERT IGNORE INTO FPTesting.FP_DeviceCode(DeviceCode, DeviceID, FirstTransID, CreatedTime, CreatedDate, InsertTime)
+    INSERT IGNORE INTO FPSTesting.FP_DeviceCode(DeviceCode, DeviceID, FirstTransID, CreatedTime, CreatedDate, InsertTime)
     WITH CTE_DeviceCode AS (
 		SELECT t.DeviceCode
 			, MIN(t.TransID) AS FirstTransID
@@ -320,7 +320,7 @@ BEGIN
 		, tts.CreatedDate
 		, tts.InsertTime
 	FROM CTE_DeviceCode AS tts
-	INNER JOIN FPTesting.FP_Device dv ON dv.FirstDeviceCode = tts.DeviceCode;
+	INNER JOIN FPSTesting.FP_Device dv ON dv.FirstDeviceCode = tts.DeviceCode;
 
     
     GET DIAGNOSTICS rowCount = ROW_COUNT;
@@ -332,7 +332,7 @@ BEGIN
     
     #NEW code vs Old DeviceID
     SET start_time = CURRENT_TIMESTAMP(4);
-    INSERT IGNORE INTO FPTesting.FP_DeviceCode(DeviceCode, DeviceID, FirstTransID, CreatedTime, CreatedDate, InsertTime)
+    INSERT IGNORE INTO FPSTesting.FP_DeviceCode(DeviceCode, DeviceID, FirstTransID, CreatedTime, CreatedDate, InsertTime)
     WITH CTE_DeviceCode AS (
 		SELECT t.DeviceCode
 			, MIN(t.TransID) AS FirstTransID
@@ -354,7 +354,7 @@ BEGIN
 		, tts.InsertTime
 	FROM CTE_DeviceCode AS tts
 	INNER JOIN CTE_NewCodeOldDeviceID dr ON dr.DeviceCode = tts.DeviceCode
-    LEFT JOIN FPTesting.FP_DeviceCode dc ON dc.DeviceCode = dr.RecoverCode AND dc.DeviceID > 0
+    LEFT JOIN FPSTesting.FP_DeviceCode dc ON dc.DeviceCode = dr.RecoverCode AND dc.DeviceID > 0
     WHERE IF(dr.DeviceID > 0 , dr.DeviceID, dc.DeviceID)  > 0;
 	
 	GET DIAGNOSTICS rowCount = ROW_COUNT;
@@ -370,7 +370,7 @@ BEGIN
     WITH CTE_DeviceCode AS (SELECT DISTINCT DeviceCode FROM Temp_Transaction)
     SELECT dc.DeviceID, tts.DeviceCode, dc.DeviceCodeID, 1 AS IsNew
     FROM  CTE_DeviceCode tts
-    INNER JOIN FPTesting.FP_DeviceCode dc ON dc.DeviceCode = tts.DeviceCode;
+    INNER JOIN FPSTesting.FP_DeviceCode dc ON dc.DeviceCode = tts.DeviceCode;
 
     GET DIAGNOSTICS rowCount = ROW_COUNT;
     INSERT INTO Temp_PerformanceStats(step_name, start_time, diff_time, stats)
@@ -382,7 +382,7 @@ BEGIN
     # INSERT new DeviceFingerprint
     SET start_time = CURRENT_TIMESTAMP(4);
     
-    INSERT IGNORE INTO FPTesting.FP_DeviceFingerprint(FingerprintCode, DeviceID, CreatedTime, InsertTime)
+    INSERT IGNORE INTO FPSTesting.FP_DeviceFingerprint(FingerprintCode, DeviceID, CreatedTime, InsertTime)
 	SELECT tts.FingerprintCode
 		, tmpEd.DeviceID
 		, MIN(tts.TransTime) AS CreatedTime
@@ -401,7 +401,7 @@ BEGIN
    
     # INSERT new Association
     SET start_time = CURRENT_TIMESTAMP(4);
-    INSERT IGNORE INTO FPTesting.FP_Association(DeviceID, AccountID, SubscriberID, CreatedTime, CreatedDate,  InsertTime)
+    INSERT IGNORE INTO FPSTesting.FP_Association(DeviceID, AccountID, SubscriberID, CreatedTime, CreatedDate,  InsertTime)
     SELECT de.DeviceID
 		, tts.AccountID
 		, MIN(tts.SubscriberID) AS SubscriberID
@@ -422,7 +422,7 @@ BEGIN
     # UPDATE back Temp_ExistedDevice
     SET start_time = CURRENT_TIMESTAMP(4);
     UPDATE Temp_ExistedDevice AS de
-    INNER JOIN FPTesting.FP_Device dv ON dv.DeviceID = de.DeviceID
+    INNER JOIN FPSTesting.FP_Device dv ON dv.DeviceID = de.DeviceID
     SET de.FirstTransID = dv.FirstTransID
 		, de.FirstDeviceCode = dv.FirstDeviceCode;
     
@@ -432,7 +432,7 @@ BEGIN
     LEFT JOIN Temp_RecoveredDevice dr ON dr.AccountID = tts.AccountID 
 		AND dr.DeviceCode = tts.DeviceCode 
         AND dr.FingerprintCode = tts.FingerprintCode
-	LEFT JOIN FPTesting.FP_DeviceFingerprint df ON df.DeviceID = de.DeviceID AND df.FingerprintCode = tts.FingerprintCode
+	LEFT JOIN FPSTesting.FP_DeviceFingerprint df ON df.DeviceID = de.DeviceID AND df.FingerprintCode = tts.FingerprintCode
 	SET	tts.DeviceID 				= IF(de.DeviceID > 0, de.DeviceID, tts.DeviceID)
 		, tts.FirstDeviceCode 		= IF(de.DeviceID > 0, de.FirstDeviceCode, tts.FirstDeviceCode)
 		, tts.DeviceCodeID 			= IF(de.DeviceID > 0, de.DeviceCodeID, tts.DeviceCodeID)
@@ -476,20 +476,20 @@ BEGIN
     /*****MOVE TRans competed to Trans07****************************************************/
     IF err_no = 0 THEN
 		SET start_time = CURRENT_TIMESTAMP(4);
-		INSERT IGNORE INTO  FPTesting.FP_Transaction07(RawTransID, LoginName, TransTime, SubscriberID, AccountID, URLID
+		INSERT IGNORE INTO  FPSTesting.FP_Transaction07(RawTransID, LoginName, TransTime, SubscriberID, AccountID, URLID
 			, DeviceCodeID, DeviceID, FirstDeviceCode, DeviceStatus, DeviceFingerprintID
 			, UserAgentKey, IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, FPDeviceID)
 		SELECT 	IFNULL(ts.RawTransID, ts.TransID), ts.LoginName, ts.TransTime, ts.SubscriberID, ts.AccountID, ts.URLID
 			, tmpTs.DeviceCodeID, tmpTs.DeviceID, tmpTs.FirstDeviceCode, tmpTs.DeviceStatus, tmpTs.DeviceFingerprintID
 			, ts.UserAgentKey, ts.IP, ts.IPID, ts.ActionResultID, ts.Flagged, ts.PluginID, ts.TransStatus, ts.CreatedDate, ts.InsertTime , ts.FPDeviceID
-		FROM FPTesting.FP_Transaction AS ts
+		FROM FPSTesting.FP_Transaction AS ts
 		INNER JOIN Temp_Transaction AS tmpTs
 			ON	ts.TransID = tmpTs.TransID
 		WHERE tmpTs.DeviceID IS NOT NULL;		
         
 		#DELETE Transaction
 		DELETE ts
-		FROM FPTesting.FP_Transaction AS ts
+		FROM FPSTesting.FP_Transaction AS ts
 		INNER JOIN	Temp_Transaction AS tmpTs
 					ON	ts.TransID = tmpTs.TransID
 		WHERE tmpTs.DeviceID IS NOT NULL;

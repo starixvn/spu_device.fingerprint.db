@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="1" isNested="1"></info>*/
+/*<info serverAlias="FPSDC-FPSTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="1" isNested="1"></info>*/
 DROP FUNCTION IF EXISTS FP_DCS_DC_IsListsMatchByItem;
 
 DELIMITER $$
@@ -13,7 +13,7 @@ BEGIN
 /*
 	Created: 20190610@Casey.Huynh
 	Task : Check 2 Lists are match if have any the same Item. Return 1 if match else return 0
-	DB: FPTesting
+	DB: FPSTesting
 	Original:
 
 	Revisions:

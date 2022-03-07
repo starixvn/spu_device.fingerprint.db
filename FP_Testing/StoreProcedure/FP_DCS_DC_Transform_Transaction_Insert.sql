@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPSTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_Transaction_Insert`;
 
 DELIMITER $$
@@ -11,7 +11,7 @@ BEGIN
     /*
 	    Created: 20190730@Casey.Huynh
 	    Task : Insert Transaction
-	    DB: FPTesting
+	    DB: FPSTesting
 	    Original:
 
 	    Revisions:
@@ -89,7 +89,7 @@ BEGIN
    
     SELECT DATE(VValue)
     INTO lv_SysMinCreatedDate
-    FROM FPTesting.FP_SystemSetting 
+    FROM FPSTesting.FP_SystemSetting 
     WHERE VGroup = "DCS_Device_Transform" 
         AND VName = "MinCreatedDate";
 
@@ -119,15 +119,15 @@ BEGIN
         ,	rt.UserAgent_Old
         , 	rt.URL_Old
         ,	rt.Flagged_Old
-	FROM		FPTesting.FP_RawTransaction AS rt
+	FROM		FPSTesting.FP_RawTransaction AS rt
         INNER JOIN	CTS_Admin.Subscriber AS su ON	rt.SubscriberID = su.SubscriberID
-	    LEFT JOIN	FPTesting.FP_ActionResult AS ar ON	rt.Action = ar.Action AND IFNULL(rt.ActionResult,'') = ar.ActionResult
+	    LEFT JOIN	FPSTesting.FP_ActionResult AS ar ON	rt.Action = ar.Action AND IFNULL(rt.ActionResult,'') = ar.ActionResult
 	WHERE   rt.IsProcessed = 0
 	    AND rt.TransID BETWEEN ip_FromTransID AND ip_ToTransID
         AND rt.CreatedDate 	>=	lv_SysMinCreatedDate;
 
     #===INSERT SUBCRIBERURL    
-    INSERT IGNORE INTO FPTesting.FP_URL(URLDetails, SubscriberID, CreatedDate)
+    INSERT IGNORE INTO FPSTesting.FP_URL(URLDetails, SubscriberID, CreatedDate)
 	SELECT	trt.URLDetails
         ,   trt.SubscriberID
         ,   MIN(trt.CreatedDate)
@@ -136,7 +136,7 @@ BEGIN
         ,    trt.URLDetails;    
     
 	# Insert New Account
-    INSERT IGNORE INTO FPTesting.FP_Account(LoginName, SubscriberID, SubscriberType, CreatedDate, InsertTime, CreatedTime, LastLoginTime)
+    INSERT IGNORE INTO FPSTesting.FP_Account(LoginName, SubscriberID, SubscriberType, CreatedDate, InsertTime, CreatedTime, LastLoginTime)
     SELECT  trt.LoginName
 	    ,   trt.SubscriberID
 	    ,   trt.SubscriberType
@@ -145,7 +145,7 @@ BEGIN
         ,   MIN(trt.TransTime) AS CreatedTime
         ,   MAX(trt.TransTime) AS LastLoginTime
     FROM Temp_RawTransaction AS trt
-    WHERE NOT EXISTS (SELECT 1 FROM FPTesting.FP_Account AS acc  where trt.LoginName = acc.LoginName and trt.SubscriberID = acc.SubscriberID)
+    WHERE NOT EXISTS (SELECT 1 FROM FPSTesting.FP_Account AS acc  where trt.LoginName = acc.LoginName and trt.SubscriberID = acc.SubscriberID)
     GROUP BY trt.SubscriberID
         ,    trt.LoginName
         ,    trt.SubscriberType;
@@ -156,8 +156,8 @@ BEGIN
         ,   ac.AccountID
         ,   ur.URLID
     FROM Temp_RawTransaction AS trt
-        INNER JOIN	FPTesting.FP_Account AS ac ON trt.SubscriberID = ac.SubscriberID  AND trt.LoginName = ac.LoginName
-	    LEFT JOIN	FPTesting.FP_URL	AS ur ON trt.URLDetails = ur.URLDetails;
+        INNER JOIN	FPSTesting.FP_Account AS ac ON trt.SubscriberID = ac.SubscriberID  AND trt.LoginName = ac.LoginName
+	    LEFT JOIN	FPSTesting.FP_URL	AS ur ON trt.URLDetails = ur.URLDetails;
 
     UPDATE Temp_RawTransaction AS trt
         INNER JOIN	Temp_RawTransactionInfo AS info ON trt.TransID = info.TransID  
@@ -173,16 +173,16 @@ BEGIN
     SELECT  acc.SubscriberID
         ,   acc.AccountID
         ,   tac.LastLoginTime
-    FROM FPTesting.FP_Account 	AS acc
+    FROM FPSTesting.FP_Account 	AS acc
         INNER JOIN (SELECT trt.AccountID, MAX(trt.TransTime) AS LastLoginTime FROM Temp_RawTransaction AS trt GROUP BY trt.AccountID) AS tac ON	acc.AccountID = tac.AccountID
     WHERE tac.LastLoginTime > acc.LastLoginTime;    
 
-    INSERT INTO FPTesting.FP_AccountLastLoginTimeProcess(AccountID, LastLoginTime)
+    INSERT INTO FPSTesting.FP_AccountLastLoginTimeProcess(AccountID, LastLoginTime)
     SELECT  tll.AccountID
         ,   tll.LastLoginTime
     FROM Temp_LastLoginTime AS tll;
 
-    INSERT IGNORE INTO  FPTesting.FP_Transaction(RawTransID, LoginName, TransTime,  AccountID, URLID, UserAgentKey , IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, DeviceCode, FingerprintCode
+    INSERT IGNORE INTO  FPSTesting.FP_Transaction(RawTransID, LoginName, TransTime,  AccountID, URLID, UserAgentKey , IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, DeviceCode, FingerprintCode
     , FPDeviceID, SubscriberID)
    	SELECT  trt.TransID
 	    ,   trt.LoginName
@@ -206,7 +206,7 @@ BEGIN
     
     #================================================================
     
-	INSERT IGNORE INTO FPTesting.FP_ProcessedTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, UserAgent , IP, IPID, Flagged, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, IsProcessed, TransID
+	INSERT IGNORE INTO FPSTesting.FP_ProcessedTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, UserAgent , IP, IPID, Flagged, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, IsProcessed, TransID
     , FPDeviceID, SubscriberID,CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old,UserAgent_Old, URL_Old,Flagged_Old)
 	SELECT  rt.LoginName
         ,   rt.SubscriberName
@@ -236,11 +236,11 @@ BEGIN
         ,	rt.UserAgent_Old
         , 	rt.URL_Old
         ,	rt.Flagged_Old
-	FROM FPTesting.FP_RawTransaction AS rt
+	FROM FPSTesting.FP_RawTransaction AS rt
 	    INNER JOIN	Temp_RawTransaction	AS tmp_rm ON	rt.TransID = tmp_rm.TransID AND rt.CreatedDate = tmp_rm.CreatedDate;
         
 	DELETE rt
-	FROM FPTesting.FP_RawTransaction AS rt
+	FROM FPSTesting.FP_RawTransaction AS rt
 	    INNER JOIN	Temp_RawTransaction	AS tmp_rm ON rt.TransID = tmp_rm.TransID AND rt.CreatedDate = tmp_rm.CreatedDate;   
 
     

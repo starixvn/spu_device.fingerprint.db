@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPSTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_RawTrans_GetPackage`;
 
 DELIMITER $$
@@ -41,7 +41,7 @@ BEGIN
     SET lv_TotalRecord 	= ip_NoOfTickets*ip_NoOfBatch;
     SET lv_GroupLookup 	= 'DCS_RawTrans_Transform';
     SET lv_KeyLookup	= 'MinRawTransId';
-    SET lv_FromTransID 	= IFNULL((SELECT CAST(VValue AS UNSIGNED) FROM FPTesting.FP_SystemSetting WHERE VGroup=lv_GroupLookup AND VName=lv_KeyLookup), 0);
+    SET lv_FromTransID 	= IFNULL((SELECT CAST(VValue AS UNSIGNED) FROM FPSTesting.FP_SystemSetting WHERE VGroup=lv_GroupLookup AND VName=lv_KeyLookup), 0);
 
     SET lv_TotalRecord = ip_NoOfTickets * ip_NoOfBatch;
 	set @RowId = 0;
@@ -54,7 +54,7 @@ BEGIN
 		SELECT	@RowId := @RowId+1
 			,   rt.TransID	
 			,   CEIL(@RowId/ip_NoOfTickets) as batchID
-		FROM 	FPTesting.FP_RawTransaction AS rt
+		FROM 	FPSTesting.FP_RawTransaction AS rt
 		WHERE	rt.TransID >= lv_FromTransID
 		    AND rt.IsProcessed = ip_IsProcessed
 		LIMIT	 lv_TotalRecord
@@ -63,7 +63,7 @@ BEGIN
     
 
     SET lv_FromTransID = IFNULL((SELECT MIN(MinTransID) FROM Temp_Transaction), lv_FromTransID);
-    INSERT INTO FPTesting.FP_SystemSetting (VGroup, VName, VValue, UpdatedTime)
+    INSERT INTO FPSTesting.FP_SystemSetting (VGroup, VName, VValue, UpdatedTime)
     SELECT  VGroup
         ,   VName
         ,   VValue

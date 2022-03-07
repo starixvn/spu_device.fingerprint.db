@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPSTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_RawTransOld_Insert`;
 
 DELIMITER $$
@@ -86,7 +86,7 @@ BEGIN
 				)
 		   ) AS  rt; 
 	
-	INSERT INTO FPTesting.FP_RawTransaction_Old(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, UserAgent, IP, IPID, Flagged, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, TransKey)
+	INSERT INTO FPSTesting.FP_RawTransaction_Old(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, UserAgent, IP, IPID, Flagged, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, TransKey)
 	SELECT	rt.LoginName
 		,	rt.SubscriberName
 		,	rt.TransTime

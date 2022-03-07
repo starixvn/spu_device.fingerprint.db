@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPSTesting" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FP_DCS_DC_Transform_UnhandleSubscriberAction`;
 
 DELIMITER $$
@@ -53,15 +53,15 @@ BEGIN
         ,   su.SubscriberStatus
         ,   ActionResultID
         ,   ActionResultStatus
-	FROM	FPTesting.FP_RawTransaction AS rt
+	FROM	FPSTesting.FP_RawTransaction AS rt
 	    LEFT JOIN	CTS_Admin.Subscriber AS su ON rt.SubscriberName = su.SubscriberName AND su.DCSStatus = 1
-	    LEFT JOIN	FPTesting.FP_ActionResult AS ar ON rt.Action = ar.Action AND rt.ActionResult = ar.ActionResult
+	    LEFT JOIN	FPSTesting.FP_ActionResult AS ar ON rt.Action = ar.Action AND rt.ActionResult = ar.ActionResult
     WHERE	rt.TransID BETWEEN ip_FromTransID AND ip_ToTransID
 	    AND rt.IsProcessed = 0;       
    
    
     #==UNHANDLE ACTION================================================================    
-	INSERT IGNORE INTO FPTesting.FP_ActionResult (Action, ActionResult, CreatedDate, ActionResultStatus)
+	INSERT IGNORE INTO FPSTesting.FP_ActionResult (Action, ActionResult, CreatedDate, ActionResultStatus)
 	SELECT  Action 
 	    ,   ts.ActionResult AS ActionResult
 	    ,   MIN(ts.CreatedDate)	AS CreatedDate
@@ -84,7 +84,7 @@ BEGIN
     WHERE   ts.ActionResultID IS NULL
 	    OR  ts.ActionResultStatus = lv_UnhandleStatus; 
    
-    UPDATE FPTesting.FP_RawTransaction AS rt
+    UPDATE FPSTesting.FP_RawTransaction AS rt
         INNER JOIN	Temp_Transaction AS ts ON rt.TransID = ts.TransID
 	SET     rt.IsProcessed = CASE WHEN (ts.TransStatus & lv_NotTransformedStatus) != 0 THEN -1 ELSE rt.IsProcessed END 
 	    ,   rt.TransStatus = ts.TransStatus;
