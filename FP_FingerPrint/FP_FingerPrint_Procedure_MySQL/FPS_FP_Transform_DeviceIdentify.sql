@@ -152,8 +152,7 @@ BEGIN
 		,	lv_CreatedDate
         ,	tmpIt.Transtime
     FROM Temp_InputTrans AS tmpIt 
-    WHERE tmpIt.RecoverType IN (1,3)
-    ON DUPLICATE KEY UPDATE ModifiedDate = tmpIt.Transtime;  
+    WHERE tmpIt.RecoverType IN (1,3);  
     
     /*====RECOVER DEVICE: Update Modified Date Of Old Device*/
     UPDATE FPS_FingerPrint.Device AS dv
@@ -208,22 +207,20 @@ BEGIN
 			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpGd.GroupId = tmpIt.GroupId
 		SET	tmpIt.DeviceId = tmpGd.DeviceId;        
   
-        INSERT INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId,  CreatedDate, ModifiedDate)
+        INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId,  CreatedDate, ModifiedDate)
         SELECT 	tmpIt.FingerprintCode
 			,	tmpIt.DeviceId 
 			,	lv_CreatedDate
 			,	tmpIt.Transtime AS ModifiedDate        
 		FROM Temp_InputTrans AS tmpIt
-        WHERE tmpIt.Id != tmpIt.GroupId
-        ON DUPLICATE KEY UPDATE ModifiedDate = tmpIt.Transtime; 
+        WHERE tmpIt.Id != tmpIt.GroupId; 
         
 		INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieCode, DeviceId,  CreatedDate, ModifiedDate)
         SELECT 	tmpIt.CookieCode
 			,	tmpIt.DeviceId AS DeviceId
 			,	lv_CreatedDate
 			,	tmpIt.Transtime AS ModifiedDate              
-		FROM Temp_InputTrans AS tmpIt
-        ON DUPLICATE KEY UPDATE ModifiedDate = tmpIt.Transtime; 
+		FROM Temp_InputTrans AS tmpIt; 
         
 	END IF;
     
