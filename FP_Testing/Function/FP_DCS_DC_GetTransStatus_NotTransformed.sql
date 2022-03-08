@@ -36,7 +36,7 @@ BEGIN
 	
 	INSERT INTO Temp_NotTransformedStatus(TransStatus)
 	SELECT  StatusValue
-	FROM 	FPTesting.FP_TransStatus
+	FROM 	FPSTesting.FP_TransStatus
 	WHERE	IsTransformed = 0;
 
 	WHILE EXISTS (SELECT 1 FROM Temp_NotTransformedStatus LIMIT 1)
