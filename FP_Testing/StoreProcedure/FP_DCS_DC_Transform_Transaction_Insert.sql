@@ -90,9 +90,9 @@ BEGIN
     SELECT DATE(VValue)
     INTO lv_SysMinCreatedDate
     FROM FPSTesting.FP_SystemSetting 
-    WHERE VGroup = "DCS_Device_Transform" 
-        AND VName = "MinCreatedDate";
-
+   # WHERE VGroup = "DCS_Device_Transform" AND VName = "MinCreatedDate";
+	WHERE Id = 2;
+    
 	INSERT INTO Temp_RawTransaction(TransID, LoginName, TransTime, SubscriberType, DeviceCode , URLDetails, UserAgentKey, IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, FingerprintCode, FPDeviceID, SubscriberID,CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old,UserAgent_Old, URL_Old,Flagged_Old)
 	SELECT  rt.TransID
 	    ,   rt.LoginName
@@ -158,7 +158,7 @@ BEGIN
     FROM Temp_RawTransaction AS trt
         INNER JOIN	FPSTesting.FP_Account AS ac ON trt.SubscriberID = ac.SubscriberID  AND trt.LoginName = ac.LoginName
 	    LEFT JOIN	FPSTesting.FP_URL	AS ur ON trt.URLDetails = ur.URLDetails;
-
+	SELECT 1;
     UPDATE Temp_RawTransaction AS trt
         INNER JOIN	Temp_RawTransactionInfo AS info ON trt.TransID = info.TransID  
     SET     trt.AccountID = info.AccountID
