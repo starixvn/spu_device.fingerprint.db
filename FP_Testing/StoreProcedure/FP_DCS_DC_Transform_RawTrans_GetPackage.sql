@@ -41,7 +41,7 @@ BEGIN
     SET lv_TotalRecord 	= ip_NoOfTickets*ip_NoOfBatch;
     SET lv_GroupLookup 	= 'DCS_RawTrans_Transform';
     SET lv_KeyLookup	= 'MinRawTransId';
-    SET lv_FromTransID 	= IFNULL((SELECT CAST(VValue AS UNSIGNED) FROM FPSTesting.FP_SystemSetting WHERE VGroup=lv_GroupLookup AND VName=lv_KeyLookup), 0);
+    SET lv_FromTransID 	= IFNULL((SELECT CAST(VValue AS UNSIGNED) FROM FPSTesting.FP_SystemSetting WHERE ID = 94423), 0);
 
     SET lv_TotalRecord = ip_NoOfTickets * ip_NoOfBatch;
 	set @RowId = 0;

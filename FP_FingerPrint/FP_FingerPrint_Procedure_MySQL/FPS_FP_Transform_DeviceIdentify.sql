@@ -147,13 +147,13 @@ BEGIN
     WHERE tmpIt.RecoverType = 2;
     
     /*====RECOVER DEVICE: Insert New Cookie For Old Device*/
-    INSERT INTO FPS_FingerPrint.DeviceCookie(CookieCode, DeviceId, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieCode, DeviceId, CreatedDate, ModifiedDate)
     SELECT	tmpIt.CookieCode
 		,	tmpIt.DeviceId
 		,	lv_CreatedDate
         ,	tmpIt.Transtime
     FROM Temp_InputTrans AS tmpIt 
-    WHERE tmpIt.RecoverType IN (1,3);  
+    WHERE tmpIt.RecoverType = 1;  
     
     /*====RECOVER DEVICE: Update Modified Date Of Old Device*/
     UPDATE FPS_FingerPrint.Device AS dv
