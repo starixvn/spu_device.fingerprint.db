@@ -22,7 +22,12 @@ BEGIN
 			- CALL FPS_FP_Transform_DeviceIdentify_NoFingerPrint('1,2,3');
 			
 	*/
-   
+    
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_DeviceIdentify_NoFingerPrint', NULL,ip_TransList, CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
 	DROP TEMPORARY TABLE IF EXISTS Temp_InputTrans;    
 	CREATE TEMPORARY TABLE Temp_InputTrans(
 		Id	BIGINT UNSIGNED PRIMARY KEY

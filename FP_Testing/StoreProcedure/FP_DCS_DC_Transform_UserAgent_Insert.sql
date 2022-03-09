@@ -23,6 +23,7 @@ BEGIN
 
 	    Param's Explanation (filtered by):
     */
+    
 	/*******LOG TEST********************/
     INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
     SELECT 'FP_DCS_DC_Transform_UserAgent_Insert', NULL,CONCAT('ip_FromTransID:',ip_FromTransID,'; ip_ToTransID:',ip_ToTransID), CURRENT_TIMESTAMP();

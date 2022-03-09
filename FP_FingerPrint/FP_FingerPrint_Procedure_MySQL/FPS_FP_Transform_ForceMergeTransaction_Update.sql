@@ -19,9 +19,14 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_ForceMergeTransaction_Update();
+			- CALL FPS_FP_Transform_ForceMergeTransaction_Update('[{"Id":1,"TransKey":"ABC"},{"Id":2,"TransKey":"abv"}]');
 			
 	*/        
+    
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_ForceMergeTransaction_Update', ip_TransJson , NULL, CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions; 
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions2; 

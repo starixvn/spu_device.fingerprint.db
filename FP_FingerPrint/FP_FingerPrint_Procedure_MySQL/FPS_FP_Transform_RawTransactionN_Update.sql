@@ -27,6 +27,11 @@ BEGIN
    
     DECLARE lv_currentDate DATETIME DEFAULT NOW();   
     
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_RawTransactionN_Update', ip_RawTransJson,CONCAT('ip_OffsetId:',ip_OffsetId,'; ip_OffsetValue:',ip_OffsetValue), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
 	-- Create Temporary table
     DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction; 
 	CREATE TEMPORARY TABLE Temp_RawTransaction(

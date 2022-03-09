@@ -21,10 +21,15 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_GetRawTrans(100, 1234);
+			- CALL FPS_FP_Transform_RawTransaction_Get(100, 1234,1);
 			
 	*/
     DECLARE lv_offsetValue BIGINT;
+    
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_RawTransaction_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'; ip_OffsetId:',ip_OffsetId,'; ip_Retry:',ip_Retry), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
     
     SELECT off.OffsetValue 
     INTO lv_offsetValue

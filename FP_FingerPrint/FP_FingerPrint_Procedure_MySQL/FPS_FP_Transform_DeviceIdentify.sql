@@ -38,6 +38,11 @@ BEGIN
     DECLARE lv_GroupDeviceId	BIGINT UNSIGNED;
     DECLARE lv_CreatedDate		DATETIME(4);
     
+	/*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_Transaction_Update', ip_TransJson,CONCAT('ip_GroupType:',ip_GroupType), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
     DROP TEMPORARY TABLE IF EXISTS Temp_InputTrans;
     CREATE TEMPORARY TABLE Temp_InputTrans(
 			Id				BIGINT UNSIGNED PRIMARY KEY
@@ -76,7 +81,7 @@ BEGIN
      );     
 
 	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);    
-    
+
     INSERT INTO Temp_InputTrans(Id, Transtime, FingerPrintCode, CookieCode, GroupId)
 	SELECT	tmpJs.Id
 		,	tmpJs.Transtime
@@ -94,13 +99,13 @@ BEGIN
 		) AS tmpJs;	
 
     /*====RECOVER DEVICE: Get Exisitng By FingerPrintCode*/
-    
+
 	INSERT INTO Temp_ExistingFingerPrintCode(Id, DeviceID)
     SELECT	tmpTs.Id
 		,	df.DeviceId
     FROM Temp_InputTrans AS tmpTs
 		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmpTs.FingerPrintCode = df.FingerPrintCode;
-    
+
     UPDATE Temp_InputTrans AS tmpTs
 		INNER JOIN Temp_ExistingFingerPrintCode AS tmpEf ON tmpTs.Id = tmpEf.Id
 	SET 	tmpTs.RecoverType = 1
@@ -117,7 +122,7 @@ BEGIN
 		INNER JOIN Temp_ExistingCookieCode AS tmpEc ON tmpTs.Id = tmpEc.Id
 	SET 	tmpTs.RecoverType = tmpTs.RecoverType + 2
 		,	tmpTs.DeviceId = tmpEc.DeviceId;
-        
+    
     /*====RECOVER DEVICE: PROCESS FOR Group*/
     IF (ip_GroupType != 0) THEN
 		

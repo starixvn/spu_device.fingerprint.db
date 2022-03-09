@@ -20,9 +20,14 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_MergeTransaction_Get(100);
+			- CALL FPS_FP_Transform_MergeTransaction_Get(100,1);
 			
 	*/
+    
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_MergeTransaction_Get', NULL,CONCAT('ip_Size:',ip_Size,'; ip_Retry:',ip_Retry), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
     
     SELECT	trans.Id
 		,	trans.TransKey 

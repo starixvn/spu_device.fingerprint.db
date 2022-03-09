@@ -24,6 +24,11 @@ BEGIN
 	*/
     DECLARE lv_offsetValue BIGINT;
     
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_RawTransactionN_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'; ip_OffsetId:',ip_OffsetId), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
     SELECT off.OffsetValue 
     INTO lv_offsetValue
     FROM FPS_FingerPrint.Offset AS off

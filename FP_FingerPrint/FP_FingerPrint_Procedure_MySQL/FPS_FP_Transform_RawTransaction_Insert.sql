@@ -22,6 +22,12 @@ BEGIN
 			- CALL FPS_FP_Transform_Transaction_Insert(100);
 			
 	*/
+    
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Transform_RawTransaction_Insert', ip_Transaction, NULL, CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
     
 	CREATE TEMPORARY TABLE Temp_Transactions(
