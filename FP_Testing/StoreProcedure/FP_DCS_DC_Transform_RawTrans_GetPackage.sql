@@ -29,8 +29,12 @@ BEGIN
     DECLARE		lv_GroupLookup		        VARCHAR(128);
     DECLARE		lv_KeyLookup			    VARCHAR(128);
     
-    DROP TEMPORARY TABLE IF EXISTS Temp_Transaction; 
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FP_DCS_DC_Transform_RawTrans_GetPackage', NULL, CONCAT('ip_IsProcessed:',ip_IsProcessed,'; ip_NoOfTickets:',ip_NoOfTickets,'; ip_NoOfBatch:',ip_NoOfBatch), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
     
+    DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;    
     CREATE TEMPORARY TABLE Temp_Transaction(		
 		    MinTransID			BIGINT UNSIGNED
         ,   MaxTransID			BIGINT UNSIGNED

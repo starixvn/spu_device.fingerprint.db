@@ -25,6 +25,11 @@ BEGIN
     DECLARE lv_UnhandleStatus	            TINYINT DEFAULT 0;
     DECLARE lv_NotTransformedStatus         BIT(16);
     
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FP_DCS_DC_Transform_UnhandleSubscriberAction', NULL,CONCAT('ip_FromTransID:',ip_FromTransID,'; ip_ToTransID:',ip_ToTransID), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
 	DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;
     CREATE TEMPORARY TABLE Temp_Transaction (	
 		    TransID			    BIGINT

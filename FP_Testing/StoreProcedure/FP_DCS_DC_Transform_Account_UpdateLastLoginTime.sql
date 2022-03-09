@@ -17,8 +17,15 @@ BEGIN
 			- 20210705@Aries.Nguyen: Created
 			
 		Param's Explanation (filtered by):
+		
+        Examples: 
+			CALL FP_DCS_DC_Transform_Account_UpdateLastLoginTime(1);
 	*/ 
-   
+	/*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FP_DCS_DC_Transform_Account_UpdateLastLoginTime', NULL,CONCAT('BatchSize:',BatchSize), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
     DROP TEMPORARY TABLE IF EXISTS Temp_AccountLastLoginTimeProcess;  
 	CREATE TEMPORARY TABLE Temp_AccountLastLoginTimeProcess(
 			ID 				BIGINT UNSIGNED

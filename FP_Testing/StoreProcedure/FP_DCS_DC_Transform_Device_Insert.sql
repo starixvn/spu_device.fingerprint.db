@@ -90,6 +90,11 @@ BEGIN
 		FROM Temp_PerformanceStats;
 	END;
     
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FP_DCS_DC_Transform_Device_Insert', ip_TransJson,NULL, CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
     #============================================
     DROP TEMPORARY TABLE IF EXISTS Temp_ExistedDevice;
     DROP TEMPORARY TABLE IF EXISTS Temp_RecoveredDevice;

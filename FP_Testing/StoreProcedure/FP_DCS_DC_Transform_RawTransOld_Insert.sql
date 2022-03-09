@@ -26,7 +26,10 @@ BEGIN
             ');
 
 	*/
-
+	/*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FP_DCS_DC_Transform_RawTransOld_Insert', ip_RawTransJson,NULL, CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
 	DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
 	CREATE TEMPORARY TABLE Temp_Transactions(
 			LoginName					VARCHAR(100) CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' NOT NULL	

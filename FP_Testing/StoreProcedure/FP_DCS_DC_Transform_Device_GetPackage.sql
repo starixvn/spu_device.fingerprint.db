@@ -31,7 +31,11 @@ BEGIN
     DECLARE		lv_FromCreatedDate	DATE;
     DECLARE		lv_GroupLookup	    VARCHAR(128);
     DECLARE		lv_KeyLookup		VARCHAR(128);
-
+	
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FP_DCS_DC_Transform_Device_GetPackage', NULL,CONCAT('ip_NoOfTickets:',ip_NoOfTickets,'; ip_NoOfBatch:',ip_NoOfBatch), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Trans;
     CREATE TEMPORARY TABLE Temp_Trans(	
