@@ -273,5 +273,3 @@ BEGIN
     
 END$$
 DELIMITER ;
-
-GRANT EXECUTE ON PROCEDURE FPS_FingerPrint.FPS_FP_Transform_MergeTransaction_Update TO 'fpsServiceAdmin'@'%';
