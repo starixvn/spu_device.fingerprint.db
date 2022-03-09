@@ -120,7 +120,7 @@ BEGIN
         , 	rt.URL_Old
         ,	rt.Flagged_Old
 	FROM		FPSTesting.FP_RawTransaction AS rt
-        INNER JOIN	CTS_Admin.Subscriber AS su ON	rt.SubscriberID = su.SubscriberID
+        INNER JOIN	CTS_Admin.Subscriber AS su ON	rt.SubscriberName = su.SubscriberName
 	    LEFT JOIN	FPSTesting.FP_ActionResult AS ar ON	rt.Action = ar.Action AND IFNULL(rt.ActionResult,'') = ar.ActionResult
 	WHERE   rt.IsProcessed = 0
 	    AND rt.TransID BETWEEN ip_FromTransID AND ip_ToTransID
@@ -243,6 +243,5 @@ BEGIN
 	FROM FPSTesting.FP_RawTransaction AS rt
 	    INNER JOIN	Temp_RawTransaction	AS tmp_rm ON rt.TransID = tmp_rm.TransID AND rt.CreatedDate = tmp_rm.CreatedDate;   
 
-    
 END$$
 DELIMITER ;
