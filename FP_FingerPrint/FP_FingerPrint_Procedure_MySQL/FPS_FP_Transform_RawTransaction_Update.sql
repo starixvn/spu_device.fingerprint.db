@@ -83,7 +83,7 @@ BEGIN
         ,	INDEX Temp_RawTransaction_FingerPrintCode_Index (FingerPrintCode)
     );    
     
-   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action)
+   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action, CreatedDate)
 	SELECT	rt.Id
 		,	rt.SessionKey
 		,	rt.CustId
@@ -97,6 +97,7 @@ BEGIN
         ,	rt.TransKey	
         ,	rt.Retry	
         ,	rt.Action
+        ,	lv_currentDate
 	FROM	JSON_TABLE(
 			ip_RawTransJson,
 			 "$[*]" COLUMNS(
@@ -116,7 +117,7 @@ BEGIN
 				)
 		   ) AS  rt;    
     
-   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieCode, Flagged)
+   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieCode, Flagged, CreatedDate)
    SELECT tmpTs.Id
    , 	tmpTs.SessionKey
    , 	tmpTs.CustId
@@ -133,6 +134,7 @@ BEGIN
    ,	fp.FingerPrintCode
    ,	fp.CookieCode
    ,	fp.Flagged
+   ,	lv_currentDate
    FROM Temp_RawTransaction AS tmpTs 
 		LEFT JOIN FPS_FingerPrint.FingerPrint AS fp ON fp.SessionKey = tmpTs.SessionKey;
   
