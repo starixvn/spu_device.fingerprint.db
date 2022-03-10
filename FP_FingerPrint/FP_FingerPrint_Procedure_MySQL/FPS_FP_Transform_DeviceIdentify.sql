@@ -256,9 +256,9 @@ BEGIN
 	SET dv.ModifiedDate = tmpGd.MaxTransTime;
     
 	/*****UPDATE Trans******************/
-	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(Id, RawTransId, Transtime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(Id, ServerTransId, Transtime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.Id
-			, 	ts.RawTransId
+			, 	ts.ServerTransId
             ,	ts.Transtime
 			, 	ts.CustId
 			, 	ts.SubAccId

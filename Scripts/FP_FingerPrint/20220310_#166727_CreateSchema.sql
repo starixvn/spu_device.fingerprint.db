@@ -38,7 +38,7 @@ CREATE TABLE DeviceFingerPrint (
   UNIQUE KEY UX_DeviceFingerPrint_FingerPrintCode (FingerPrintCode)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE FingerPrint (
+CREATE TABLE ClientTransaction (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
   SessionKey varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   FingerPrintCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE FingerPrint (
   PRIMARY KEY (Id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE FingerPrintCompleted (
+CREATE TABLE ClientTransactionCompleted (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
   FingerPrintCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   UserAgentCode varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -130,7 +130,7 @@ CREATE TABLE RawFingerPrint (
   PRIMARY KEY (FingerPrintCode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE RawTransaction (
+CREATE TABLE ServerTransaction (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
   SessionKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   CustId bigint unsigned DEFAULT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE RawTransaction (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
-CREATE TABLE RawTransactionCompleted (
+CREATE TABLE ServerTransactionCompleted (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
   SessionKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   CustId bigint unsigned DEFAULT NULL,
@@ -214,9 +214,9 @@ CREATE TABLE RawTransactionCompleted (
  PARTITION pw202252 VALUES LESS THAN (202301) ENGINE = InnoDB,
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 
-CREATE TABLE RawTransactionN (
+CREATE TABLE ServerTransactionN (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
-  RawTransId bigint unsigned NOT NULL,
+  ServerTransId bigint unsigned NOT NULL,
   SessionKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   ModifiedDate datetime DEFAULT CURRENT_TIMESTAMP,
   CreatedDate datetime DEFAULT CURRENT_TIMESTAMP,
@@ -255,7 +255,7 @@ CREATE TABLE Test_LOG (
 
 CREATE TABLE `Transaction` (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
-  RawTransId bigint unsigned DEFAULT NULL,
+  ServerTransId bigint unsigned DEFAULT NULL,
   CustId bigint unsigned DEFAULT NULL,
   SubAccId bigint unsigned DEFAULT NULL,
   LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -275,7 +275,7 @@ CREATE TABLE `Transaction` (
 
 CREATE TABLE TransactionCompleted (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
-  RawTransId bigint unsigned DEFAULT NULL,
+  ServerTransId bigint unsigned DEFAULT NULL,
   CustId bigint unsigned DEFAULT NULL,
   SubAccId bigint unsigned DEFAULT NULL,
   LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -341,7 +341,7 @@ CREATE TABLE TransactionCompleted (
 
 CREATE TABLE TransactionDevice (
   Id bigint unsigned NOT NULL AUTO_INCREMENT,
-  RawTransId bigint unsigned DEFAULT NULL,
+  ServerTransId bigint unsigned DEFAULT NULL,
   CustId bigint unsigned DEFAULT NULL,
   SubAccId bigint unsigned DEFAULT NULL,
   LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -364,7 +364,7 @@ CREATE TABLE TransactionDevice (
 
 CREATE TABLE Transaction_TestData (
   Id bigint unsigned NOT NULL DEFAULT '0',
-  RawTransId bigint unsigned DEFAULT NULL,
+  ServerTransId bigint unsigned DEFAULT NULL,
   CustId bigint unsigned DEFAULT NULL,
   SubAccId bigint unsigned DEFAULT NULL,
   LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,

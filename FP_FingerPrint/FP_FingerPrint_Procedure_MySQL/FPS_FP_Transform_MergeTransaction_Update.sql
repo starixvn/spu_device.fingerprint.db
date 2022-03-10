@@ -213,7 +213,7 @@ BEGIN
    
    INSERT INTO FPS_FingerPrint.TransactionCompleted(
 		Id
-	,	RawTransId
+	,	ServerTransId
 	,	CustId
 	,	SubAccId
 	,	LoginName
@@ -231,7 +231,7 @@ BEGIN
 	,	Flagged)
    SELECT 
 		transD.Id
-	,	transD.RawTransId
+	,	transD.ServerTransId
 	,	transD.CustId
 	,	transD.SubAccId
 	,	transD.LoginName
