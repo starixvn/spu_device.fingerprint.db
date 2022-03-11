@@ -48,7 +48,7 @@ BEGIN
         , 	trans.Action
         ,	trans.Retry
     FROM FPS_FingerPrint.ServerTransaction AS trans 
-		INNER JOIN FPS_FingerPrint.ServerTransactionN transN ON trans.Id = transN.RawTransId
+		INNER JOIN FPS_FingerPrint.ServerTransactionN transN ON trans.Id = transN.ServerTransId
     WHERE trans.Id >= lv_offsetValue 
     LIMIT ip_BatchSize;
     
