@@ -22,16 +22,16 @@ BEGIN
 
 		Example:
 			CALL FPS_FP_Transform_DeviceIdentify(0,'[
-						{"Id":3356314495,"Transtime":"2022-02-20 00:00:05.2640","FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","CookieCode": "Cookie01f5d0e59645d09cfb56690a7b0916" ,"GroupId":0},
-						{"Id":3356314496,"Transtime":"2022-02-20 00:00:05.2757","FingerPrintCode":"e61bec118a0a44869ea57aec2b57d5a6","CookieCode":"Cookie02f5d0e59645d09cfb56690a7b0916","GroupId":0},
-						{"Id":3356314498,"Transtime":"2022-02-20 00:00:05.4575","FingerPrintCode":"1245f5a2122b4f74b9e09c416497f6e6","CookieCode":"Cookie03f5d0e59645d09cfb56690a7b0916","GroupId":0}
+						{"Id":3356314495,"TransTime":"2022-02-20 00:00:05.2640","FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","CookieCode": "Cookie01f5d0e59645d09cfb56690a7b0916" ,"GroupId":0},
+						{"Id":3356314496,"TransTime":"2022-02-20 00:00:05.2757","FingerPrintCode":"e61bec118a0a44869ea57aec2b57d5a6","CookieCode":"Cookie02f5d0e59645d09cfb56690a7b0916","GroupId":0},
+						{"Id":3356314498,"TransTime":"2022-02-20 00:00:05.4575","FingerPrintCode":"1245f5a2122b4f74b9e09c416497f6e6","CookieCode":"Cookie03f5d0e59645d09cfb56690a7b0916","GroupId":0}
 					]');
 			
             CALL FPS_FP_Transform_DeviceIdentify(1,'[
-						{"Id":3356314503,"Transtime":"2022-02-20 00:00:05","FingerPrintCode":"ac918eadfdc1499cb1aade3183f6363f","CookieCode":"Cookie04f5d0e59645d09cfb56690a7b0916","GroupId":3356314503},
-						{"Id":3356314519,"Transtime":"2022-02-20 00:00:06.2956","FingerPrintCode":"ac918eadfdc1499cb1aade3183f6363f","CookieCode":"Cookie05f5d0e59645d09cfb56690a7b0916","GroupId":3356314503},
-						{"Id":3356314505,"Transtime":"2022-02-20 00:00:05.7028","FingerPrintCode":"66e37de75aad4166ae4dc7270dcd995a","CookieCode":"Cookie06f5d0e59645d09cfb56690a7b0916","GroupId":3356314505},
-						{"Id":3356314721,"Transtime":"2022-02-20 00:00:02.8868","FingerPrintCode":"88e37de75aad4166ae4dc7270dcd995a","CookieCode":"Cookie06f5d0e59645d09cfb56690a7b0916","GroupId":3356314505}
+						{"Id":3356314503,"TransTime":"2022-02-20 00:00:05","FingerPrintCode":"ac918eadfdc1499cb1aade3183f6363f","CookieCode":"Cookie04f5d0e59645d09cfb56690a7b0916","GroupId":3356314503},
+						{"Id":3356314519,"TransTime":"2022-02-20 00:00:06.2956","FingerPrintCode":"ac918eadfdc1499cb1aade3183f6363f","CookieCode":"Cookie05f5d0e59645d09cfb56690a7b0916","GroupId":3356314503},
+						{"Id":3356314505,"TransTime":"2022-02-20 00:00:05.7028","FingerPrintCode":"66e37de75aad4166ae4dc7270dcd995a","CookieCode":"Cookie06f5d0e59645d09cfb56690a7b0916","GroupId":3356314505},
+						{"Id":3356314721,"TransTime":"2022-02-20 00:00:02.8868","FingerPrintCode":"88e37de75aad4166ae4dc7270dcd995a","CookieCode":"Cookie06f5d0e59645d09cfb56690a7b0916","GroupId":3356314505}
 					]');
 	*/
     
@@ -46,7 +46,7 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_InputTrans;
     CREATE TEMPORARY TABLE Temp_InputTrans(
 			Id				BIGINT UNSIGNED PRIMARY KEY
-		,	Transtime		DATETIME(4)
+		,	TransTime		DATETIME(4)
 		,	FingerPrintCode	VARCHAR(64)
         ,	CookieCode		VARCHAR(64)
         ,	DeviceID		BIGINT UNSIGNED
@@ -62,7 +62,7 @@ BEGIN
     CREATE TEMPORARY TABLE Temp_GroupDevice(
 			GroupId			BIGINT UNSIGNED PRIMARY KEY
         ,	Id				BIGINT UNSIGNED
-		,	Transtime		DATETIME(4)
+		,	TransTime		DATETIME(4)
 		,	FingerPrintCode	VARCHAR(64)
         ,	CookieCode		VARCHAR(64)
         ,	DeviceID		BIGINT UNSIGNED
@@ -82,9 +82,9 @@ BEGIN
 
 	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);    
 
-    INSERT INTO Temp_InputTrans(Id, Transtime, FingerPrintCode, CookieCode, GroupId)
+    INSERT INTO Temp_InputTrans(Id, TransTime, FingerPrintCode, CookieCode, GroupId)
 	SELECT	tmpJs.Id
-		,	tmpJs.Transtime
+		,	tmpJs.TransTime
 		,	tmpJs.FingerPrintCode
         ,	tmpJs.CookieCode
         ,	tmpJs.GroupId
@@ -92,7 +92,7 @@ BEGIN
 			ip_TransJson,
 			 "$[*]" COLUMNS(
 								Id				BIGINT UNSIGNED	PATH "$.Id"
-							,	Transtime		DATETIME(4)		PATH "$.Transtime"
+							,	TransTime		DATETIME(4)		PATH "$.TransTime"
 							,	FingerPrintCode	VARCHAR(64)		PATH "$.FingerPrintCode"
                             ,	CookieCode		VARCHAR(64)		PATH "$.CookieCode"
                             ,	GroupId			BIGINT UNSIGNED	PATH "$.GroupId")
@@ -147,7 +147,7 @@ BEGIN
     SELECT	tmpIt.FingerPrintCode
 		,	tmpIt.DeviceId
 		,	lv_CreatedDate
-        ,	tmpIt.Transtime
+        ,	tmpIt.TransTime
     FROM Temp_InputTrans AS tmpIt
     WHERE tmpIt.RecoverType = 2;
     
@@ -156,17 +156,17 @@ BEGIN
     SELECT	tmpIt.CookieCode
 		,	tmpIt.DeviceId
 		,	lv_CreatedDate
-        ,	tmpIt.Transtime
+        ,	tmpIt.TransTime
     FROM Temp_InputTrans AS tmpIt 
     WHERE tmpIt.RecoverType = 1;  
     
     /*====RECOVER DEVICE: Update Modified Date Of Old Device*/
     UPDATE FPS_FingerPrint.Device AS dv
 		INNER JOIN (SELECT	tmpIt.DeviceId
-						,	MAX(tmpIt.Transtime) AS Transtime
+						,	MAX(tmpIt.TransTime) AS TransTime
 					FROM Temp_InputTrans AS tmpIt WHERE tmpIt.DeviceId > 0
                     GROUP BY tmpIt.DeviceId) AS tmpDv ON dv.Id = tmpDv.DeviceId
-	SET dv.ModifiedDate = tmpDv.Transtime;
+	SET dv.ModifiedDate = tmpDv.TransTime;
     
     /*====NEW DEVICE */
     IF (ip_GroupType = 0) THEN	
@@ -174,7 +174,7 @@ BEGIN
 		INSERT IGNORE INTO FPS_FingerPrint.Device(FirstFingerprintCode, CreatedDate, ModifiedDate)
 		SELECT 	tmpIt.FingerprintCode
 			,	lv_CreatedDate
-			,	tmpIt.Transtime
+			,	tmpIt.TransTime
 		FROM Temp_InputTrans AS tmpIt
 		WHERE tmpIt.DeviceId IS NULL;	
         
@@ -186,14 +186,14 @@ BEGIN
         SELECT 	tmpIt.FingerprintCode
 			,	tmpIt.DeviceId
 			,	lv_CreatedDate
-			,	tmpIt.Transtime            
+			,	tmpIt.TransTime            
 		FROM Temp_InputTrans AS tmpIt;
 	
 		INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieCode, DeviceId,  CreatedDate, ModifiedDate)
         SELECT 	tmpIt.CookieCode
 			,	tmpIt.DeviceId
 			,	lv_CreatedDate
-			,	tmpIt.Transtime            
+			,	tmpIt.TransTime            
 		FROM Temp_InputTrans AS tmpIt;
     
     ELSE		
@@ -201,7 +201,7 @@ BEGIN
 		INSERT IGNORE INTO FPS_FingerPrint.Device(FirstFingerprintCode, CreatedDate, ModifiedDate)
 		SELECT 	tmpIt.FingerprintCode
 			,	lv_CreatedDate
-			,	tmpIt.Transtime AS ModifiedDate
+			,	tmpIt.TransTime AS ModifiedDate
 		FROM Temp_GroupDevice AS tmpIt
 		WHERE tmpIt.Id = tmpIt.GroupId;	
         
@@ -217,7 +217,7 @@ BEGIN
         SELECT 	tmpIt.FingerprintCode
 			,	tmpIt.DeviceId 
 			,	lv_CreatedDate
-			,	tmpIt.Transtime AS ModifiedDate        
+			,	tmpIt.TransTime AS ModifiedDate        
 		FROM Temp_InputTrans AS tmpIt
         WHERE tmpIt.Id != tmpIt.GroupId; 
         
@@ -225,7 +225,7 @@ BEGIN
         SELECT 	tmpIt.CookieCode
 			,	tmpIt.DeviceId AS DeviceId
 			,	lv_CreatedDate
-			,	tmpIt.Transtime AS ModifiedDate              
+			,	tmpIt.TransTime AS ModifiedDate              
 		FROM Temp_InputTrans AS tmpIt; 
         
 	END IF;
@@ -233,7 +233,7 @@ BEGIN
     /****UPDATE ModifiedDate*****/
     UPDATE FPS_FingerPrint.Device AS dv
 		INNER JOIN(	SELECT	tmpIt.DeviceId
-						,	MAX(tmpIt.Transtime) AS MaxTransTime
+						,	MAX(tmpIt.TransTime) AS MaxTransTime
 					FROM Temp_InputTrans AS tmpIt
                     GROUP BY tmpIt.DeviceId
                     HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.DeviceId = dv.Id
@@ -241,7 +241,7 @@ BEGIN
     
     UPDATE FPS_FingerPrint.DeviceFingerPrint AS dv
 		INNER JOIN(	SELECT	tmpIt.FingerPrintCode
-						,	MAX(tmpIt.Transtime) AS MaxTransTime
+						,	MAX(tmpIt.TransTime) AS MaxTransTime
 					FROM Temp_InputTrans AS tmpIt
                     GROUP BY tmpIt.FingerPrintCode
                     HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.FingerPrintCode = dv.FingerPrintCode
@@ -249,17 +249,17 @@ BEGIN
     
     UPDATE FPS_FingerPrint.DeviceCookie AS dv
 		INNER JOIN(	SELECT	tmpIt.CookieCode
-						,	MAX(tmpIt.Transtime) AS MaxTransTime
+						,	MAX(tmpIt.TransTime) AS MaxTransTime
 					FROM Temp_InputTrans AS tmpIt
                     GROUP BY tmpIt.CookieCode
                     HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.CookieCode = dv.CookieCode
 	SET dv.ModifiedDate = tmpGd.MaxTransTime;
     
 	/*****UPDATE Trans******************/
-	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(Id, ServerTransId, Transtime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(Id, ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.Id
 			, 	ts.ServerTransId
-            ,	ts.Transtime
+            ,	ts.TransTime
 			, 	ts.CustId
 			, 	ts.SubAccId
 			, 	ts.LoginName
