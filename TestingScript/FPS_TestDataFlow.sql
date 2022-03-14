@@ -28,6 +28,36 @@ WHERE Id IN (1,2) ;
 
 */
 
+/* TRUNCATE and RESET FPSTesting
+
+TRUNCATE TABLE FPSTesting.FP_Account;
+TRUNCATE TABLE FPSTesting.FP_AccountLastLoginTimeProcess;
+TRUNCATE TABLE FPSTesting.FP_ActionResult;
+TRUNCATE TABLE FPSTesting.FP_AssociationNew;
+TRUNCATE TABLE FPSTesting.FP_dba_SP_PerformanceStats;
+TRUNCATE TABLE FPSTesting.FP_Device;
+TRUNCATE TABLE FPSTesting.FP_DeviceCode;
+TRUNCATE TABLE FPSTesting.FP_DeviceFingerprint;
+TRUNCATE TABLE FPSTesting.FP_DeviceType;
+TRUNCATE TABLE FPSTesting.FP_MappingDevice;
+TRUNCATE TABLE FPSTesting.FP_ProcessedTransaction;
+TRUNCATE TABLE FPSTesting.FP_RawTransaction;
+TRUNCATE TABLE FPSTesting.FP_RawTransaction;
+TRUNCATE TABLE FPSTesting.FP_Transaction;
+TRUNCATE TABLE FPSTesting.FP_Transaction07;
+TRUNCATE TABLE FPSTesting.FP_URL;
+TRUNCATE TABLE FPSTesting.FP_UserAgent;
+
+UPDATE FPSTesting.FP_SystemSetting
+SET VValue = 0
+WHERE Id IN (94423,1) ;
+
+UPDATE FPSTesting.FP_SystemSetting
+SET VValue = '2020-01-01'
+WHERE Id IN (2) ;
+
+*/
+
 SELECT * FROM FPS_FingerPrint.Offset;
 SELECT * FROM FPS_FingerPrint.RawUserAgent;
 SELECT * FROM FPS_FingerPrint.TransactionDevice;
