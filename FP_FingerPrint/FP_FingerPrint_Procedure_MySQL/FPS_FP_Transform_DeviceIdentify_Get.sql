@@ -45,7 +45,7 @@ BEGIN
         
         , 	INDEX IX_Temp_Transaction(FingerPrintCode)
         ,	INDEX IX_Temp_Transaction_CookieCode(CookieCode)
-    )ENGINE = MEMORY;
+    );
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transaction2;  
     CREATE TEMPORARY TABLE Temp_Transaction2(
@@ -59,7 +59,7 @@ BEGIN
         , 	INDEX IX_Temp_Transaction(FingerPrintCode)
         ,	INDEX IX_Temp_Transaction_CookieCode(CookieCode)
         ,	INDEX IX_Temp_Transaction_GroupFp(GroupFp,GroupCk)
-    )ENGINE = MEMORY;
+    );
     
     DROP TEMPORARY TABLE IF EXISTS Temp_TransGroup;        
 	CREATE TEMPORARY TABLE Temp_TransGroup(
