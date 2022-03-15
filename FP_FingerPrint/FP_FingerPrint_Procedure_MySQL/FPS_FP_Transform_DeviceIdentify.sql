@@ -49,7 +49,7 @@ BEGIN
 		,	TransTime		DATETIME(4)
 		,	FingerPrintCode	VARCHAR(64)
         ,	CookieCode		VARCHAR(64)
-        ,	DeviceID		BIGINT UNSIGNED
+        ,	DeviceId		BIGINT UNSIGNED
         ,	RecoverType		TINYINT DEFAULT 0	#0 New, 1 By FingerPrintCode, 2 By Cookie
         ,	GroupId			BIGINT UNSIGNED
         
@@ -65,19 +65,19 @@ BEGIN
 		,	TransTime		DATETIME(4)
 		,	FingerPrintCode	VARCHAR(64)
         ,	CookieCode		VARCHAR(64)
-        ,	DeviceID		BIGINT UNSIGNED
+        ,	DeviceId		BIGINT UNSIGNED
      );
      
      DROP TEMPORARY TABLE IF EXISTS Temp_ExistingFingerPrintCode;
      CREATE TEMPORARY TABLE Temp_ExistingFingerPrintCode(
         	Id				BIGINT UNSIGNED PRIMARY KEY
-		,   DeviceID		BIGINT UNSIGNED
+		,   DeviceId		BIGINT UNSIGNED
      );
      
      DROP TEMPORARY TABLE IF EXISTS Temp_ExistingCookieCode;
      CREATE TEMPORARY TABLE Temp_ExistingCookieCode(
         	Id				BIGINT UNSIGNED PRIMARY KEY
-        ,   DeviceID		BIGINT UNSIGNED
+        ,   DeviceId		BIGINT UNSIGNED
      );     
 
 	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);    
@@ -100,7 +100,7 @@ BEGIN
 
     /*====RECOVER DEVICE: Get Exisitng By FingerPrintCode*/
 
-	INSERT INTO Temp_ExistingFingerPrintCode(Id, DeviceID)
+	INSERT INTO Temp_ExistingFingerPrintCode(Id, DeviceId)
     SELECT	tmpTs.Id
 		,	df.DeviceId
     FROM Temp_InputTrans AS tmpTs
@@ -112,7 +112,7 @@ BEGIN
 		,	tmpTs.DeviceId = tmpEf.DeviceId;
     
     /*====RECOVER DEVICE: Get Exisitng By Cookie*/    
-	INSERT INTO Temp_ExistingCookieCode(Id, DeviceID)
+	INSERT INTO Temp_ExistingCookieCode(Id, DeviceId)
     SELECT	tmpTs.Id
 		,	dc.DeviceId
     FROM Temp_InputTrans AS tmpTs

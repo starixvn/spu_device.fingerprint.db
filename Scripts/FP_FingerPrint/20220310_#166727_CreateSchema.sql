@@ -15,7 +15,7 @@ CREATE TABLE Device (
   CreatedDate datetime DEFAULT NULL,
   ModifiedDate datetime DEFAULT NULL,
   PRIMARY KEY (Id),
-  KEY IX_Device_FirstFingerprintCode (FirstFingerprintCode)
+  UNIQUE KEY UX_Device_FirstFingerprintCode (FirstFingerprintCode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE DeviceCookie (
@@ -120,7 +120,6 @@ CREATE TABLE `Offset` (
   PRIMARY KEY (Id),
   KEY IX_Offset_Name (OffsetName)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 CREATE TABLE RawFingerPrint (
   FingerPrintCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
