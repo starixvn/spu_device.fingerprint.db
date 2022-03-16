@@ -1,8 +1,8 @@
 /*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
-DROP PROCEDURE IF EXISTS `FPS_FP_Transform_ClientTrans_Insert`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_ClientTransaction_Insert`;
 DELIMITER $$
 
-CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_ClientTrans_Insert`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_ClientTransaction_Insert`(
 		ip_FingerPrint LONGTEXT
 )
     SQL SECURITY INVOKER
@@ -19,13 +19,13 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_ClientTrans_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","UserAgentCode":"fdsafasfasf","UserAgentAttribute":"dddddd","CookieCode":"cookief5d0e59645d09cfb56690a7b0916","Flagged":"Human","Url":"fdsafdsaf"}]');
+			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","UserAgentCode":"fdsafasfasf","UserAgentAttribute":"dddddd","CookieCode":"cookief5d0e59645d09cfb56690a7b0916","Flagged":"Human","Url":"fdsafdsaf"}]');
 			
 	*/
     
     /*******LOG TEST********************/
     INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FPS_FP_Transform_FingerPrint_Insert', ip_FingerPrint , NULL, CURRENT_TIMESTAMP();
+    SELECT 'FPS_FP_Transform_ClientTransaction_Insert', ip_FingerPrint , NULL, CURRENT_TIMESTAMP();
     /*******LOG TEST********************/
     
     DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;    
