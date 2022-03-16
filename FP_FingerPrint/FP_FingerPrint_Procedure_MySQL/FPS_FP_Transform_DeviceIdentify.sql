@@ -58,6 +58,21 @@ BEGIN
         ,	INDEX IX_Temp_InputTrans_GroupId(GroupId)
     );    
     
+    DROP TEMPORARY TABLE IF EXISTS Temp_TransDevice;
+    CREATE TEMPORARY TABLE Temp_TransDevice(
+			Id				BIGINT UNSIGNED PRIMARY KEY
+		,	TransTime		DATETIME(4)
+		,	FingerPrintCode	VARCHAR(64)
+        ,	CookieCode		VARCHAR(64)
+        ,	DeviceId		BIGINT UNSIGNED
+        ,	RecoverType		TINYINT DEFAULT 0	#0 New, 1 By FingerPrintCode, 2 By Cookie
+        ,	GroupId			BIGINT UNSIGNED
+        
+		,	INDEX IX_Temp_InputTrans_FingerPrintCode(FingerPrintCode)
+        ,	INDEX IX_Temp_InputTrans_CookieCode(CookieCode)
+        ,	INDEX IX_Temp_InputTrans_GroupId(GroupId)
+    );  
+    
 	DROP TEMPORARY TABLE IF EXISTS Temp_GroupDevice;
     CREATE TEMPORARY TABLE Temp_GroupDevice(
 			GroupId			BIGINT UNSIGNED PRIMARY KEY
@@ -177,24 +192,31 @@ BEGIN
 			,	tmpIt.TransTime
 		FROM Temp_InputTrans AS tmpIt
 		WHERE tmpIt.DeviceId IS NULL;	
-        
-		UPDATE Temp_InputTrans AS tmpIt
-			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstFingerprintCode = tmpIt.FingerPrintCode
-		SET	tmpIt.DeviceId = dv.Id;
+    
+        INSERT INTO Temp_TransDevice(Id, TransTime, FingerPrintCode, CookieCode, DeviceId, RecoverType, GroupId)
+        SELECT	tmpIt.Id
+			,	tmpIt.TransTime
+            ,	tmpIt.FingerPrintCode
+            ,	tmpIt.CookieCode
+            ,	dv.Id
+            ,	tmpIt.RecoverType
+            ,	tmpIt.GroupId
+		FROM Temp_InputTrans AS tmpIt
+			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstFingerprintCode = tmpIt.FingerPrintCode;
         
         INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId,  CreatedDate, ModifiedDate)
-        SELECT 	tmpIt.FingerprintCode
-			,	tmpIt.DeviceId
+        SELECT 	tmpTd.FingerprintCode
+			,	tmpTd.DeviceId
 			,	lv_CreatedDate
-			,	tmpIt.TransTime            
-		FROM Temp_InputTrans AS tmpIt;
+			,	tmpTd.TransTime            
+		FROM Temp_TransDevice AS tmpTd;
 	
 		INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieCode, DeviceId,  CreatedDate, ModifiedDate)
-        SELECT 	tmpIt.CookieCode
-			,	tmpIt.DeviceId
+        SELECT 	tmpTd.CookieCode
+			,	tmpTd.DeviceId
 			,	lv_CreatedDate
-			,	tmpIt.TransTime            
-		FROM Temp_InputTrans AS tmpIt;
+			,	tmpTd.TransTime            
+		FROM Temp_TransDevice AS tmpTd;
     
     ELSE		
         
@@ -205,60 +227,64 @@ BEGIN
 		FROM Temp_GroupDevice AS tmpIt
 		WHERE tmpIt.Id = tmpIt.GroupId;	
         
-        UPDATE Temp_GroupDevice AS tmpGd
-			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstFingerprintCode = tmpGd.FingerPrintCode
-        SET  tmpGd.DeviceId = dv.Id;	
-        
-        UPDATE Temp_InputTrans AS tmpIt
+		INSERT INTO Temp_TransDevice(Id, TransTime, FingerPrintCode, CookieCode, DeviceId, RecoverType, GroupId)
+        SELECT	tmpIt.Id
+			,	tmpIt.TransTime
+            ,	tmpIt.FingerPrintCode
+            ,	tmpIt.CookieCode
+            ,	dv.Id
+            ,	tmpIt.RecoverType
+            ,	tmpIt.GroupId
+		FROM Temp_InputTrans AS tmpIt
 			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpGd.GroupId = tmpIt.GroupId
-		SET	tmpIt.DeviceId = tmpGd.DeviceId;        
+			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstFingerprintCode = tmpGd.FingerPrintCode;            
   
         INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(FingerPrintCode, DeviceId,  CreatedDate, ModifiedDate)
-        SELECT 	tmpIt.FingerprintCode
-			,	tmpIt.DeviceId 
+        SELECT 	tmpTd.FingerprintCode
+			,	tmpTd.DeviceId 
 			,	lv_CreatedDate
-			,	tmpIt.TransTime AS ModifiedDate        
-		FROM Temp_InputTrans AS tmpIt
-        WHERE tmpIt.Id != tmpIt.GroupId; 
+			,	tmpTd.TransTime AS ModifiedDate        
+		FROM Temp_TransDevice AS tmpTd
+        WHERE tmpTd.Id != tmpTd.GroupId; 
         
 		INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieCode, DeviceId,  CreatedDate, ModifiedDate)
-        SELECT 	tmpIt.CookieCode
-			,	tmpIt.DeviceId AS DeviceId
+        SELECT 	tmpTd.CookieCode
+			,	tmpTd.DeviceId AS DeviceId
 			,	lv_CreatedDate
-			,	tmpIt.TransTime AS ModifiedDate              
-		FROM Temp_InputTrans AS tmpIt; 
+			,	tmpTd.TransTime AS ModifiedDate              
+		FROM Temp_TransDevice AS tmpTd
+        WHERE tmpTd.Id != tmpTd.GroupId;  
         
 	END IF;
     
     /****UPDATE ModifiedDate*****/
     UPDATE FPS_FingerPrint.Device AS dv
-		INNER JOIN(	SELECT	tmpIt.DeviceId
-						,	MAX(tmpIt.TransTime) AS MaxTransTime
-					FROM Temp_InputTrans AS tmpIt
-                    GROUP BY tmpIt.DeviceId
+		INNER JOIN(	SELECT	tmpTd.DeviceId
+						,	MAX(tmpTd.TransTime) AS MaxTransTime
+					FROM Temp_TransDevice AS tmpTd
+                    GROUP BY tmpTd.DeviceId
                     HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.DeviceId = dv.Id
 	SET dv.ModifiedDate = tmpGd.MaxTransTime;
     
     UPDATE FPS_FingerPrint.DeviceFingerPrint AS dv
-		INNER JOIN(	SELECT	tmpIt.FingerPrintCode
-						,	MAX(tmpIt.TransTime) AS MaxTransTime
-					FROM Temp_InputTrans AS tmpIt
-                    GROUP BY tmpIt.FingerPrintCode
+		INNER JOIN(	SELECT	tmpTd.FingerPrintCode
+						,	MAX(tmpTd.TransTime) AS MaxTransTime
+					FROM Temp_TransDevice AS tmpTd
+                    GROUP BY tmpTd.FingerPrintCode
                     HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.FingerPrintCode = dv.FingerPrintCode
 	SET dv.ModifiedDate = tmpGd.MaxTransTime;
     
     UPDATE FPS_FingerPrint.DeviceCookie AS dv
-		INNER JOIN(	SELECT	tmpIt.CookieCode
-						,	MAX(tmpIt.TransTime) AS MaxTransTime
-					FROM Temp_InputTrans AS tmpIt
-                    GROUP BY tmpIt.CookieCode
+		INNER JOIN(	SELECT	tmpTd.CookieCode
+						,	MAX(tmpTd.TransTime) AS MaxTransTime
+					FROM Temp_TransDevice AS tmpTd
+                    GROUP BY tmpTd.CookieCode
                     HAVING COUNT(1) > 1) AS tmpGd ON tmpGd.CookieCode = dv.CookieCode
 	SET dv.ModifiedDate = tmpGd.MaxTransTime;
     
 	/*****UPDATE Trans******************/
-	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(Id, ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
-    SELECT  	ts.Id
-			, 	ts.ServerTransId
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+    SELECT  	ts.ServerTransId
             ,	ts.TransTime
 			, 	ts.CustId
 			, 	ts.SubAccId
@@ -266,7 +292,7 @@ BEGIN
 			, 	ts.SubscriberId
 			, 	ts.FingerPrintCode
 			, 	ts.CookieCode
-			, 	tmpIt.DeviceId
+			, 	tmpTd.DeviceId
 			, 	ts.ClientIP
 			, 	ts.UserAgent
 			, 	ts.Url
@@ -274,12 +300,12 @@ BEGIN
 			, 	lv_CreatedDate
 			, 	ts.TransKey
 			, 	ts.Flagged    
-	FROM Temp_InputTrans AS tmpIt		
-        INNER JOIN Transaction AS ts ON tmpIt.Id = ts.Id;   
+	FROM Temp_TransDevice AS tmpTd		
+        INNER JOIN Transaction AS ts ON tmpTd.Id = ts.Id;   
 	
     DELETE ts
     FROM FPS_FingerPrint.Transaction AS ts
-		INNER JOIN Temp_InputTrans AS tmpIt ON tmpIt.Id = ts.Id; 
+		INNER JOIN Temp_TransDevice AS tmpTd ON tmpTd.Id = ts.Id; 
 
 END$$
 DELIMITER ;
