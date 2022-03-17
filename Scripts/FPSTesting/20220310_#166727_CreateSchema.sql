@@ -267,7 +267,7 @@ CREATE TABLE FP_RawTransaction_Old (
   Flagged smallint DEFAULT NULL,
   IsProcessed tinyint NOT NULL DEFAULT '0',
   TransID bigint unsigned NOT NULL AUTO_INCREMENT,
-  TransKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  TransKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (TransID,CreatedDate),
   KEY IX_RawTransaction_IsProcessed (IsProcessed,TransKey),
   KEY IX_RawTransaction_SubscriberName (SubscriberName,CreatedDate)
