@@ -118,14 +118,22 @@ BEGIN
             ,	TotalTrans
             ,	TotalValidTrans
             ,	CreateDate
+            ,	ModifiedDate
     )
-    SELECT CAST(tmp.TransTime as DATE) as TransDate
+    SELECT 	tmp.TransDate
 			,	tmp.SubscriberId
-			,	COUNT(tmp.SubscriberId) as TotalTrans
+			,	tmp.CountTrans as TotalTrans
 			,	0 as TotalValidTrans
 			,	NOW() AS CreatedDate
-    FROM Temp_FingerPrint tmp
-    GROUP BY TransDate, tmp.SubscriberId
-    ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + COUNT(tmp.SubscriberId);
+			,	NOW() AS ModifiedDate
+	FROM (
+		SELECT CAST(tmp.TransTime as DATE) as TransDate
+				,	tmp.SubscriberId
+				,	COUNT(tmp.SubscriberId) as CountTrans
+		FROM Temp_FingerPrint tmp
+		GROUP BY TransDate, tmp.SubscriberId
+    ) tmp
+    ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + tmp.CountTrans,
+							ModifiedDate = NOW();
 END$$
 DELIMITER ;

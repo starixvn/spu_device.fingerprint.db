@@ -113,6 +113,30 @@ BEGIN
                     ,	tmp.SubAccId
 	FROM Temp_Transactions AS tmp; 
     
+	INSERT INTO FPS_FingerPrint.ServerTransactionDailySum(
+			TransDate
+            ,	SubscriberId
+            ,	TotalTrans
+            ,	TotalValidTrans
+            ,	CreateDate
+            ,	ModifiedDate
+    )
+    SELECT 	tmp.TransDate
+			,	tmp.SubscriberId
+			,	tmp.CountTrans as TotalTrans
+			,	0 as TotalValidTrans
+			,	NOW() AS CreatedDate
+			,	NOW() AS ModifiedDate
+	FROM (
+		SELECT CAST(tmp.TransTime as DATE) as TransDate
+				,	tmp.SubscriberId
+				,	COUNT(tmp.SubscriberId) as CountTrans
+		FROM Temp_Transactions tmp
+		GROUP BY TransDate, tmp.SubscriberId
+    ) tmp
+    ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + tmp.CountTrans,
+							ModifiedDate = NOW();
+    
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
 END$$
 DELIMITER ;
