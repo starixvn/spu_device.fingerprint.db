@@ -181,7 +181,7 @@ BEGIN
    , 	tmp.Flagged
    FROM Temp_Transactions2 AS tmp;
    
-   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, Transtime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
    SELECT	transD.Id
 		,	transD.ServerTransId
 		,	transD.CustId
@@ -191,7 +191,7 @@ BEGIN
 		,	transD.FingerPrintCode
 		,	transD.CookieCode
 		,	transD.DeviceId
-		,	transD.Transtime
+		,	transD.TransTime
 		,	transD.ClientIP
 		,	transD.UserAgent
 		,	transD.Url
@@ -310,7 +310,7 @@ BEGIN
 	,	FingerPrintCode
 	,	CookieCode
 	,	DeviceId
-	,	Transtime
+	,	TransTime
 	,	ClientIP
 	,	UserAgent
 	,	Url
@@ -328,7 +328,7 @@ BEGIN
 	,	transD.FingerPrintCode
 	,	transD.CookieCode
 	,	transD.DeviceId
-	,	transD.Transtime
+	,	transD.TransTime
 	,	transD.ClientIP
 	,	transD.UserAgent
 	,	transD.Url

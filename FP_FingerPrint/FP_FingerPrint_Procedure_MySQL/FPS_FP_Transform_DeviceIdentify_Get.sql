@@ -40,7 +40,7 @@ BEGIN
 			Id				BIGINT UNSIGNED PRIMARY KEY		
 		,	FingerPrintCode	VARCHAR(64)
         ,	CookieCode		VARCHAR(64)
-        ,	Transtime		DATETIME(4)
+        ,	TransTime		DATETIME(4)
         ,	GroupId			BIGINT UNSIGNED DEFAULT 0
         
         , 	INDEX IX_Temp_Transaction(FingerPrintCode)
@@ -155,7 +155,7 @@ BEGIN
     
     #====RETURN 1: Group By (FingerPrintCode OR CookieCode)*/
     SELECT	tmpTs.Id
-		,	tmpTs.Transtime
+		,	tmpTs.TransTime
 		,	tmpTs.FingerPrintCode
         ,	tmpTs.CookieCode
 		,	tmpTs.GroupId
@@ -170,7 +170,7 @@ BEGIN
     SET @rowNo = 0;
     SET @BatchNo = @BatchNo + 1;  
     SELECT	tmpTs.Id
-		,	tmpTs.Transtime
+		,	tmpTs.TransTime
 		,	tmpTs.FingerPrintCode
         ,	tmpTs.CookieCode
 		,	tmpTs.GroupId

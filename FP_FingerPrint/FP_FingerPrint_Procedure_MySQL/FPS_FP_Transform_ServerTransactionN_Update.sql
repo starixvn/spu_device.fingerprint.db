@@ -41,7 +41,7 @@ BEGIN
 		,	SubAccId 		BIGINT DEFAULT NULL
 		,	LoginName 		VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 	INT DEFAULT NULL
-		,	Transtime 		DATETIME(4) DEFAULT NULL
+		,	TransTime 		DATETIME(4) DEFAULT NULL
 		,	ClientIP 		VARCHAR(45) DEFAULT NULL
 		,	UserAgent 		VARCHAR(500) DEFAULT NULL
 		,	Url 			VARCHAR(100) DEFAULT NULL
@@ -65,7 +65,7 @@ BEGIN
 		,	SubAccId 			BIGINT DEFAULT NULL
 		,	LoginName 			VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 		INT DEFAULT NULL
-		,	Transtime 			DATETIME(4) DEFAULT NULL
+		,	TransTime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
 		,	UserAgent 			VARCHAR(500) DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
@@ -82,14 +82,14 @@ BEGIN
         ,	INDEX IX_Temp_RawTransaction2_SessionKey(SessionKey)
     );  
     
-   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action)
+   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, Url, TransKey, Retry, Action)
 	SELECT	rt.Id
 		,	rt.SessionKey
 		,	rt.CustId
 		,	rt.SubAccId
 		,	rt.LoginName
 		,	rt.SubscriberId
-		,	rt.Transtime
+		,	rt.TransTime
 		,	rt.ClientIP
 		,	rt.UserAgent
 		,	rt.Url	
@@ -105,7 +105,7 @@ BEGIN
 							,	SubAccId				BIGINT			PATH "$.SubAccId"
 							,	LoginName				VARCHAR(100)	PATH "$.LoginName"
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
-							,	Transtime				DATETIME(4)	 	PATH "$.Transtime"
+							,	TransTime				DATETIME(4)	 	PATH "$.TransTime"
                             ,	ClientIP				VARCHAR(45)		PATH "$.ClientIP"
                             ,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
 							,	Url						VARCHAR(100) 	PATH "$.Url"
@@ -115,14 +115,14 @@ BEGIN
 				)
 		   ) AS  rt; 
            
-    INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieCode, Flagged)
+    INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieCode, Flagged)
 	SELECT	tmpRt.Id
 		,	tmpRt.SessionKey
 		,	tmpRt.CustId
 		,	tmpRt.SubAccId
 		,	tmpRt.LoginName
 		,	tmpRt.SubscriberId
-		,	tmpRt.Transtime
+		,	tmpRt.TransTime
 		,	tmpRt.ClientIP
 		,	tmpRt.UserAgent
 		,	IFNULL(tmpRt.Url, fp.Url)
@@ -136,7 +136,7 @@ BEGIN
 		LEFT JOIN FPS_FingerPrint.ClientTransaction fp ON fp.SessionKey = tmpRt.SessionKey;
       
 	-- Insert data completed
-    INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, Transtime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+    INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT Id
 		,	tmpRt2.CustId
         ,	tmpRt2.SubAccId
@@ -144,7 +144,7 @@ BEGIN
         ,	tmpRt2.SubscriberId
         ,	tmpRt2.FingerPrintCode
 		,	tmpRt2.CookieCode
-        ,	tmpRt2.Transtime
+        ,	tmpRt2.TransTime
         ,	tmpRt2.ClientIP
         ,	tmpRt2.UserAgent
         ,	tmpRt2.Url
@@ -154,14 +154,14 @@ BEGIN
         ,	tmpRt2.Flagged
     FROM Temp_RawTransaction2 AS tmpRt2;
 
-	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, Transtime, ClientIP, UserAgent, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
+	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
     SELECT ts.Id
     , 	ts.SessionKey
     , 	ts.CustId
     , 	ts.SubAccId
     , 	ts.LoginName
     , 	ts.SubscriberId
-    , 	ts.Transtime
+    , 	ts.TransTime
     , 	ts.ClientIP
     , 	ts.UserAgent
     , 	ts.Url

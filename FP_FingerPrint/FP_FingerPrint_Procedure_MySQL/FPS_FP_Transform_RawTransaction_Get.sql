@@ -42,7 +42,7 @@ BEGIN
         , 	trans.SubAccId
         , 	trans.LoginName
         , 	trans.SubscriberId
-        , 	trans.Transtime
+        , 	trans.TransTime
         , 	trans.ClientIP
         , 	trans.UserAgent
         , 	trans.Url

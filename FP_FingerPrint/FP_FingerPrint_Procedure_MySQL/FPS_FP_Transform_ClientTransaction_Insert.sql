@@ -90,6 +90,7 @@ BEGIN
 	FROM Temp_FingerPrint tmp
 	ON DUPLICATE KEY UPDATE ModifiedDate = NOW();
     
+    
     INSERT INTO FPS_FingerPrint.ClientTransaction(FingerPrintCode, SubscriberId, UserAgentCode, CookieCode, SessionKey, Flagged, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SubscriberId
@@ -102,15 +103,6 @@ BEGIN
 		,	NOW() AS CreatedDate
 		,	NOW() AS CreatedDate
 	FROM Temp_FingerPrint tmp;
-
-
-    SELECT CAST(tmp.TransTime as DATE) as TransDate
-			,	tmp.SubscriberId
-			,	COUNT(tmp.SubscriberId) as TotalTrans
-			,	0 as TotalValidTrans
-			,	NOW() AS CreatedDate
-    FROM Temp_FingerPrint tmp
-    GROUP BY TransDate, tmp.SubscriberId;
     
 	INSERT INTO FPS_FingerPrint.ClientTransactionDailySum(
 			TransDate

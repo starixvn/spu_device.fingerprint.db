@@ -89,7 +89,7 @@ BEGIN
 						LoginName
 					,	SubscriberId                    
                     ,	SessionKey
-					,	Transtime
+					,	TransTime
 					,	ClientIP
 					,	UserAgent
                     ,	Url                    

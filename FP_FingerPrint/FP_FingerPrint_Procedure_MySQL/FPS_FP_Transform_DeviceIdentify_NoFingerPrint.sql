@@ -37,14 +37,14 @@ BEGIN
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
     
-    INSERT INTO FPS_FingerPrint.TransactionDevice(Id, ServerTransId, CustId , SubAccId, LoginName, SubscriberId, Transtime,  ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+    INSERT INTO FPS_FingerPrint.TransactionDevice(Id, ServerTransId, CustId , SubAccId, LoginName, SubscriberId, TransTime,  ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.Id
 			, 	ts.ServerTransId
 			, 	ts.CustId
 			, 	ts.SubAccId
 			, 	ts.LoginName
 			, 	ts.SubscriberId			
-			, 	ts.Transtime
+			, 	ts.TransTime
 			, 	ts.ClientIP
 			, 	ts.UserAgent
 			, 	ts.Url
