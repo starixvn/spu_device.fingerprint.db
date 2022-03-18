@@ -18,6 +18,7 @@ BEGIN
 
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
+			- 20220318@Jonathan.Doan: Update TotalValidTrans in table TransactionDailySum [Redmine ID: #162668]
             
 		Param's Explanation (filtered by):	
 
