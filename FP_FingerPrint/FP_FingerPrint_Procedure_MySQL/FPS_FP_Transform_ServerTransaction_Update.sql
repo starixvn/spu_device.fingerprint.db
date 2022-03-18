@@ -207,7 +207,7 @@ BEGIN
 		sum.ModifiedDate = NOW();
     
     
-    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, FingerPrintCode, UserAgentCode, CookieCode, SubscriberId, SessionKey, Flagged, Url, CreatedDate)
+    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, FingerPrintCode, UserAgentCode, CookieCode, SubscriberId, SessionKey, Flagged, Url, TransTime, CreatedDate)
     SELECT	fp.Id
 		,	fp.FingerPrintCode
 		,	fp.UserAgentCode
@@ -216,6 +216,7 @@ BEGIN
 		,	fp.SessionKey
 		,	fp.Flagged
 		,	fp.Url
+		,	fp.TransTime
 		,	fp.CreatedDate
     FROM FPS_FingerPrint.ClientTransaction AS fp
 		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON tmpT2.SessionKey = fp.SessionKey;
