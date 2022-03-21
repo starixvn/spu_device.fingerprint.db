@@ -131,7 +131,8 @@ BEGIN
 		,	tmpRt.Action
 		,	fp.FingerPrintCode
 		,	fp.CookieCode
-		,	fp.Flagged
+		,	(CASE WHEN fp.Flagged is NULL THEN 'undefined'		
+			ELSE fp.Flagged END) 
     FROM Temp_RawTransaction AS tmpRt
 		LEFT JOIN FPS_FingerPrint.ClientTransaction fp ON fp.SessionKey = tmpRt.SessionKey;
       

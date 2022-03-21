@@ -104,7 +104,8 @@ BEGIN
 		,	transO.TransStatus 		
 		,	transO.FPSTransID 			
 		, 		(CASE WHEN transD.Flagged = 'human' THEN 1
-				WHEN transD.Flagged = 'bot' THEN 9 END) AS Flagged			
+				WHEN transD.Flagged = 'bot' THEN 9 
+                ELSE transO.Flagged END) AS Flagged			
 		,	transO.IsProcessed 		
 		,	transO.TransID 			
 		,	transD.DeviceId 			
@@ -225,8 +226,8 @@ BEGIN
    , 	NULL
    , 	0
    , 	NULL
-   , 	(CASE WHEN transD.Flagged = 'human' THEN 1
-		WHEN transD.Flagged = 'bot' THEN 9 END)   
+   , 	(CASE WHEN transD.Flagged = 'human' THEN 1		
+        ELSE 9 END)   
    , 	transD.DeviceId
    , 	sub.Id
    , 	transD.CustId
@@ -276,8 +277,7 @@ BEGIN
 	,	transD.Action
 	,	transD.CreatedDate
 	,	transD.TransKey
-	,	(CASE WHEN transD.Flagged = NULL THEN 'Undefined'
-				ELSE transD.Flagged END)    
+	,	transD.Flagged    
 	FROM  FPS_FingerPrint.TransactionDevice transD 
 	INNER JOIN Temp_Transactions tmp ON transD.Id = tmp.Id;
     

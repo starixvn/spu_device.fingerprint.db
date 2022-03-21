@@ -104,7 +104,8 @@ BEGIN
 		,	transO.TransStatus 		
 		,	transO.FPSTransID 			
 		, 	(CASE WHEN transD.Flagged = 'human' THEN 1
-			WHEN transD.Flagged = 'bot' THEN 9 END) AS Flagged			
+			WHEN transD.Flagged = 'bot' THEN 9 
+            ELSE transO.Flagged END) AS Flagged			
 		,	transO.IsProcessed 		
 		,	transO.TransID 			
 		,	transD.DeviceId 			

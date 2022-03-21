@@ -152,7 +152,8 @@ BEGIN
    ,	tmpTs.Action
    ,	fp.FingerPrintCode
    ,	fp.CookieCode
-   ,	fp.Flagged
+   ,	(CASE WHEN fp.Flagged is NULL THEN 'undefined'		
+			ELSE fp.Flagged END)
    ,	lv_currentDate
    FROM Temp_RawTransaction AS tmpTs 
 		LEFT JOIN FPS_FingerPrint.ClientTransaction AS fp ON fp.SessionKey = tmpTs.SessionKey;
