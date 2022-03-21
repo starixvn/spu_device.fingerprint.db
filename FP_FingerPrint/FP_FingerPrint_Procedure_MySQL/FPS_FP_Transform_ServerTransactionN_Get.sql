@@ -40,6 +40,7 @@ BEGIN
         , 	trans.SubAccId
         , 	trans.LoginName
         , 	trans.SubAccId
+        , 	trans.SubscriberId
         , 	trans.TransTime
         , 	trans.ClientIP
         , 	trans.UserAgent
