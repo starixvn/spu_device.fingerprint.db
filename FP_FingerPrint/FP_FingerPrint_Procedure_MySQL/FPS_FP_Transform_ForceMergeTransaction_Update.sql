@@ -33,7 +33,7 @@ BEGIN
     
     CREATE TEMPORARY TABLE Temp_Transactions(
 				Id 				BIGINT	NOT NULL PRIMARY KEY	
-			, 	TransKey 		VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+			, 	TransKey 		VARCHAR(200)
             , 	INDEX IX_Temp_Transactions_TransKey(TransKey)            
     );
     
@@ -104,8 +104,7 @@ BEGIN
 		,	transO.TransStatus 		
 		,	transO.FPSTransID 			
 		, 		(CASE WHEN transD.Flagged = 'human' THEN 1
-				WHEN transD.Flagged = 'bot' THEN 2
-				ELSE 0 END) AS Flagged			
+				WHEN transD.Flagged = 'bot' THEN 9 END) AS Flagged			
 		,	transO.IsProcessed 		
 		,	transO.TransID 			
 		,	transD.DeviceId 			
@@ -122,35 +121,7 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.TransactionDevice AS transD ON transD.Id = tmp.Id
 		INNER JOIN FPSTesting.FP_RawTransaction_Old AS transO ON tmp.TransKey = transO.TransKey;
     
-    INSERT INTO FPSTesting.FP_RawTransaction(
-		LoginName
-    , 	SubscriberName
-    , 	TransTime
-    , 	CreatedDate
-    , 	DeviceCode
-    , 	FingerprintCode
-    , 	FingerprintMoreInfo
-    , 	UserAgent
-    , 	IP
-    , 	IPID
-    , 	PluginID
-    , 	URL
-    , 	Action
-    , 	ActionResult
-    , 	InvalidDevice
-    , 	TransStatus
-    , 	FPSTransID
-    , 	Flagged    
-    , 	FPDeviceID
-    , 	SubscriberID
-    , 	CustID
-    ,	CustSubID
-    , 	LoginName_Old
-    , 	TransTime_Old
-    , 	IP_Old
-    , 	UserAgent_Old
-    , 	URL_Old
-    , 	Flagged_Old)
+	INSERT INTO FPSTesting.FP_RawTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old)
    SELECT tmp.LoginName	
    , 	tmp.SubscriberName
    , 	tmp.TransTime
@@ -236,37 +207,8 @@ BEGIN
 	DELETE trans FROM FPSTesting.FP_RawTransaction_Old trans
 	INNER JOIN Temp_Transactions2 tmp ON trans.TransID = tmp.Id_Old;
    
-    INSERT INTO FPSTesting.FP_RawTransaction(
-		LoginName
-    , 	SubscriberName
-    , 	TransTime
-    , 	CreatedDate
-    , 	DeviceCode
-    , 	FingerprintCode
-    , 	FingerprintMoreInfo
-    , 	UserAgent
-    , 	IP
-    , 	IPID
-    , 	PluginID
-    , 	URL
-    , 	Action
-    , 	ActionResult
-    , 	InvalidDevice
-    , 	TransStatus
-    , 	FPSTransID
-    , 	Flagged    
-    , 	FPDeviceID
-    , 	SubscriberID
-    , 	CustID
-    ,	CustSubID
-    , 	LoginName_Old
-    , 	TransTime_Old
-    , 	IP_Old
-    , 	UserAgent_Old
-    , 	URL_Old
-    , 	Flagged_Old)
-   SELECT 
-		transD.LoginName	
+    INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult,	InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old,	IP_Old,	UserAgent_Old, URL_Old,	Flagged_Old)
+   SELECT transD.LoginName	
    , 	sub.Name
    , 	transD.TransTime
    ,	DATE(transD.TransTime)	
@@ -283,9 +225,8 @@ BEGIN
    , 	NULL
    , 	0
    , 	NULL
-  , 		(CASE WHEN transD.Flagged = 'human' THEN 1
-				WHEN transD.Flagged = 'bot' THEN 2
-				ELSE 0 END)   
+   , 	(CASE WHEN transD.Flagged = 'human' THEN 1
+		WHEN transD.Flagged = 'bot' THEN 9 END)   
    , 	transD.DeviceId
    , 	sub.Id
    , 	transD.CustId

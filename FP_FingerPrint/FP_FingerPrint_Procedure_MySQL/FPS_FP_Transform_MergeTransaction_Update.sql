@@ -32,7 +32,7 @@ BEGIN
     
     CREATE TEMPORARY TABLE Temp_Transactions(
 				Id 				BIGINT	NOT NULL PRIMARY KEY	
-			, 	TransKey 		VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci 
+			, 	TransKey 		VARCHAR(200)
             , 	INDEX IX_Temp_Transactions_TransKey(TransKey)            
     );
     
@@ -43,7 +43,7 @@ BEGIN
 			ip_TransJson,
 			 "$[*]" COLUMNS(
 								Id						BIGINT			PATH "$.Id"       
-							,	TransKey				VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci 	PATH "$.TransKey"                                                 
+							,	TransKey				VARCHAR(200) 	PATH "$.TransKey"                                                 
 				)
 		   ) AS  rt; 
     
@@ -103,9 +103,8 @@ BEGIN
 		,	transO.InvalidDevice 		
 		,	transO.TransStatus 		
 		,	transO.FPSTransID 			
-		, 		(CASE WHEN transD.Flagged = 'human' THEN 1
-				WHEN transD.Flagged = 'bot' THEN 2
-				ELSE 0 END) AS Flagged			
+		, 	(CASE WHEN transD.Flagged = 'human' THEN 1
+			WHEN transD.Flagged = 'bot' THEN 9 END) AS Flagged			
 		,	transO.IsProcessed 		
 		,	transO.TransID 			
 		,	transD.DeviceId 			
@@ -213,7 +212,27 @@ BEGIN
 	SET transD.Retry = 1;
       
 	INSERT INTO FPSTesting.FP_RawTransaction_Old_Completed(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, Flagged, IsProcessed, TransID, TransKey)
-	SELECT trans.LoginName, trans.SubscriberName, trans.TransTime, trans.CreatedDate, trans.DeviceCode, trans.FingerprintCode, trans.FingerprintMoreInfo, trans.UserAgent, trans.IP, trans.IPID, trans.PluginID, trans.URL, trans.Action, trans.ActionResult, trans.InvalidDevice, trans.TransStatus, trans.FPSTransID, trans.Flagged, trans.IsProcessed, trans.TransID, trans.TransKey 
+	SELECT trans.LoginName
+    , 	trans.SubscriberName
+    , 	trans.TransTime
+    , 	trans.CreatedDate
+    , 	trans.DeviceCode
+    , 	trans.FingerprintCode
+    , 	trans.FingerprintMoreInfo
+    , 	trans.UserAgent
+    , 	trans.IP
+    , 	trans.IPID
+    , 	trans.PluginID
+    , 	trans.URL
+    , 	trans.Action
+    , 	trans.ActionResult
+    , 	trans.InvalidDevice
+    , 	trans.TransStatus
+    , 	trans.FPSTransID
+    , 	trans.Flagged
+    , 	trans.IsProcessed
+    , 	trans.TransID
+    , 	trans.TransKey 
 	FROM FPSTesting.FP_RawTransaction_Old AS trans 
 		INNER JOIN Temp_Transactions2 AS tmp ON trans.TransID = tmp.Id_Old;
    
