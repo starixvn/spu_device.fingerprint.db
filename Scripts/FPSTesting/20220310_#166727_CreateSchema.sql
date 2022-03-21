@@ -4,12 +4,12 @@
 	Task: Init Schema
 	DB: FPSTesting
 */
-CREATE SCHEMA `FPSTesting` DEFAULT CHARACTER SET utf8mb4 ;
+CREATE SCHEMA `FPSTesting` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; 
 USE FPSTesting;
 
 CREATE TABLE FP_Account (
   AccountID bigint unsigned NOT NULL AUTO_INCREMENT,
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   SubscriberID int NOT NULL,
   SubscriberType tinyint NOT NULL,
   CreatedTime timestamp(4) NOT NULL,
@@ -21,24 +21,24 @@ CREATE TABLE FP_Account (
   UNIQUE KEY UK_Account_SubscriberIDLoginName (SubscriberID,LoginName),
   KEY IX_Account_IsCTSTransformed (IsCTSTransformed),
   KEY IXF_Account_LastLoginTime ((cast(LastLoginTime as date)))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_AccountLastLoginTimeProcess (
   ID bigint unsigned NOT NULL AUTO_INCREMENT,
   AccountID bigint unsigned DEFAULT NULL,
   LastLoginTime timestamp(4) NOT NULL,
   PRIMARY KEY (ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_ActionResult (
   ActionResultID int NOT NULL AUTO_INCREMENT,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   ActionResultStatus tinyint NOT NULL COMMENT '0: Inactive; 1: Active; -1: Unhandled(Action has not defined in Intergrated Action List)',
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
   PRIMARY KEY (ActionResultID),
   UNIQUE KEY UK_ActionResult_ActionResultDetails (`Action`,ActionResult)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE FP_Association (
   AssociationID bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -54,7 +54,7 @@ CREATE TABLE FP_Association (
   KEY IX_Association_IsCTSTransformed (IsCTSTransformed),
   KEY IX_Association_CTSCustID_DeviceID_AccountID (DeviceID,AccountID),
   KEY KEY_AssociationID (AssociationID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_AssociationNew (
   AssociationID bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -68,12 +68,12 @@ CREATE TABLE FP_AssociationNew (
   UNIQUE KEY UX_FP_AssociationNew_AccountIDFPDeviceID (AccountID,FPDeviceID),
   KEY IX_FP_AssociationNew_IsCTSTransformed (IsCTSTransformed),
   KEY IX_FP_AssociationNew_FPDeviceIDAccountID (FPDeviceID,AccountID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_Device (
   DeviceID bigint unsigned NOT NULL AUTO_INCREMENT,
-  FirstDeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  FirstDeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   FirstTransID bigint DEFAULT NULL,
   CreatedTime timestamp(4) NOT NULL COMMENT 'CreatedTime of First Transaction',
   CreatedDate datetime NOT NULL COMMENT 'Date Only, Date of First Transaction',
@@ -81,11 +81,11 @@ CREATE TABLE FP_Device (
   PRIMARY KEY (DeviceID),
   UNIQUE KEY UK_Device_FirstDeviceCode (FirstDeviceCode),
   KEY IX_Device_CreatedDate (CreatedDate)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_DeviceCode (
   DeviceCodeID bigint unsigned NOT NULL AUTO_INCREMENT,
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT ' DeviceCode Captured From DI',
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT ' DeviceCode Captured From DI',
   DeviceID bigint unsigned DEFAULT NULL,
   FirstTransID bigint DEFAULT NULL,
   CreatedTime timestamp(4) NOT NULL,
@@ -95,26 +95,26 @@ CREATE TABLE FP_DeviceCode (
   UNIQUE KEY UK_DeviceCode_DeviceID (DeviceCode,DeviceID),
   KEY IX_DeviceCode_CreatedDate (CreatedDate),
   KEY IX_DeviceCode_DeviceID (DeviceID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_DeviceFingerprint (
   DeviceFingerprintID bigint unsigned NOT NULL AUTO_INCREMENT,
   DeviceID bigint unsigned NOT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   CreatedTime timestamp(4) NOT NULL,
   InsertTime timestamp(4) NOT NULL,
   PRIMARY KEY (DeviceID,FingerprintCode),
   KEY KEY_DeviceFingerprintID (DeviceFingerprintID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_DeviceType (
   DeviceTypeID int unsigned NOT NULL AUTO_INCREMENT,
-  DeviceTypeName varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  GroupName varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  DeviceTypeName varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  GroupName varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   Created datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (DeviceTypeID),
   UNIQUE KEY UK_DeviceTypeName (DeviceTypeName)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_MappingDevice (
   DeviceID bigint unsigned NOT NULL,
@@ -124,24 +124,24 @@ CREATE TABLE FP_MappingDevice (
   InsertTime datetime(4) NOT NULL,
   PRIMARY KEY (FPDeviceID,DeviceID),
   KEY IX_Association_CTSCustID_DeviceID_AccountID (DeviceID,FPDeviceID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_ProcessedTransaction (
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   PluginID bigint DEFAULT NULL,
-  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   TransStatus bit(16) DEFAULT NULL COMMENT 'Refer Table TransStatus',
   FPSTransID bigint unsigned DEFAULT NULL,
   Flagged smallint DEFAULT NULL,
@@ -151,18 +151,18 @@ CREATE TABLE FP_ProcessedTransaction (
   SubscriberID int DEFAULT NULL,
   CustID int DEFAULT NULL,
   CustSubID int DEFAULT NULL,
-  LoginName_Old varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName_Old varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime_Old timestamp(4) NULL DEFAULT NULL,
-  IP_Old varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent_Old varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  URL_Old varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  IP_Old varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent_Old varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  URL_Old varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   Flagged_Old smallint DEFAULT NULL,
   PRIMARY KEY (TransID,CreatedDate),
   KEY IX_RawTransaction_IsProcessed (IsProcessed),
   KEY IX_RawTransaction_TransTime (CreatedDate),
   KEY IX_RawTransaction_SubscriberName_CreatedDate (SubscriberName,CreatedDate),
   KEY IX_RawTransactionDeviceID (FPDeviceID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(CreatedDate,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
  PARTITION pw202211 VALUES LESS THAN (202212) ENGINE = InnoDB,
@@ -210,21 +210,21 @@ CREATE TABLE FP_ProcessedTransaction (
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 
 CREATE TABLE FP_RawTransaction (
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   PluginID bigint DEFAULT NULL,
-  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   TransStatus bit(16) DEFAULT NULL COMMENT 'Refer Table TransStatus',
   FPSTransID bigint unsigned DEFAULT NULL,
   Flagged smallint DEFAULT NULL,
@@ -234,44 +234,44 @@ CREATE TABLE FP_RawTransaction (
   SubscriberID int DEFAULT NULL,
   CustID int DEFAULT NULL,
   CustSubID int DEFAULT NULL,
-  LoginName_Old varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  LoginName_Old varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   TransTime_Old timestamp(4) NULL DEFAULT NULL,
-  IP_Old varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent_Old varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  URL_Old varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  IP_Old varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent_Old varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  URL_Old varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   Flagged_Old smallint DEFAULT NULL,
   PRIMARY KEY (TransID,CreatedDate),
   KEY IX_RawTransaction_IsProcessed (IsProcessed),
   KEY IX_RawTransaction_SubscriberName (SubscriberName,CreatedDate),
   KEY IX_RawTransactionDeviceID (FPDeviceID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_RawTransaction_Old (
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   PluginID bigint DEFAULT NULL,
-  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   TransStatus bit(16) DEFAULT NULL COMMENT 'Refer Table TransStatus',
   FPSTransID bigint unsigned DEFAULT NULL,
   Flagged smallint DEFAULT NULL,
   IsProcessed tinyint NOT NULL DEFAULT '0',
   TransID bigint unsigned NOT NULL AUTO_INCREMENT,
-  TransKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  TransKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (TransID,CreatedDate),
   KEY IX_RawTransaction_IsProcessed (IsProcessed,TransKey),
   KEY IX_RawTransaction_SubscriberName (SubscriberName,CreatedDate)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(CreatedDate,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
  PARTITION pw202211 VALUES LESS THAN (202212) ENGINE = InnoDB,
@@ -319,31 +319,31 @@ CREATE TABLE FP_RawTransaction_Old (
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
     
 CREATE TABLE FP_RawTransaction_Old_Completed (
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   PluginID bigint DEFAULT NULL,
-  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   TransStatus bit(16) DEFAULT NULL COMMENT 'Refer Table TransStatus',
   FPSTransID bigint unsigned DEFAULT NULL,
   Flagged smallint DEFAULT NULL,
   IsProcessed tinyint NOT NULL DEFAULT '0',
   TransID bigint unsigned NOT NULL AUTO_INCREMENT,
-  TransKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  TransKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (TransID,CreatedDate),
   KEY IX_RawTransaction_IsProcessed (IsProcessed,TransKey),
   KEY IX_RawTransaction_SubscriberName (SubscriberName,CreatedDate)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(CreatedDate,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
  PARTITION pw202211 VALUES LESS THAN (202212) ENGINE = InnoDB,
@@ -391,21 +391,21 @@ CREATE TABLE FP_RawTransaction_Old_Completed (
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
     
 CREATE TABLE FP_RawTransaction_v1 (
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   PluginID bigint DEFAULT NULL,
-  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   TransStatus bit(16) DEFAULT NULL COMMENT 'Refer Table TransStatus',
   FPSTransID bigint unsigned DEFAULT NULL,
   Flagged smallint DEFAULT NULL,
@@ -417,7 +417,7 @@ CREATE TABLE FP_RawTransaction_v1 (
   KEY IX_RawTransaction_IsProcessed (IsProcessed),
   KEY IX_RawTransaction_SubscriberName (SubscriberName,CreatedDate),
   KEY IX_RawTransactionDeviceID (FPDeviceID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(CreatedDate,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
  PARTITION pw202211 VALUES LESS THAN (202212) ENGINE = InnoDB,
@@ -466,11 +466,11 @@ CREATE TABLE FP_RawTransaction_v1 (
     
     
 CREATE TABLE FP_SystemEventStatus (
-  EventName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `Status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  EventName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   LastExecTime datetime DEFAULT NULL,
   PRIMARY KEY (EventName)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_SystemSetting (
   ID int NOT NULL AUTO_INCREMENT,
@@ -484,28 +484,28 @@ CREATE TABLE FP_SystemSetting (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE FP_TransStatus (
-  TransStatusName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  TransStatusName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   StatusValue bit(16) NOT NULL,
-  Notes varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  Notes varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IsTransformed bit(1) DEFAULT NULL,
   CreatedDate datetime DEFAULT NULL,
   PRIMARY KEY (StatusValue)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_Transaction (
   TransID bigint unsigned NOT NULL AUTO_INCREMENT,
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   SubscriberID int DEFAULT NULL,
   AccountID bigint unsigned DEFAULT NULL,
   URLID bigint unsigned DEFAULT NULL,
   DeviceCodeID bigint unsigned DEFAULT NULL,
   DeviceID bigint unsigned DEFAULT NULL,
-  FirstDeviceCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  FirstDeviceCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   DeviceStatus tinyint DEFAULT NULL,
   DeviceFingerprintID bigint unsigned DEFAULT NULL,
-  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   ActionResultID bigint DEFAULT NULL,
   Flagged smallint DEFAULT NULL COMMENT 'captcha & browserless',
@@ -513,29 +513,29 @@ CREATE TABLE FP_Transaction (
   TransStatus bit(16) DEFAULT NULL,
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
   InsertTime timestamp(4) NOT NULL,
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   RawTransID bigint unsigned NOT NULL,
   FPDeviceID bigint unsigned DEFAULT NULL,
   PRIMARY KEY (TransID),
   UNIQUE KEY UN_RawTransID (RawTransID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE FP_Transaction07 (
   TransID bigint unsigned NOT NULL AUTO_INCREMENT,
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   SubscriberID int DEFAULT NULL,
   AccountID bigint unsigned DEFAULT NULL,
   URLID bigint unsigned DEFAULT NULL,
   DeviceCodeID bigint unsigned DEFAULT NULL,
   DeviceID bigint unsigned DEFAULT NULL,
-  FirstDeviceCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  FirstDeviceCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   DeviceStatus tinyint DEFAULT NULL,
   DeviceFingerprintID bigint unsigned DEFAULT NULL,
-  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   ActionResultID bigint DEFAULT NULL,
   Flagged smallint DEFAULT NULL COMMENT 'captcha & browserless',
@@ -551,7 +551,7 @@ CREATE TABLE FP_Transaction07 (
   KEY IX_Transaction07_SubscriberID_TransTime (SubscriberID,TransTime DESC),
   KEY IX_Transaction07_AccountID (AccountID),
   KEY IX_Transaction07DeviceID (FPDeviceID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(CreatedDate,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
  PARTITION pw202211 VALUES LESS THAN (202212) ENGINE = InnoDB,
@@ -608,12 +608,12 @@ CREATE TABLE FP_URL (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE FP_UserAgent (
-  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  UserAgent varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  UserAgentKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  UserAgent varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   BrowserID int unsigned DEFAULT NULL,
   OSID int unsigned DEFAULT NULL,
-  OS varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  Browser varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  OS varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  Browser varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   CreatedDate datetime DEFAULT NULL,
   DeviceTypeID int unsigned DEFAULT NULL,
   Created datetime DEFAULT CURRENT_TIMESTAMP,
@@ -622,14 +622,14 @@ CREATE TABLE FP_UserAgent (
   KEY IX_UserAgent_BrowserID (BrowserID),
   KEY IX_UserAgent_OSID (OSID),
   KEY IX_UserAgent_DeviceTypeID (DeviceTypeID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
       
 CREATE TABLE FP_dba_SP_PerformanceStats (
   row_id int NOT NULL AUTO_INCREMENT,
-  sch_name varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  sp_name varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  sch_name varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  sp_name varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   step_id int DEFAULT NULL,
-  step_name varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  step_name varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   start_time timestamp(4) NULL DEFAULT NULL,
   diff_time int DEFAULT NULL,
   stats json DEFAULT NULL,
@@ -638,24 +638,24 @@ CREATE TABLE FP_dba_SP_PerformanceStats (
   PRIMARY KEY (row_id),
   KEY idx_dba_SP_PerformanceStats_call_time (call_time),
   KEY idx_dba_SP_PerformanceStats_sp_name (sp_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     
 CREATE TABLE ProcessedTransaction_DataTest (
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  SubscriberName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   TransTime timestamp(4) NOT NULL,
   CreatedDate datetime NOT NULL COMMENT 'Date Only',
-  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  DeviceCode varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintCode varchar(620) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  FingerprintMoreInfo varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  IP varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   IPID decimal(50,0) DEFAULT NULL,
   PluginID bigint DEFAULT NULL,
-  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  URL varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  ActionResult varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  InvalidDevice varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   TransStatus bit(16) DEFAULT NULL COMMENT 'Refer Table TransStatus',
   FPSTransID bigint unsigned DEFAULT NULL,
   Flagged smallint DEFAULT NULL,
@@ -665,7 +665,7 @@ CREATE TABLE ProcessedTransaction_DataTest (
   KEY IX_RawTransaction_IsProcessed (IsProcessed),
   KEY IX_RawTransaction_TransTime (CreatedDate),
   KEY IX_RawTransaction_SubscriberName_CreatedDate (SubscriberName,CreatedDate)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(CreatedDate,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
  PARTITION pw202211 VALUES LESS THAN (202212) ENGINE = InnoDB,
@@ -714,11 +714,11 @@ CREATE TABLE ProcessedTransaction_DataTest (
     
     
 CREATE TABLE SystemEventStatus (
-  EventName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `Status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  EventName varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   LastExecTime datetime DEFAULT NULL,
   PRIMARY KEY (EventName)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `FP_SystemSetting` 
 VALUES (1,'DCS_Device_Transform','MinTransId','0','2022-03-09 01:09:09'),
