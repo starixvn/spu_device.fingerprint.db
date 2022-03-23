@@ -105,7 +105,7 @@ BEGIN
 		,	transO.FPSTransID 			
 		, 	(CASE WHEN transD.Flagged = 'human' THEN 1
 			WHEN transD.Flagged = 'bot' THEN 9 
-            ELSE transO.Flagged END) AS Flagged			
+            ELSE 6 END) AS Flagged			
 		,	transO.IsProcessed 		
 		,	transO.TransID 			
 		,	transD.DeviceId 			
@@ -173,14 +173,14 @@ BEGIN
 	   , 	tmp.SubscriberId
 	   , 	tmp.CustId
 	   , 	tmp.CustSubID
-	   , 	tmp.LoginName
-	   , 	tmp.TransTime
-	   , 	tmp.IP
-	   , 	tmp.UserAgent
-	   , 	tmp.URL
-	   , 	tmp.Flagged
+	   , 	tmp.LoginName_Old
+	   , 	tmp.TransTime_Old
+	   , 	tmp.IP_Old
+	   , 	tmp.UserAgent_Old
+	   , 	tmp.URL_Old
+	   , 	tmp.Flagged_Old
    FROM Temp_Transactions2 AS tmp;
-   
+      
    INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
    SELECT	transD.Id
 		,	transD.ServerTransId
