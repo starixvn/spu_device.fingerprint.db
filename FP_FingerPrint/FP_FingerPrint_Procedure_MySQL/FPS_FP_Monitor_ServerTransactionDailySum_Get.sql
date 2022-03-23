@@ -7,8 +7,6 @@ CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Monitor_ServerTransactionDailySu
 )
     SQL SECURITY INVOKER
 BEGIN
-	DECLARE lv_Date DATE;
-    SET lv_Date = CAST(STR_TO_DATE(ip_dmyDate, '%d/%m/%Y') as DATE);
 	/*
 		Created:	20220322@Jonathan.Doan
 		Task :		
@@ -24,6 +22,9 @@ BEGIN
 			- CALL FPS_FP_Monitor_ServerTransactionDailySum_Get('22/03/2022');
 			
 	*/
+    
+	DECLARE lv_Date DATE;
+    SET lv_Date = STR_TO_DATE(ip_dmyDate, '%d/%m/%Y');
    
     SELECT daily.TransDate
 		, daily.SubscriberId
