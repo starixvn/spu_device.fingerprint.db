@@ -40,7 +40,7 @@ BEGIN
     
 	/*******LOG TEST********************/
     INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FPS_FP_Transform_Transaction_Update', ip_TransJson,CONCAT('ip_GroupType:',ip_GroupType), CURRENT_TIMESTAMP();
+    SELECT 'FPS_FP_Transform_DeviceIdentify', ip_TransJson,CONCAT('ip_GroupType:',ip_GroupType), CURRENT_TIMESTAMP();
     /*******LOG TEST********************/
     
     DROP TEMPORARY TABLE IF EXISTS Temp_InputTrans;
