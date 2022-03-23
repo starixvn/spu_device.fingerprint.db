@@ -300,12 +300,13 @@ BEGIN
 			, 	lv_CreatedDate
 			, 	ts.TransKey
 			, 	ts.Flagged    
-	FROM Temp_TransDevice AS tmpTd		
-        INNER JOIN Transaction AS ts ON tmpTd.Id = ts.Id;   
+	FROM Temp_InputTrans AS tmpIt 
+		LEFT JOIN Temp_TransDevice AS tmpTd	ON tmpIt.Id = tmpTd.Id
+        INNER JOIN Transaction AS ts ON tmpIt.Id = ts.Id;   
 	
     DELETE ts
     FROM FPS_FingerPrint.Transaction AS ts
-		INNER JOIN Temp_TransDevice AS tmpTd ON tmpTd.Id = ts.Id; 
+		INNER JOIN Temp_InputTrans AS tmpIt ON tmpIt.Id = ts.Id; 
 
 END$$
 DELIMITER ;
