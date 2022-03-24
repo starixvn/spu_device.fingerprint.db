@@ -286,5 +286,5 @@ BEGIN
     UPDATE FPS_FingerPrint.Offset AS off
 		SET off.OffsetValue = ip_OffsetValue
     WHERE off.Id = ip_OffsetId;
-
-END
+END$$
+DELIMITER ;
