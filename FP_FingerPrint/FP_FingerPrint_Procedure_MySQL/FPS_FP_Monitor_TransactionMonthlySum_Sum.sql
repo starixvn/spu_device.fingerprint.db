@@ -1,8 +1,8 @@
 /*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
-DROP PROCEDURE IF EXISTS `FPS_FP_Report_Monthly_Sum`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Monitor_TransactionMonthlySum_Sum`;
 DELIMITER $$
 
-CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Report_Monthly_Sum`(
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Monitor_TransactionMonthlySum_Sum`(
 		ip_Month VARCHAR(7)
 )
     SQL SECURITY INVOKER
@@ -19,7 +19,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Report_Monthly_Sum('03/2022');
+			- CALL FPS_FP_Monitor_TransactionMonthlySum_Sum('03/2022');
 			
 	*/
    
