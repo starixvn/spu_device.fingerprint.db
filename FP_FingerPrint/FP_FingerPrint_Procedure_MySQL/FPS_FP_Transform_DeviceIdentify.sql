@@ -283,6 +283,11 @@ BEGIN
 	SET dv.ModifiedDate = tmpGd.MaxTransTime;
     
 	/*****UPDATE Trans******************/
+	UPDATE Temp_InputTrans AS tmpIt
+		INNER JOIN Temp_TransDevice AS tmpTd ON tmpIt.Id = tmpTd.Id
+	SET tmpIt.DeviceId = tmpTd.DeviceId
+	WHERE tmpIt.DeviceId IS NULL;      
+    
 	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.ServerTransId
             ,	ts.TransTime
@@ -292,7 +297,7 @@ BEGIN
 			, 	ts.SubscriberId
 			, 	ts.FingerPrintCode
 			, 	ts.CookieCode
-			, 	tmpTd.DeviceId
+			, 	tmpIt.DeviceId
 			, 	ts.ClientIP
 			, 	ts.UserAgent
 			, 	ts.Url
@@ -301,8 +306,7 @@ BEGIN
 			, 	ts.TransKey
 			, 	ts.Flagged    
 	FROM Temp_InputTrans AS tmpIt 
-		LEFT JOIN Temp_TransDevice AS tmpTd	ON tmpIt.Id = tmpTd.Id
-        INNER JOIN Transaction AS ts ON tmpIt.Id = ts.Id;   
+		INNER JOIN Transaction AS ts ON tmpIt.Id = ts.Id;   
 	
     DELETE ts
     FROM FPS_FingerPrint.Transaction AS ts
