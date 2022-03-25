@@ -267,7 +267,7 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpT2
     WHERE tmpT2.FingerPrintCode IS NOT NULL;
     	   
-    INSERT INTO FPS_FingerPrint.ServerTransactionN(SessionKey, ServerTransId, CreatedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionN(SessionKey, ServerTransId, CreatedDate)
     SELECT tmpT2.SessionKey
 		,	tmpT2.Id
         ,	tmpT2.CreatedDate 

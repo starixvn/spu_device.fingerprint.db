@@ -213,13 +213,12 @@ CREATE TABLE ServerTransactionCompleted (
  PARTITION pw202252 VALUES LESS THAN (202301) ENGINE = InnoDB,
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 
-CREATE TABLE ServerTransactionN (
-  Id bigint unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE ServerTransactionN (  
   ServerTransId bigint unsigned NOT NULL,
   SessionKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   ModifiedDate datetime DEFAULT CURRENT_TIMESTAMP,
   CreatedDate datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (Id)
+  PRIMARY KEY (ServerTransId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE RawUserAgent (
