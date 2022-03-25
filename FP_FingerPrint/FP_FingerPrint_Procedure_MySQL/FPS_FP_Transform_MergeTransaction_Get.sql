@@ -32,7 +32,7 @@ BEGIN
     SELECT	trans.Id
 		,	trans.TransKey 
     FROM FPS_FingerPrint.TransactionDevice AS trans 
-	WHERE trans.Retry = ip_Retry
+	WHERE trans.Retry <= ip_Retry
     LIMIT ip_Size;
    
 END$$
