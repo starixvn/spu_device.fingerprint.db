@@ -77,19 +77,21 @@ BEGIN
 		,   SubscriberID			INT 
         ,   SubscriberType		    TINYINT	UNSIGNED	
     );
-    
+    /*
 	DROP TEMPORARY TABLE IF EXISTS Temp_LastLoginTime;
     CREATE TEMPORARY TABLE Temp_LastLoginTime(
 		    SubscriberID	INT
         ,   AccountID		BIGINT UNSIGNED
         ,   LastLoginTime	TIMESTAMP(4)
     );
+    
    
     DROP TEMPORARY TABLE IF EXISTS Temp_LastLoginTimeCTSCust;
     CREATE TEMPORARY TABLE Temp_LastLoginTimeCTSCust(
 		    CTSCustID		BIGINT UNSIGNED
         ,   LastLoginTime	TIMESTAMP(4)
     );
+    */
    
     SELECT DATE(VValue)
     INTO lv_SysMinCreatedDate
@@ -172,7 +174,7 @@ BEGIN
     DELETE 	trt
     FROM	Temp_RawTransaction AS trt
     WHERE 	trt.AccountID IS NULL;       
-
+	/*
     INSERT INTO Temp_LastLoginTime(SubscriberID, AccountID, LastLoginTime)   
     SELECT  acc.SubscriberID
         ,   acc.AccountID
@@ -185,7 +187,7 @@ BEGIN
     SELECT  tll.AccountID
         ,   tll.LastLoginTime
     FROM Temp_LastLoginTime AS tll;
-
+	*/
     INSERT IGNORE INTO  FPSTesting.FP_Transaction(RawTransID, LoginName, TransTime,  AccountID, URLID, UserAgentKey , IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, DeviceCode, FingerprintCode
     , FPDeviceID, SubscriberID)
    	SELECT  trt.TransID
