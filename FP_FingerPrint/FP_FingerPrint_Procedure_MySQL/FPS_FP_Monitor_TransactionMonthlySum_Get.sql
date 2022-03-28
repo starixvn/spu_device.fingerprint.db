@@ -27,7 +27,7 @@ BEGIN
     SET lv_FirstDate = STR_TO_DATE(CONCAT('01/',ip_Month), '%d/%m/%Y');
 
    -- Server monthly sum
-    SELECT daily.TransMonth
+    SELECT daily.TransMonth as TransDate
 		, daily.SubscriberId
 		, sub.Name as SubscriberName
         , daily.TotalTrans

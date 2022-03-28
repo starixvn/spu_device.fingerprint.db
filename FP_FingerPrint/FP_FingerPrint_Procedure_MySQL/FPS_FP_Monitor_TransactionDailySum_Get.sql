@@ -3,7 +3,7 @@ DROP PROCEDURE IF EXISTS `FPS_FP_Monitor_TransactionDailySum_Get`;
 DELIMITER $$
 
 CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Monitor_TransactionDailySum_Get`(
-		ip_dmyDate VARCHAR(10)
+		ip_mdyDate VARCHAR(10)
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -24,7 +24,7 @@ BEGIN
 	*/
     
 	DECLARE lv_Date DATE;
-    SET lv_Date = STR_TO_DATE(ip_dmyDate, '%d/%m/%Y');
+    SET lv_Date = STR_TO_DATE(ip_mdyDate, '%m/%d/%Y');
    
    -- Server daily sum
     SELECT daily.TransDate
