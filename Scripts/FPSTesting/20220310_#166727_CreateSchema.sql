@@ -150,11 +150,11 @@ CREATE TABLE FP_ProcessedTransaction (
   UserAgent_Old varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   URL_Old varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   Flagged_Old smallint DEFAULT NULL,
+  TransKey VARCHAR(200),
   PRIMARY KEY (TransID,CreatedDate),
-  KEY IX_RawTransaction_IsProcessed (IsProcessed),
   KEY IX_RawTransaction_TransTime (CreatedDate),
   KEY IX_RawTransaction_SubscriberName_CreatedDate (SubscriberName,CreatedDate),
-  KEY IX_RawTransactionDeviceID (FPDeviceID)
+  KEY IX_RawTransaction_CreatedDateTransKey(CreatedDate,TransKey)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(CreatedDate,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
@@ -233,6 +233,7 @@ CREATE TABLE FP_RawTransaction (
   UserAgent_Old varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   URL_Old varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   Flagged_Old smallint DEFAULT NULL,
+  TransKey VARCHAR(200),
   PRIMARY KEY (TransID,CreatedDate),
   KEY IX_RawTransaction_IsProcessed (IsProcessed),
   KEY IX_RawTransaction_SubscriberName (SubscriberName,CreatedDate),
@@ -332,7 +333,7 @@ CREATE TABLE FP_RawTransaction_Old_Completed (
   Flagged smallint DEFAULT NULL,
   IsProcessed tinyint NOT NULL DEFAULT '0',
   TransID bigint unsigned NOT NULL AUTO_INCREMENT,
-  TransKey varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  TransKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (TransID,CreatedDate),
   KEY IX_RawTransaction_IsProcessed (IsProcessed,TransKey),
   KEY IX_RawTransaction_SubscriberName (SubscriberName,CreatedDate)

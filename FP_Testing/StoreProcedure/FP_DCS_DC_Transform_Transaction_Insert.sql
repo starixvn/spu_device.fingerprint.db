@@ -213,7 +213,7 @@ BEGIN
     #================================================================
     
 	INSERT IGNORE INTO FPSTesting.FP_ProcessedTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, UserAgent , IP, IPID, Flagged, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, IsProcessed, TransID
-    , FPDeviceID, SubscriberID,CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old,UserAgent_Old, URL_Old,Flagged_Old)
+    , FPDeviceID, SubscriberID,CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old,UserAgent_Old, URL_Old,Flagged_Old, TransKey)
 	SELECT  rt.LoginName
         ,   rt.SubscriberName
         ,   rt.TransTime
@@ -242,6 +242,7 @@ BEGIN
         ,	rt.UserAgent_Old
         , 	rt.URL_Old
         ,	rt.Flagged_Old
+        ,	rt.TransKey
 	FROM FPSTesting.FP_RawTransaction AS rt
 	    INNER JOIN	Temp_RawTransaction	AS tmp_rm ON	rt.TransID = tmp_rm.TransID AND rt.CreatedDate = tmp_rm.CreatedDate;
         
