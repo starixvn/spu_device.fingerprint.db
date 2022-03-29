@@ -196,7 +196,7 @@ BEGIN
 	   , 	tmp.Flagged_Old
    FROM Temp_Transactions2 AS tmp;
       
-   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged, Retry)
    SELECT	transD.Id
 		,	transD.ServerTransId
 		,	transD.CustId
@@ -214,6 +214,7 @@ BEGIN
 		,	transD.CreatedDate
 		,	transD.TransKey
 		,	transD.Flagged 
+		,	transD.Retry
 	FROM  Temp_TransactionsDevice AS transD 
 		INNER JOIN Temp_Transactions2 AS tmp ON transD.Id = tmp.Id;
    

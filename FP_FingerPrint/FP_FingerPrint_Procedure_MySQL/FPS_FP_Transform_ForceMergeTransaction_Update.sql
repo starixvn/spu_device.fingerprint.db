@@ -127,7 +127,7 @@ BEGIN
    FROM Temp_TransactionsDevice transD   
    INNER JOIN FPS_FingerPrint.Subscribers sub ON sub.Id = transD.SubscriberId;
     
-   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, FingerPrintCode,	CookieCode,	DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate,	TransKey, Flagged)
+   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, FingerPrintCode,	CookieCode,	DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate,	TransKey, Flagged, Retry)
    SELECT transD.Id	
 	,	transD.ServerTransId
 	,	transD.CustId
@@ -145,6 +145,7 @@ BEGIN
 	,	transD.CreatedDate
 	,	transD.TransKey
 	,	transD.Flagged    
+	,	transD.Retry    
 	FROM  Temp_TransactionsDevice transD;
     
 	DELETE transD FROM FPS_FingerPrint.TransactionDevice transD
