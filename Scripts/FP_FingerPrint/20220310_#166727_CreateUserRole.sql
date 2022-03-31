@@ -29,7 +29,7 @@ GRANT `FPSWriter`@`%` TO `fpsWebAdmin`@`%`;
 CREATE USER 'fpsService'@'%' IDENTIFIED WITH mysql_native_password BY 'xxxxx';
 GRANT `FPSReader`@`%`  TO `fpsService`@`%`;
 CREATE USER 'fpsServiceAdmin'@'%' IDENTIFIED WITH mysql_native_password BY 'xxxxx';
-GRANT `FPSWriter`@`%` TO `fpsServiceAdmin`@`%`;
+GRANT `FPSWriter`@`%`,`CTSAdminWriter`@`%` TO `fpsServiceAdmin`@`%`;
 
 CREATE USER 'fpsAPI'@'%' IDENTIFIED WITH mysql_native_password BY 'xxxxx';
 GRANT `FPSReader`@`%`  TO `fpsAPI`@`%`;
