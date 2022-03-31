@@ -164,7 +164,7 @@ BEGIN
     FROM Temp_RawTransaction AS trt
         INNER JOIN	FPSTesting.FP_Account AS ac ON trt.SubscriberID = ac.SubscriberID  AND trt.LoginName = ac.LoginName
 	    LEFT JOIN	FPSTesting.FP_URL	AS ur ON trt.URLDetails = ur.URLDetails;
-	SELECT 1;
+	
     UPDATE Temp_RawTransaction AS trt
         INNER JOIN	Temp_RawTransactionInfo AS info ON trt.TransID = info.TransID  
     SET     trt.AccountID = info.AccountID
