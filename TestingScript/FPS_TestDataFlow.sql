@@ -31,7 +31,7 @@ WHERE Id IN (1,2) ;
 /* TRUNCATE and RESET FPSTesting
 
 TRUNCATE TABLE FPSTesting.FP_Account;
-TRUNCATE TABLE FPSTesting.FP_AccountLastLoginTimeProcess;
+
 TRUNCATE TABLE FPSTesting.FP_ActionResult;
 TRUNCATE TABLE FPSTesting.FP_AssociationNew;
 TRUNCATE TABLE FPSTesting.FP_dba_SP_PerformanceStats;
@@ -42,11 +42,11 @@ TRUNCATE TABLE FPSTesting.FP_DeviceType;
 TRUNCATE TABLE FPSTesting.FP_MappingDevice;
 TRUNCATE TABLE FPSTesting.FP_ProcessedTransaction;
 TRUNCATE TABLE FPSTesting.FP_RawTransaction;
-TRUNCATE TABLE FPSTesting.FP_RawTransaction;
 TRUNCATE TABLE FPSTesting.FP_Transaction;
 TRUNCATE TABLE FPSTesting.FP_Transaction07;
 TRUNCATE TABLE FPSTesting.FP_URL;
 TRUNCATE TABLE FPSTesting.FP_UserAgent;
+TRUNCATE FPS_FingerPrint.Test_LOG;
 
 UPDATE FPSTesting.FP_SystemSetting
 SET VValue = 0
@@ -56,7 +56,91 @@ UPDATE FPSTesting.FP_SystemSetting
 SET VValue = '2020-01-01'
 WHERE Id IN (2) ;
 
+SELECT * FROM FP_Transaction07;
+SELECT * FROM FP_Transaction;
+SELECT TransId, t.* FROM FP_RawTransaction t;
+SELECT * FROM FP_SystemSetting;
+SELECT * FROM FPS_FingerPrint.Test_LOG ORDER BY ID DESC;
+SELECT * FROM FPS_FingerPrint.Test_LOG WHERE SPName LIKE '%FP_DCS_DC_Transform_Device%'
+
+CALL FPS_FingerPrint.Test_LOG
 */
+CALL FP_DCS_DC_Transform_RawTrans_GetPackage(0,10,5); --> n goi
+
+Get ---
+	(7	20) --unsub, userAgent, TransactionInsert 
+	(21	29) --unsub, userAgent, TransactionInsert
+Get ---
+
+INSERT INTO FP_RawTransaction SELECT * FROM zzzTestData_FP_RawTransaction;
+
+INSERT INTO `FPSTesting`.`FP_RawTransaction`
+(`LoginName`,
+`SubscriberName`,
+`TransTime`,
+`CreatedDate`,
+`DeviceCode`,
+`FingerprintCode`,
+`FingerprintMoreInfo`,
+`UserAgent`,
+`IP`,
+`IPID`,
+`PluginID`,
+`URL`,
+`Action`,
+`ActionResult`,
+`InvalidDevice`,
+`TransStatus`,
+`FPSTransID`,
+`Flagged`,
+`IsProcessed`,
+`FPDeviceID`,
+`SubscriberID`,
+`CustID`,
+`CustSubID`,
+`LoginName_Old`,
+`TransTime_Old`,
+`IP_Old`,
+`UserAgent_Old`,
+`URL_Old`,
+`Flagged_Old`,
+`TransKey`)
+SELECT `LoginName`,
+`SubscriberName`,
+`TransTime`,
+`CreatedDate`,
+`DeviceCode`,
+`FingerprintCode`,
+`FingerprintMoreInfo`,
+`UserAgent`,
+`IP`,
+`IPID`,
+`PluginID`,
+`URL`,
+`Action`,
+`ActionResult`,
+`InvalidDevice`,
+`TransStatus`,
+`FPSTransID`,
+`Flagged`,
+`IsProcessed`,
+`FPDeviceID`,
+`SubscriberID`,
+`CustID`,
+`CustSubID`,
+`LoginName_Old`,
+`TransTime_Old`,
+`IP_Old`,
+`UserAgent_Old`,
+`URL_Old`,
+`Flagged_Old`,
+`TransKey`
+FROM FPSTesting.zzzTestData_FP_RawTransaction;
+
+
+CREATE TABLE zzzTestData_FP_RawTransaction SELECT * FROM FP_RawTransaction;
+TRUNCATE TABLE FP_ProcessedTransaction;
+CALL FPSTesting.FP_DCS_DC_Transform_Transaction_Insert(7,29); '209', 'FP_DCS_DC_Transform_Transaction_Insert', NULL, 'ip_FromTransID:7; ip_ToTransID:32', '2022-03-31 02:40:47'
 
 SELECT * FROM FPS_FingerPrint.Offset;
 SELECT * FROM FPS_FingerPrint.RawUserAgent;
