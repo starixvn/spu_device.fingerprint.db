@@ -1,0 +1,109 @@
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+DROP PROCEDURE IF EXISTS `FPS_FP_Detect_RawUserAgent_Update`;
+DELIMITER $$
+
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Detect_RawUserAgent_Update`(
+		ip_RawUserAgentJson	LONGTEXT
+    ,   ip_OffsetId		INT
+	,	ip_OffsetValue	BIGINT
+)
+    SQL SECURITY INVOKER
+BEGIN
+	/*
+		Created:	20220406@Jonathan.Doan
+		Task :		
+		DB:			FPS_FingerPrint
+		Original:
+
+		Revisions:
+			- 20220406@Jonathan.Doan: Created [Redmine ID: #162668]
+            
+		Param's Explanation (filtered by):	
+
+		Example:
+			- CALL FPS_FP_Detect_RawUserAgent_Update(100,4);
+			
+	*/
+    DECLARE lv_offsetValue BIGINT;
+    
+    /*******LOG TEST********************/
+    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
+    SELECT 'FPS_FP_Detect_RawUserAgent_Update', ip_RawUserAgentJson,CONCAT('ip_OffsetId:',ip_OffsetId,'; ip_OffsetValue:',ip_OffsetValue), CURRENT_TIMESTAMP();
+    /*******LOG TEST********************/
+    
+    
+	DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent; 
+    
+	/* Create Temporary table */
+	CREATE TEMPORARY TABLE Temp_RawUserAgent(
+			Id 					BIGINT UNSIGNED PRIMARY KEY        
+		,	ClientType 			VARCHAR(100) NULL
+		,	ClientName 			VARCHAR(100) NULL
+		,	ClientVersion 		VARCHAR(100) NULL
+		,	OSName 				VARCHAR(100) NULL
+		,	OSShortName 		VARCHAR(100) NULL
+		,	OSVersion 			VARCHAR(100) NULL
+		,	OSPlatform 			VARCHAR(100) NULL
+		,	Device 				VARCHAR(100) NULL
+		,	Brand 				VARCHAR(100) NULL
+		,	Model 				VARCHAR(100) NULL
+		,	BotName 			VARCHAR(100) NULL
+		,	BotCategory 		VARCHAR(100) NULL
+    );
+    
+   INSERT INTO Temp_RawUserAgent(Id, ClientType, ClientName, ClientVersion, OSName, OSShortName, OSVersion, OSPlatform, Device, Brand, Model, BotName, BotCategory)
+	SELECT	rt.Id
+		,	rt.ClientType
+		,	rt.ClientName
+		,	rt.ClientVersion
+		,	rt.OSName
+		,	rt.OSShortName
+		,	rt.OSVersion
+		,	rt.OSPlatform
+		,	rt.Device
+		,	rt.Brand
+		,	rt.Model	
+        ,	rt.BotName	
+        ,	rt.BotCategory
+	FROM	JSON_TABLE(
+			ip_RawUserAgentJson,
+			 "$[*]" COLUMNS(
+								Id					BIGINT			PATH "$.Id"       
+							,	ClientType			VARCHAR(100) 	PATH "$.ClientType"                        
+							,	ClientName			VARCHAR(100) 	PATH "$.ClientName"                        
+							,	ClientVersion		VARCHAR(100) 	PATH "$.ClientVersion"                        
+							,	OSName				VARCHAR(100) 	PATH "$.OSName"                        
+							,	OSShortName			VARCHAR(100) 	PATH "$.OSShortName"                        
+							,	OSVersion			VARCHAR(100) 	PATH "$.OSVersion"                        
+							,	OSPlatform			VARCHAR(100) 	PATH "$.OSPlatform"                        
+							,	Device				VARCHAR(100) 	PATH "$.Device"                        
+							,	Brand				VARCHAR(100) 	PATH "$.Brand"                        
+							,	Model				VARCHAR(100) 	PATH "$.Model"                        
+							,	BotName				VARCHAR(100) 	PATH "$.BotName"                        
+							,	BotCategory			VARCHAR(100) 	PATH "$.BotCategory"                        
+				)
+		   ) AS  rt;    
+    
+    
+	/* Process data */
+    UPDATE FPS_FingerPrint.RawUserAgent ua
+		INNER JOIN Temp_RawUserAgent AS tmp ON ua.Id = tmp.Id
+    SET ua.ClientType = tmp.ClientType,
+		ua.ClientName = tmp.ClientName,
+		ua.ClientVersion = tmp.ClientVersion,
+		ua.OSName = tmp.OSName,
+		ua.OSShortName = tmp.OSShortName,
+		ua.OSVersion = tmp.OSVersion,
+		ua.OSPlatform = tmp.OSPlatform,
+		ua.Device = tmp.Device,
+		ua.Brand = tmp.Brand,
+		ua.Model = tmp.Model,
+		ua.BotName = tmp.BotName,
+		ua.BotCategory = tmp.BotCategory;
+    
+    UPDATE FPS_FingerPrint.Offset AS off
+		SET off.OffsetValue = ip_OffsetValue
+    WHERE off.Id = ip_OffsetId;
+          
+END$$
+DELIMITER ;
