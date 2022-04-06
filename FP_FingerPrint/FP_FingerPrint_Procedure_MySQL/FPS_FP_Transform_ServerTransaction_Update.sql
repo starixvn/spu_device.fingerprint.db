@@ -36,9 +36,6 @@ BEGIN
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;  
     DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction2;
-	DROP TEMPORARY TABLE IF EXISTS Temp_ClientTransactionDailySum;
-	DROP TEMPORARY TABLE IF EXISTS Temp_ServerTransactionDailySum;
-    
 	-- Create Temporary table
 
 	CREATE TEMPORARY TABLE Temp_RawTransaction(
@@ -50,6 +47,7 @@ BEGIN
 		,	SubscriberId 		INT DEFAULT NULL
 		,	TransTime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
+		,	UserAgentId			BIGINT DEFAULT NULL
 		,	UserAgent 			VARCHAR(500) DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
 		,	Action 				VARCHAR(100) DEFAULT NULL		
@@ -73,6 +71,7 @@ BEGIN
 		,	SubscriberId 		INT DEFAULT NULL
 		,	TransTime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
+		,	UserAgentId			BIGINT DEFAULT NULL
 		,	UserAgent 			VARCHAR(500) DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
 		,	Action 				VARCHAR(100) DEFAULT NULL		
@@ -85,24 +84,8 @@ BEGIN
         
         ,	INDEX Temp_RawTransaction_FingerPrintCode_Index (FingerPrintCode)
     );    
-    
-	CREATE TEMPORARY TABLE Temp_ClientTransactionDailySum(
-			SubscriberId 		INT DEFAULT NULL
-		,	TransDate 			DATE DEFAULT NULL	
-		,	CountTrans 			TINYINT DEFAULT 0
-        
-        ,	INDEX Temp_ClientTransactionDailySum_Index (SubscriberId, TransDate)
-    );    
-    
-	CREATE TEMPORARY TABLE Temp_ServerTransactionDailySum(
-			SubscriberId 		INT DEFAULT NULL
-		,	TransDate 			DATE DEFAULT NULL	
-		,	CountTrans 			TINYINT DEFAULT 0
-        
-        ,	INDEX Temp_ServerTransactionDailySum_Index (SubscriberId, TransDate)
-    );
-    
-   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, Url, TransKey, Retry, Action, CreatedDate)
+   
+   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, UserAgent, Url, TransKey, Retry, Action, CreatedDate)
 	SELECT	rt.Id
 		,	rt.SessionKey
 		,	rt.CustId
@@ -111,6 +94,7 @@ BEGIN
 		,	rt.SubscriberId
 		,	rt.TransTime
 		,	rt.ClientIP
+		,	rt.UserAgentId
 		,	rt.UserAgent
 		,	rt.Url	
         ,	rt.TransKey	
@@ -128,6 +112,7 @@ BEGIN
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
 							,	TransTime				DATETIME(4)	 	PATH "$.TransTime"
                             ,	ClientIP				VARCHAR(45)		PATH "$.ClientIP"
+                            ,	UserAgentId				BIGINT			PATH "$.UserAgentId"
                             ,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
 							,	Url						VARCHAR(100) 	PATH "$.Url"
 							,	TransKey				VARCHAR(200) 	PATH "$.TransKey"
@@ -136,7 +121,7 @@ BEGIN
 				)
 		   ) AS  rt;    
     
-   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieCode, Flagged, CreatedDate)
+   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, UserAgent, Url, TransKey, Retry, Action, FingerPrintCode, CookieCode, Flagged, CreatedDate)
    SELECT tmpTs.Id
    , 	tmpTs.SessionKey
    , 	tmpTs.CustId
@@ -145,6 +130,7 @@ BEGIN
    , 	tmpTs.SubscriberId
    , 	tmpTs.TransTime
    , 	tmpTs.ClientIP
+   , 	tmpTs.UserAgentId
    , 	tmpTs.UserAgent
    , 	IFNULL(tmpTs.Url, fp.Url)
    , 	tmpTs.TransKey
@@ -169,6 +155,7 @@ BEGIN
 		,	CookieCode
 		,	TransTime
 		,	ClientIP
+		,	UserAgentId
 		,	UserAgent
 		,	Url
 		,	Action		
@@ -185,6 +172,7 @@ BEGIN
 		,	tmpTs2.CookieCode
         ,	tmpTs2.TransTime
         ,	tmpTs2.ClientIP
+        ,	tmpTs2.UserAgentId
         ,	tmpTs2.UserAgent
         ,	tmpTs2.Url
         ,	tmpTs2.Action        
@@ -194,7 +182,7 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpTs2
     WHERE tmpTs2.FingerPrintCode IS NOT NULL;
 
-	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
+	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, UserAgent, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
     SELECT	rt.Id
 		,	rt.SessionKey
         ,	rt.CustId
@@ -203,6 +191,7 @@ BEGIN
         ,	rt.SubscriberId
         ,	rt.TransTime
         ,	rt.ClientIP
+        ,	rt.UserAgentId
         ,	rt.UserAgent
         ,	rt.Url
         ,	rt.ModifiedDate
@@ -214,24 +203,10 @@ BEGIN
 		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON rt.Id = tmpT2.Id 
     WHERE tmpT2.FingerPrintCode IS NOT NULL;
     
-    
-    INSERT INTO Temp_ServerTransactionDailySum(SubscriberId, TransDate, CountTrans)
-	SELECT tmpT2.SubscriberId, CAST(tmpT2.TransTime as DATE) as TransDate, COUNT(tmpT2.SubscriberId) as CountTrans
-	FROM Temp_RawTransaction2 tmpT2
-	WHERE tmpT2.FingerPrintCode IS NOT NULL
-	GROUP BY tmpT2.SubscriberId, TransDate;
-    
-    UPDATE FPS_FingerPrint.ServerTransactionDailySum as sum
-		INNER JOIN Temp_ServerTransactionDailySum AS tmp ON sum.SubscriberId = tmp.SubscriberId 
-														AND sum.TransDate = tmp.TransDate
-	SET sum.TotalValidTrans = sum.TotalValidTrans + tmp.CountTrans,
-		sum.ModifiedDate = NOW();
-    
-    
-    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, FingerPrintCode, UserAgentCode, CookieCode, SubscriberId, SessionKey, Flagged, Url, TransTime, CreatedDate)
+    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, FingerPrintCode, CookieCode, SubscriberId, SessionKey, Flagged, Url, TransTime, CreatedDate)
     SELECT	fp.Id
 		,	fp.FingerPrintCode
-		,	fp.UserAgentCode
+                    
 		,	fp.CookieCode
 		,	fp.SubscriberId
 		,	fp.SessionKey
@@ -242,20 +217,6 @@ BEGIN
     FROM FPS_FingerPrint.ClientTransaction AS fp
 		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON tmpT2.SessionKey = fp.SessionKey;
         
-
-    INSERT INTO Temp_ClientTransactionDailySum(SubscriberId, TransDate, CountTrans)
-	SELECT tmpT2.SubscriberId, CAST(tmpT2.TransTime as DATE) as TransDate, COUNT(tmpT2.SubscriberId) as CountTrans
-	FROM Temp_RawTransaction2 tmpT2
-	WHERE tmpT2.FingerPrintCode IS NOT NULL
-	GROUP BY tmpT2.SubscriberId, TransDate;
-    
-    UPDATE FPS_FingerPrint.ClientTransactionDailySum as sum
-		INNER JOIN Temp_ClientTransactionDailySum AS tmp ON sum.SubscriberId = tmp.SubscriberId 
-														AND sum.TransDate = tmp.TransDate
-	SET sum.TotalValidTrans = sum.TotalValidTrans + tmp.CountTrans,
-		sum.ModifiedDate = NOW();
-    
-    
     DELETE fp FROM FPS_FingerPrint.ClientTransaction AS fp
 		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON tmpT2.SessionKey = fp.SessionKey;   
     

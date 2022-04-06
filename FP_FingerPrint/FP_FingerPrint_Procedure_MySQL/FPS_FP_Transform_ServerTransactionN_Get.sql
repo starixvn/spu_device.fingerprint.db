@@ -43,6 +43,7 @@ BEGIN
         , 	trans.SubscriberId
         , 	trans.TransTime
         , 	trans.ClientIP
+        , 	trans.UserAgentId
         , 	trans.UserAgent
         , 	trans.Url
         , 	trans.TransKey

@@ -36,8 +36,10 @@ BEGIN
 		,	SubscriberId				INT						NOT NULL
 		,	SessionKey					VARCHAR(200)	 		NOT NULL
 		,	TransTime					DATETIME(4)	 			NULL		
-		,	ClientIp					VARCHAR(45)				NULL		
+		,	ClientIp					VARCHAR(45)				NULL	
+		,	UserAgentId					BIGINT					NULL
 		,	UserAgent					VARCHAR(500)			NULL
+		,	UserAgentCode				VARCHAR(200)			NULL
 		,	Url							VARCHAR(100)			NULL
 		,	Action						VARCHAR(100)			NULL
 		,	TransKey					VARCHAR(500)			NULL
@@ -52,6 +54,7 @@ BEGIN
         ,	TransTime
         ,	ClientIp
         ,	UserAgent
+        ,	UserAgentCode
         ,	Url
         ,	Action
         ,	TransKey
@@ -63,6 +66,7 @@ BEGIN
 		,	tmp.TransTime
         ,	tmp.ClientIp
         ,	tmp.UserAgent
+        ,	tmp.UserAgentCode
         ,	tmp.Url
         ,	tmp.Action
         ,	tmp.TransKey
@@ -77,6 +81,7 @@ BEGIN
 				,	TransTime				DATETIME(4)		PATH "$.TransTime"
 				,	ClientIp				VARCHAR(45)		PATH "$.ClientIp"
 				,	UserAgent				VARCHAR(500)	PATH "$.UserAgent"
+				,	UserAgentCode			VARCHAR(200)	PATH "$.UserAgentCode"
 				,	Url						VARCHAR(100) 	PATH "$.Url"
 				,	Action					VARCHAR(100) 	PATH "$.Action"
 				,	TransKey				VARCHAR(200) 	PATH "$.TransKey"
@@ -84,6 +89,21 @@ BEGIN
 				,	SubAccId				BIGINT		 	PATH "$.SubAccId"
 				)
 		   ) AS  tmp; 
+           
+     
+	
+    INSERT INTO FPS_FingerPrint.RawUserAgent (UserAgentCode, UserAgent, CreatedDate, ModifiedDate)	
+	SELECT	tmp.UserAgentCode
+		,	tmp.UserAgent
+        ,	NOW() AS CreatedDate
+        ,	NOW() AS ModifiedDate
+	FROM Temp_Transactions tmp
+		LEFT JOIN FPS_FingerPrint.RawUserAgent ua ON ua.UserAgentCode = tmp.UserAgentCode
+	WHERE ua.Id IS NULL;
+    
+    UPDATE Temp_Transactions tmp
+		LEFT JOIN FPS_FingerPrint.RawUserAgent ua ON ua.UserAgentCode = tmp.UserAgentCode
+	SET tmp.UserAgentId = ua.Id;
 		
     INSERT INTO FPS_FingerPrint.ServerTransaction(
 						LoginName
@@ -91,6 +111,7 @@ BEGIN
                     ,	SessionKey
 					,	TransTime
 					,	ClientIP
+					,	UserAgentId
 					,	UserAgent
                     ,	Url                    
                     ,	Action                    
@@ -104,6 +125,7 @@ BEGIN
                      ,	tmp.SessionKey
 					,	tmp.TransTime
 					,	tmp.ClientIp
+					,	tmp.UserAgentId
 					,	tmp.UserAgent
                     ,	tmp.Url                   
                     ,	tmp.Action                   
