@@ -20,7 +20,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","UserAgentCode":"fdsafasfasf","UserAgentAttribute":"dddddd","CookieCode":"cookief5d0e59645d09cfb56690a7b0916","Flagged":"Human","Url":"fdsafdsaf"}]');
+			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","CookieCode":"cookief5d0e59645d09cfb56690a7b0916","Flagged":"Human","Url":"fdsafdsaf"}]');
 			
 	*/
     
@@ -34,24 +34,18 @@ BEGIN
 			FingerPrintCode				VARCHAR(200) 	NULL	
 		,	SessionKey					VARCHAR(100) 	NULL
 		,	SubscriberId				INT	 			NULL
-		,	Attribute					LONGTEXT	 	NULL		
-		,	UserAgentCode				VARCHAR(100)	NULL		
-		,	UserAgentAttribute			LONGTEXT		NULL
+		,	Attribute					LONGTEXT	 	NULL
 		,	CookieCode 					VARCHAR(64)		NULL		
         ,	Flagged						VARCHAR(50)		NULL		
         ,	Url							VARCHAR(100)	NULL
 		,	TransTime					DATETIME(4)	 	NULL	
-		
-		,	INDEX	IX_Temp_FingerPrint_UserAgentCode(UserAgentCode)
     );     
     
-    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, Attribute, UserAgentCode, UserAgentAttribute, CookieCode, Flagged, Url, TransTime)
+    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, Attribute, CookieCode, Flagged, Url, TransTime)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SessionKey
 		,	tmp.SubscriberId
 		,	tmp.Attribute
-        ,	tmp.UserAgentCode
-        ,	tmp.UserAgentAttribute
         ,	tmp.CookieCode
         ,	tmp.Flagged
         ,	tmp.Url
@@ -63,24 +57,12 @@ BEGIN
 							,	SessionKey				VARCHAR(100) 	PATH "$.SessionKey"   
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
 							,	Attribute				LONGTEXT		PATH "$.Attribute"
-							,	UserAgentCode			VARCHAR(100)	PATH "$.UserAgentCode"
-							,	UserAgentAttribute		LONGTEXT		PATH "$.UserAgentAttribute"
 							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"							
                             ,	Flagged					VARCHAR(50) 	PATH "$.Flagged"
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
                             ,	TransTime				DATETIME(4)		PATH "$.TransTime"
 				)
 		   ) AS  tmp; 
- 
-    INSERT INTO FPS_FingerPrint.RawUserAgent (UserAgentCode, Attribute, CreatedDate, ModifiedDate)	
-	SELECT	tmp.UserAgentCode
-		,	tmp.UserAgentAttribute
-        ,	NOW() AS CreatedDate
-        ,	NOW() AS ModifiedDate
-	FROM FPS_FingerPrint.RawUserAgent ua 
-		RIGHT JOIN Temp_FingerPrint tmp ON ua.UserAgentCode = tmp.UserAgentCode
-	ON DUPLICATE KEY UPDATE ModifiedDate = NOW();
-    
     
     INSERT INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, Attribute, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode
@@ -91,10 +73,9 @@ BEGIN
 	ON DUPLICATE KEY UPDATE ModifiedDate = NOW();
     
     
-    INSERT INTO FPS_FingerPrint.ClientTransaction(FingerPrintCode, SubscriberId, UserAgentCode, CookieCode, SessionKey, Flagged, Url, TransTime, CreatedDate, ModifiedDate)
+    INSERT INTO FPS_FingerPrint.ClientTransaction(FingerPrintCode, SubscriberId, CookieCode, SessionKey, Flagged, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SubscriberId
-		,	tmp.UserAgentCode
 		,	tmp.CookieCode
 		,	tmp.SessionKey
 		,	tmp.Flagged

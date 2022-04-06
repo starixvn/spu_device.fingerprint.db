@@ -60,6 +60,7 @@ BEGIN
 		,	DeviceId 		BIGINT
 		,	TransTime 		DATETIME(4) 
 		,	ClientIP 		VARCHAR(45) 
+		,	UserAgentId		BIGINT
 		,	UserAgent 		VARCHAR(500) 
 		,	Url 			VARCHAR(100) 
 		,	Action 			VARCHAR(100) 
@@ -70,7 +71,7 @@ BEGIN
         , 	INDEX IX_Temp_Transactions_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
+    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
     SELECT  td.Id
     , td.ServerTransId
     , td.CustId
@@ -82,6 +83,7 @@ BEGIN
     , td.DeviceId
     , td.TransTime
     , td.ClientIP
+    , td.UserAgentId
     , td.UserAgent
     , td.Url
     , td.Action
@@ -102,7 +104,8 @@ BEGIN
 		,	DeviceCode 			VARCHAR(32) 
 		,	FingerprintCode 	VARCHAR(620) 
 		,	FingerprintMoreInfo VARCHAR(250) 
-		,	UserAgent 			VARCHAR(1000) 
+		,	UserAgentId			BIGINT 
+		,	UserAgent 			VARCHAR(500) 
 		,	IP 					VARCHAR(50) 
 		,	IPID 				DECIMAL(50,0) 
 		,	PluginID 			BIGINT 
@@ -128,7 +131,7 @@ BEGIN
         ,	TransKey			VARCHAR(200)
     );
     
-    INSERT INTO Temp_Transactions2(Id, Id_Old, LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, Flagged, IsProcessed, TransID, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old,TransKey)
+    INSERT INTO Temp_Transactions2(Id, Id_Old, LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgentId, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, Flagged, IsProcessed, TransID, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old,TransKey)
 	SELECT	transD.Id
 		,	transO.TransID
 		,	transD.LoginName 			
@@ -138,6 +141,7 @@ BEGIN
 		,	transO.DeviceCode 			
 		,	transO.FingerprintCode 	
 		,	transO.FingerprintMoreInfo 
+		,	transD.UserAgentId 			
 		,	transD.UserAgent 			
 		,	transD.ClientIP 					
 		,	transO.IPID 				
@@ -167,7 +171,7 @@ BEGIN
 	FROM Temp_TransactionsDevice AS transD
 	INNER JOIN FPSTesting.FP_RawTransaction_Old AS transO ON transD.TransKey = transO.TransKey;
     
-    INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
+    INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgentId, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	tmp.LoginName	
 	   , 	tmp.SubscriberName
 	   , 	tmp.TransTime
@@ -175,6 +179,7 @@ BEGIN
 	   , 	tmp.DeviceCode
 	   , 	tmp.FingerprintCode
 	   , 	tmp.FingerprintMoreInfo
+	   ,	tmp.UserAgentId
 	   ,	tmp.UserAgent
 	   , 	tmp.IP
 	   , 	tmp.IPID
@@ -199,7 +204,7 @@ BEGIN
        ,	tmp.TransKey
    FROM Temp_Transactions2 AS tmp;
       
-   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged, Retry)
+   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Flagged, Retry)
    SELECT	transD.Id
 		,	transD.ServerTransId
 		,	transD.CustId
@@ -211,6 +216,7 @@ BEGIN
 		,	transD.DeviceId
 		,	transD.TransTime
 		,	transD.ClientIP
+		,	transD.UserAgentId
 		,	transD.UserAgent
 		,	transD.Url
 		,	transD.Action

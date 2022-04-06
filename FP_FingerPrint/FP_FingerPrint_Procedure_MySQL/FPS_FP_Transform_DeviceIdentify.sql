@@ -288,7 +288,7 @@ BEGIN
 	SET tmpIt.DeviceId = tmpTd.DeviceId
 	WHERE tmpIt.DeviceId IS NULL;      
     
-	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT  	ts.ServerTransId
             ,	ts.TransTime
 			, 	ts.CustId
@@ -299,6 +299,7 @@ BEGIN
 			, 	ts.CookieCode
 			, 	tmpIt.DeviceId
 			, 	ts.ClientIP
+			, 	ts.UserAgentId
 			, 	ts.UserAgent
 			, 	ts.Url
 			, 	ts.Action
@@ -306,7 +307,7 @@ BEGIN
 			, 	ts.TransKey
 			, 	ts.Flagged    
 	FROM Temp_InputTrans AS tmpIt 
-		INNER JOIN Transaction AS ts ON tmpIt.Id = ts.Id;   
+		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpIt.Id = ts.Id;   
 	
     DELETE ts
     FROM FPS_FingerPrint.Transaction AS ts
