@@ -397,6 +397,46 @@ CREATE TABLE Transaction_TestData (
   Flagged varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `ClientTransactionDailySum` (
+  `TransDate` date NOT NULL,
+  `SubscriberId` int NOT NULL,
+  `TotalTrans` int DEFAULT '0',
+  `TotalValidTrans` int DEFAULT '0',
+  `CreateDate` datetime DEFAULT NULL,
+  `ModifiedDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`TransDate`,`SubscriberId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `ClientTransactionMonthlySum` (
+  `TransMonth` date NOT NULL,
+  `SubscriberId` int NOT NULL,
+  `TotalTrans` int DEFAULT '0',
+  `TotalValidTrans` int DEFAULT '0',
+  `CreateDate` datetime DEFAULT NULL,
+  `ModifiedDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`TransMonth`,`SubscriberId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `ServerTransactionDailySum` (
+  `TransDate` date NOT NULL,
+  `SubscriberId` int NOT NULL,
+  `TotalTrans` int DEFAULT '0',
+  `TotalValidTrans` int DEFAULT '0',
+  `CreateDate` datetime DEFAULT NULL,
+  `ModifiedDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`TransDate`,`SubscriberId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `ServerTransactionMonthlySum` (
+  `TransMonth` date NOT NULL,
+  `SubscriberId` int NOT NULL,
+  `TotalTrans` int DEFAULT '0',
+  `TotalValidTrans` int DEFAULT '0',
+  `CreateDate` datetime DEFAULT NULL,
+  `ModifiedDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`TransMonth`,`SubscriberId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE `TransactionMonthlySum` (
   `TransMonth` date NOT NULL,
   `SubscriberId` int NOT NULL,
