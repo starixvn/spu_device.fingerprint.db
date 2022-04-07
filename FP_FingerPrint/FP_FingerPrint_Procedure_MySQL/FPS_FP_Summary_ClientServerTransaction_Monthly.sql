@@ -82,5 +82,28 @@ BEGIN
     TotalValidTrans = tmp.TotalValidTrans, 
     ModifiedDate = lv_CurrentDate;
     
+    #==================================
+    
+    INSERT INTO FPS_FingerPrint.TransactionMonthlySum(TransMonth, SubscriberId, TotalTrans, CreateDate, ModifiedDate)
+    WITH tmp_SumDaily AS
+    (SELECT 
+		DATE_FORMAT(cl.TransDate,'%Y-%m-01') as TransDate
+        , cl.SubscriberId
+        , SUM(cl.TotalTrans) as TotalTrans       
+        , lv_CurrentDate as CreatedDate
+        , lv_CurrentDate as ModifiedDate
+    FROM FPS_FingerPrint.TransactionDailySum cl 
+    WHERE DATE(cl.TransDate) = DATE(lv_SumDate)
+    GROUP BY cl.SubscriberId, DATE_FORMAT(cl.TransDate,'%Y-%m-01'))
+    SELECT 		tmp.TransDate
+			,	tmp.SubscriberId	
+            ,	tmp.TotalTrans	           
+            ,	tmp.CreatedDate	
+            ,	tmp.ModifiedDate
+    FROM tmp_SumDaily tmp
+    ON DUPLICATE KEY UPDATE 
+    TotalTrans = tmp.TotalTrans,     
+    ModifiedDate = lv_CurrentDate;
+    
 END$$
 DELIMITER ;
