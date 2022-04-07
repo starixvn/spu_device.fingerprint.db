@@ -171,7 +171,7 @@ BEGIN
 	FROM Temp_TransactionsDevice AS transD
 	INNER JOIN FPSTesting.FP_RawTransaction_Old AS transO ON transD.TransKey = transO.TransKey;
     
-    INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgentId, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
+    INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	tmp.LoginName	
 	   , 	tmp.SubscriberName
 	   , 	tmp.TransTime
@@ -179,7 +179,6 @@ BEGIN
 	   , 	tmp.DeviceCode
 	   , 	tmp.FingerprintCode
 	   , 	tmp.FingerprintMoreInfo
-	   ,	tmp.UserAgentId
 	   ,	tmp.UserAgent
 	   , 	tmp.IP
 	   , 	tmp.IPID

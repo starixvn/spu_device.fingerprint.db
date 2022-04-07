@@ -95,7 +95,7 @@ BEGIN
     FROM FPS_FingerPrint.TransactionDevice td
 		INNER JOIN Temp_Transactions tmp ON td.Id = tmp.Id;
     
-	INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgentId, UserAgent, IP, IPID, PluginID, URL
+	INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL
 		, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old,	IP_Old,	UserAgent_Old, URL_Old,	Flagged_Old, TransKey)
 	SELECT	transD.LoginName	
 		, 	sub.Name
@@ -104,7 +104,6 @@ BEGIN
 		, 	NULL AS DeviceCode
 		, 	NULL AS FingerprintCode
 		, 	NULL AS FingerprintMoreInfo
-		,	transD.UserAgentId
 		,	transD.UserAgent
 		, 	transD.ClientIP
 		, 	NULL AS IPID
