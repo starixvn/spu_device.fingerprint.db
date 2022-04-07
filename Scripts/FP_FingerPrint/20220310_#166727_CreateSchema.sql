@@ -400,8 +400,7 @@ CREATE TABLE Transaction_TestData (
 CREATE TABLE `TransactionMonthlySum` (
   `TransMonth` date NOT NULL,
   `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0',
-  `TotalValidTrans` int DEFAULT '0',
+  `TotalTrans` int DEFAULT '0',  
   `CreateDate` datetime DEFAULT NULL,
   `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`TransMonth`,`SubscriberId`)
@@ -410,8 +409,7 @@ CREATE TABLE `TransactionMonthlySum` (
 CREATE TABLE `TransactionDailySum` (
   `TransDate` date NOT NULL,
   `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0',
-  `TotalValidTrans` int DEFAULT '0',
+  `TotalTrans` int DEFAULT '0', 
   `CreateDate` datetime DEFAULT NULL,
   `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`TransDate`,`SubscriberId`)
