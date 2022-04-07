@@ -45,7 +45,7 @@ BEGIN
     
     INSERT INTO Temp_SumTransaction(Id, SubscriberId, TransDate)
     SELECT cl.Id, cl.SubscriberId, DATE(cl.TransTime) as TransDate
-    FROM FPS_FingerPrint. TransactionCompleted cl 
+    FROM FPS_FingerPrint.TransactionCompleted cl 
     WHERE cl.Id > lv_TransId     
     LIMIT ip_batchSize;
     
