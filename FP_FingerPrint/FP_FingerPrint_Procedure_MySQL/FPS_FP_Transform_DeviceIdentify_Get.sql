@@ -29,8 +29,10 @@ BEGIN
     DECLARE lv_groupId BIGINT UNSIGNED DEFAULT 0;
 	
     /*******LOG TEST********************/
-    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FPS_FP_Transform_DeviceIdentify_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'ip_NoOfBatch:',ip_NoOfBatch), CURRENT_TIMESTAMP();
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FPS_FP_Transform_DeviceIdentify_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'ip_NoOfBatch:',ip_NoOfBatch), CURRENT_TIMESTAMP();
+    END IF;
     /*******LOG TEST********************/
     
     SET lv_Size = ip_BatchSize * ip_NoOfBatch;
