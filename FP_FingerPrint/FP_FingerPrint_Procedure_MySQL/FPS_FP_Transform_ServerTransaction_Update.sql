@@ -30,8 +30,10 @@ BEGIN
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
     
     /*******LOG TEST********************/
-    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FPS_FP_Transform_ServerTransaction_Update', ip_RawTransJson, CONCAT('ip_Retry:',ip_Retry,'; ip_OffsetId:',ip_OffsetId,'; ip_OffsetValue:',ip_OffsetValue), CURRENT_TIMESTAMP();
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FPS_FP_Transform_ServerTransaction_Update', ip_RawTransJson, CONCAT('ip_Retry:',ip_Retry,'; ip_OffsetId:',ip_OffsetId,'; ip_OffsetValue:',ip_OffsetValue), CURRENT_TIMESTAMP();
+	END IF;
     /*******LOG TEST********************/
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;  

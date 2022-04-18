@@ -27,8 +27,10 @@ BEGIN
     DECLARE lv_offsetValue BIGINT;
     
     /*******LOG TEST********************/
-    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FPS_FP_Detect_RawUserAgent_Update', ip_RawUserAgentJson,CONCAT('ip_OffsetId:',ip_OffsetId,'; ip_OffsetValue:',ip_OffsetValue), CURRENT_TIMESTAMP();
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FPS_FP_Detect_RawUserAgent_Update', ip_RawUserAgentJson,CONCAT('ip_OffsetId:',ip_OffsetId,'; ip_OffsetValue:',ip_OffsetValue), CURRENT_TIMESTAMP();
+	END IF;
     /*******LOG TEST********************/
     
     

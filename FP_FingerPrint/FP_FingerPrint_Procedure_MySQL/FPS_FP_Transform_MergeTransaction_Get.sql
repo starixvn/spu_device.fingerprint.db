@@ -25,8 +25,10 @@ BEGIN
 	*/
     
     /*******LOG TEST********************/
-    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FPS_FP_Transform_MergeTransaction_Get', NULL,CONCAT('ip_Size:',ip_Size,'; ip_Retry:',ip_Retry), CURRENT_TIMESTAMP();
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FPS_FP_Transform_MergeTransaction_Get', NULL,CONCAT('ip_Size:',ip_Size,'; ip_Retry:',ip_Retry), CURRENT_TIMESTAMP();
+	END IF;
     /*******LOG TEST********************/
     
     SELECT	trans.Id
