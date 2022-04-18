@@ -30,8 +30,10 @@ BEGIN
     DECLARE		lv_KeyLookup			    VARCHAR(128);
     
     /*******LOG TEST********************/
-    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FP_DCS_DC_Transform_RawTrans_GetPackage', NULL, CONCAT('ip_IsProcessed:',ip_IsProcessed,'; ip_NoOfTickets:',ip_NoOfTickets,'; ip_NoOfBatch:',ip_NoOfBatch), CURRENT_TIMESTAMP();
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 8) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FP_DCS_DC_Transform_RawTrans_GetPackage', NULL, CONCAT('ip_IsProcessed:',ip_IsProcessed,'; ip_NoOfTickets:',ip_NoOfTickets,'; ip_NoOfBatch:',ip_NoOfBatch), CURRENT_TIMESTAMP();
+	END IF;
     /*******LOG TEST********************/
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;    

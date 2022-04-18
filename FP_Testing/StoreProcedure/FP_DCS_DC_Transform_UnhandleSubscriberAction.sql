@@ -26,8 +26,10 @@ BEGIN
     DECLARE lv_NotTransformedStatus         BIT(16);
     
     /*******LOG TEST********************/
-    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FP_DCS_DC_Transform_UnhandleSubscriberAction', NULL,CONCAT('ip_FromTransID:',ip_FromTransID,'; ip_ToTransID:',ip_ToTransID), CURRENT_TIMESTAMP();
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 8) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FP_DCS_DC_Transform_UnhandleSubscriberAction', NULL,CONCAT('ip_FromTransID:',ip_FromTransID,'; ip_ToTransID:',ip_ToTransID), CURRENT_TIMESTAMP();
+	END IF;
     /*******LOG TEST********************/
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;
