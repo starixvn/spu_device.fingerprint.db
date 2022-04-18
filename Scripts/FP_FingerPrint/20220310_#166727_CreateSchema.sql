@@ -256,15 +256,6 @@ CREATE TABLE `Subscribers` (
   UNIQUE KEY `Name_UNIQUE` (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `Test_LOG` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `SPName` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `JsonString` json DEFAULT NULL,
-  `OtherText` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `InsertTime` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE `Transaction` (
   `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `ServerTransId` bigint unsigned DEFAULT NULL,
@@ -455,3 +446,14 @@ CREATE TABLE `TransactionDailySum` (
   PRIMARY KEY (`TransDate`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+#============================================================================================================================
+USE CTS_Log;
+CREATE TABLE `FPSLog` (
+  `Id` int NOT NULL AUTO_INCREMENT,
+  `SPName` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `InsertTime` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `OtherText` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `JsonString` json DEFAULT NULL,  
+  PRIMARY KEY (`Id`),
+  INDEX IX_FPSLog_SPName(SPName)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
