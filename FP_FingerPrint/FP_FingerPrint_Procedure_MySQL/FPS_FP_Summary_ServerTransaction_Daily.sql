@@ -50,19 +50,22 @@ BEGIN
     WHERE cl.Id > lv_ServerTransId     
     LIMIT ip_batchSize;
     
-    UPDATE FPS_FingerPrint.ServerTransactionDailySum cls 
-    INNER JOIN (SELECT tmp.SubscriberId, DATE(tmp.TransDate) as TransDate, COUNT(1) as Total 
-				FROM Temp_SumTransaction tmp 
-                GROUP BY  tmp.SubscriberId, DATE(tmp.TransDate)) tmp2 ON cls.SubscriberId = tmp2.SubscriberId AND cls.TransDate = tmp2.TransDate
-	SET cls.TotalValidTrans = cls.TotalValidTrans + tmp2.Total
-    ,	cls.ModifiedDate = NOW();
-    
-    SELECT MAX(Id) INTO lv_MaxTransId 
-		FROM Temp_SumTransaction;
-    
-    UPDATE FPS_FingerPrint.Offset off 
-		SET off.OffsetValue = lv_MaxTransId
-    WHERE off.OffsetName = 'SummaryServerTransaction'; 
-    
+    IF EXISTS(SELECT 1 FROM Temp_SumTransaction) THEN
+    BEGIN    
+		UPDATE FPS_FingerPrint.ServerTransactionDailySum cls 
+		INNER JOIN (SELECT tmp.SubscriberId, DATE(tmp.TransDate) as TransDate, COUNT(1) as Total 
+					FROM Temp_SumTransaction tmp 
+					GROUP BY  tmp.SubscriberId, DATE(tmp.TransDate)) tmp2 ON cls.SubscriberId = tmp2.SubscriberId AND cls.TransDate = tmp2.TransDate
+		SET cls.TotalValidTrans = cls.TotalValidTrans + tmp2.Total
+		,	cls.ModifiedDate = NOW();
+		
+		SELECT MAX(Id) INTO lv_MaxTransId 
+			FROM Temp_SumTransaction;
+		
+		UPDATE FPS_FingerPrint.Offset off 
+			SET off.OffsetValue = lv_MaxTransId
+		WHERE off.OffsetName = 'SummaryServerTransaction'; 
+    END;
+    END IF;
 END$$
 DELIMITER ;
