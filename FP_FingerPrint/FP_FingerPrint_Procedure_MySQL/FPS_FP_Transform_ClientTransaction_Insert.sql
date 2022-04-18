@@ -36,7 +36,7 @@ BEGIN
 		,	SubscriberId				INT	 			NULL
 		,	Attribute					LONGTEXT	 	NULL
 		,	CookieCode 					VARCHAR(64)		NULL		
-        ,	Flagged						VARCHAR(50)		NULL		
+        ,	Flagged						VARCHAR(300)		NULL		
         ,	Url							VARCHAR(100)	NULL
 		,	TransTime					DATETIME(4)	 	NULL	
     );     
@@ -58,7 +58,7 @@ BEGIN
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
 							,	Attribute				LONGTEXT		PATH "$.Attribute"
 							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"							
-                            ,	Flagged					VARCHAR(50) 	PATH "$.Flagged"
+                            ,	Flagged					VARCHAR(300) 	PATH "$.Flagged"
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
                             ,	TransTime				DATETIME(4)		PATH "$.TransTime"
 				)

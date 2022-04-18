@@ -44,7 +44,7 @@ CREATE TABLE `ClientTransaction` (
   `FingerPrintCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `CookieCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `SubscriberId` int DEFAULT NULL,
-  `Flagged` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Used headless to check data from js:\n- human\n- bot',
+  `Flagged` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Used headless to check data from js:\n- human\n- bot',
   `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `TransTime` datetime(4) DEFAULT NULL,
   `CreatedDate` datetime NOT NULL,
