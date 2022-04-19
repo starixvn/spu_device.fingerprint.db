@@ -36,18 +36,20 @@ BEGIN
 		,	SubscriberId				INT	 			NULL
 		,	Attribute					LONGTEXT	 	NULL
 		,	CookieCode 					VARCHAR(64)		NULL		
-        ,	Flagged						VARCHAR(300)		NULL		
+        ,	Flagged						VARCHAR(50)		NULL
+		,	RobotDetail					VARCHAR(300)	NULL	
         ,	Url							VARCHAR(100)	NULL
 		,	TransTime					DATETIME(4)	 	NULL	
     );     
     
-    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, Attribute, CookieCode, Flagged, Url, TransTime)
+    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, Attribute, CookieCode, Flagged, RobotDetail, Url, TransTime)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SessionKey
 		,	tmp.SubscriberId
 		,	tmp.Attribute
         ,	tmp.CookieCode
         ,	tmp.Flagged
+        ,	tmp.RobotDetail
         ,	tmp.Url
         ,	tmp.TransTime
 	FROM	JSON_TABLE(
@@ -58,7 +60,8 @@ BEGIN
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
 							,	Attribute				LONGTEXT		PATH "$.Attribute"
 							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"							
-                            ,	Flagged					VARCHAR(300) 	PATH "$.Flagged"
+                            ,	Flagged					VARCHAR(50) 	PATH "$.Flagged"
+                            ,	RobotDetail				VARCHAR(300) 	PATH "$.RobotDetail"
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
                             ,	TransTime				DATETIME(4)		PATH "$.TransTime"
 				)
@@ -73,12 +76,13 @@ BEGIN
 	ON DUPLICATE KEY UPDATE ModifiedDate = NOW();
     
     
-    INSERT INTO FPS_FingerPrint.ClientTransaction(FingerPrintCode, SubscriberId, CookieCode, SessionKey, Flagged, Url, TransTime, CreatedDate, ModifiedDate)
+    INSERT INTO FPS_FingerPrint.ClientTransaction(FingerPrintCode, SubscriberId, CookieCode, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SubscriberId
 		,	tmp.CookieCode
 		,	tmp.SessionKey
 		,	tmp.Flagged
+        ,	tmp.RobotDetail
 		,	tmp.Url
 		,	tmp.TransTime
 		,	NOW() AS CreatedDate
