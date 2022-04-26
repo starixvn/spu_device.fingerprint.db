@@ -24,12 +24,16 @@ BEGIN
 			
 	*/
     
+    DECLARE lv_CurrentDate DATETIME DEFAULT NOW();
+    
     /*******LOG TEST********************/
-    INSERT INTO FPS_FingerPrint.Test_LOG(SpName, JsonString, OtherText, InsertTime)
-    SELECT 'FPS_FP_Transform_ClientTransaction_Insert', ip_FingerPrint , NULL, CURRENT_TIMESTAMP();
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FPS_FP_Transform_ClientTransaction_Insert', ip_FingerPrint , NULL, CURRENT_TIMESTAMP();
+	END IF;
     /*******LOG TEST********************/
     
-    DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;    
+    DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;     
 	CREATE TEMPORARY TABLE Temp_FingerPrint(
 			FingerPrintCode				VARCHAR(200) 	NULL	
 		,	SessionKey					VARCHAR(100) 	NULL
@@ -67,14 +71,20 @@ BEGIN
 				)
 		   ) AS tmp; 
     
-    INSERT INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, Attribute, CreatedDate, ModifiedDate)
-	SELECT	tmp.FingerPrintCode
+    INSERT INTO FPS_FingerPrint.FingerPrintAttribute(AttributeCode, AttributeDetail, CreatedDate, ModifiedDate)
+    SELECT	tmp.FingerPrintCode
 		,	tmp.Attribute
-        ,	NOW() AS CreatedDate
-        ,	NOW() AS ModifiedDate
-	FROM Temp_FingerPrint AS tmp
-	ON DUPLICATE KEY UPDATE ModifiedDate = NOW();
+        ,	lv_CurrentDate AS CreatedDate
+        ,	lv_CurrentDate AS ModifiedDate
+	FROM Temp_FingerPrint tmp
+	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
+    INSERT INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
+	SELECT	tmp.FingerPrintCode		
+        ,	lv_CurrentDate AS CreatedDate
+        ,	lv_CurrentDate AS ModifiedDate
+	FROM Temp_FingerPrint tmp
+	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;    
     
     INSERT INTO FPS_FingerPrint.ClientTransaction(FingerPrintCode, SubscriberId, CookieCode, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode
@@ -85,8 +95,8 @@ BEGIN
         ,	tmp.RobotDetail
 		,	tmp.Url
 		,	tmp.TransTime
-		,	NOW() AS CreatedDate
-		,	NOW() AS CreatedDate
+		,	lv_CurrentDate AS CreatedDate
+		,	lv_CurrentDate AS CreatedDate
 	FROM Temp_FingerPrint AS tmp;
     
 	INSERT INTO FPS_FingerPrint.ClientTransactionDailySum(
@@ -108,10 +118,10 @@ BEGIN
 			,	gd.SubscriberId
 			,	gd.CountTrans AS TotalTrans
 			,	0 AS TotalValidTrans
-			,	NOW() AS CreatedDate
-			,	NOW() AS ModifiedDate
+			,	lv_CurrentDate AS CreatedDate
+			,	lv_CurrentDate AS ModifiedDate
 	FROM group_data AS gd
     ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + gd.CountTrans,
-							ModifiedDate = NOW();
+							ModifiedDate = lv_CurrentDate;
 END$$
 DELIMITER ;

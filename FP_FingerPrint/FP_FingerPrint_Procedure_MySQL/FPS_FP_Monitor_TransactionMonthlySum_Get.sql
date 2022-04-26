@@ -23,28 +23,45 @@ BEGIN
 			
 	*/
    
-	DECLARE lv_FirstDate DATE;
+    DECLARE lv_FirstDate DATETIME DEFAULT NULL;
+    DECLARE lv_LastDate DATETIME DEFAULT NULL;
+    
     SET lv_FirstDate = STR_TO_DATE(CONCAT('01/',ip_Month), '%d/%m/%Y');
+    SET lv_LastDate = DATE_ADD(lv_FirstDate, INTERVAL 1 MONTH);
 
    -- Server monthly sum
-    SELECT daily.TransMonth AS TransDate
-		, daily.SubscriberId
-		, sub.Name AS SubscriberName
-        , daily.TotalTrans
-        , daily.TotalValidTrans
-	FROM FPS_FingerPrint.ServerTransactionMonthlySum AS daily
-		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = daily.SubscriberId
-	WHERE daily.TransMonth = lv_FirstDate;
+    WITH tmp_SumDaily AS
+    (
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
+			, 	cl.SubscriberId
+			, 	SUM(cl.TotalTrans) AS TotalTrans
+			, 	SUM(cl.TotalValidTrans) AS TotalValidTrans
+		FROM FPS_FingerPrint.ClientTransactionDailySum AS cl 
+		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
+		GROUP BY cl.SubscriberId, TransMonth
+	)
+    SELECT 		tmp.TransMonth
+			,	tmp.SubscriberId	
+            ,	tmp.TotalTrans	
+            ,	tmp.TotalValidTrans	
+    FROM tmp_SumDaily AS tmp;
 
    -- Client monthly sum
-    SELECT daily.TransMonth
-		, daily.SubscriberId
-		, sub.Name AS SubscriberName
-        , daily.TotalTrans
-        , daily.TotalValidTrans
-	FROM FPS_FingerPrint.ClientTransactionMonthlySum AS daily
-		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = daily.SubscriberId
-	WHERE daily.TransMonth = lv_FirstDate;
+    WITH tmp_SumDaily AS
+    (
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
+			, 	cl.SubscriberId
+			, 	SUM(cl.TotalTrans) AS TotalTrans
+			, 	SUM(cl.TotalValidTrans) AS TotalValidTrans
+		FROM FPS_FingerPrint.ServerTransactionDailySum AS cl 
+		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
+		GROUP BY cl.SubscriberId, TransMonth
+	)
+    SELECT 		tmp.TransMonth
+			,	tmp.SubscriberId	
+            ,	tmp.TotalTrans	
+            ,	tmp.TotalValidTrans	
+    FROM tmp_SumDaily AS tmp;
     
 END$$
 DELIMITER ;

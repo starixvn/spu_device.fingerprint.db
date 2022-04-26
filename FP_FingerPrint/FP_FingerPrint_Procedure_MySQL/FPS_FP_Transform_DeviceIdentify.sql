@@ -70,9 +70,9 @@ BEGIN
         ,	RecoverType		TINYINT DEFAULT 0	#0 New, 1 By FingerPrintCode, 2 By Cookie
         ,	GroupId			BIGINT UNSIGNED
         
-		,	INDEX IX_Temp_InputTrans_FingerPrintCode(FingerPrintCode)
-        ,	INDEX IX_Temp_InputTrans_CookieCode(CookieCode)
-        ,	INDEX IX_Temp_InputTrans_GroupId(GroupId)
+		,	INDEX IX_Temp_TransDevice_FingerPrintCode(FingerPrintCode)
+        ,	INDEX IX_Temp_TransDevice_CookieCode(CookieCode)
+        ,	INDEX IX_Temp_TransDevice_GroupId(GroupId)
     );  
     
 	DROP TEMPORARY TABLE IF EXISTS Temp_GroupDevice;
@@ -112,7 +112,8 @@ BEGIN
 							,	TransTime		DATETIME(4)		PATH "$.TransTime"
 							,	FingerPrintCode	VARCHAR(64)		PATH "$.FingerPrintCode"
                             ,	CookieCode		VARCHAR(64)		PATH "$.CookieCode"
-                            ,	GroupId			BIGINT UNSIGNED	PATH "$.GroupId")
+                            ,	GroupId			BIGINT UNSIGNED	PATH "$.GroupId"
+						)
 		) AS tmpJs;	
 
     /*====RECOVER DEVICE: Get Exisitng By FingerPrintCode*/

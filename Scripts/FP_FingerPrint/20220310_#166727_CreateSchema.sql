@@ -63,7 +63,8 @@ CREATE TABLE `ClientTransaction` (
   `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `TransTime` datetime(4) DEFAULT NULL,
   `CreatedDate` datetime NOT NULL,
-  PRIMARY KEY (`Id`,`CreatedDate`)
+  PRIMARY KEY (`Id`,`CreatedDate`),
+  KEY `IX_ClientTransactionCompleted_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(`CreatedDate`,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
@@ -118,8 +119,7 @@ CREATE TABLE `Offset` (
   `CreatedDate` datetime DEFAULT NULL,
   `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `OffsetName_UNIQUE` (`OffsetName`),
-  KEY `IX_Offset_Name` (`OffsetName`)
+  UNIQUE KEY `UX_Offset_OffsetName` (`OffsetName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `RawFingerPrint` (
@@ -167,7 +167,8 @@ CREATE TABLE `ServerTransactionCompleted` (
   `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Retry` tinyint DEFAULT '0',
   `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  PRIMARY KEY (`Id`,`CreatedDate`)
+  PRIMARY KEY (`Id`,`CreatedDate`),
+  KEY `IX_ServerTransactionCompleted_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(`CreatedDate`,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
@@ -228,23 +229,22 @@ CREATE TABLE `RawUserAgent` (
   `Id` bigint NOT NULL AUTO_INCREMENT,
   `UserAgentCode` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `UserAgent` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `ClientType` varchar(100) DEFAULT NULL,
+  `ClientType` varchar(15) DEFAULT NULL,
   `ClientName` varchar(100) DEFAULT NULL,
-  `ClientVersion` varchar(100) DEFAULT NULL,
+  `ClientVersion` varchar(50) DEFAULT NULL,
   `OSName` varchar(100) DEFAULT NULL,
-  `OSShortName` varchar(100) DEFAULT NULL,
-  `OSVersion` varchar(100) DEFAULT NULL,
-  `OSPlatform` varchar(100) DEFAULT NULL,
-  `Device` varchar(100) DEFAULT NULL,
-  `Brand` varchar(100) DEFAULT NULL,
-  `Model` varchar(100) DEFAULT NULL,
+  `OSShortName` varchar(50) DEFAULT NULL,
+  `OSVersion` varchar(50) DEFAULT NULL,
+  `OSPlatform` varchar(15) DEFAULT NULL,
+  `Device` varchar(50) DEFAULT NULL,
+  `Brand` varchar(50) DEFAULT NULL,
+  `Model` varchar(15) DEFAULT NULL,
   `BotName` varchar(100) DEFAULT NULL,
-  `BotCategory` varchar(100) DEFAULT NULL,
+  `BotCategory` varchar(50) DEFAULT NULL,
   `CreatedDate` datetime DEFAULT NULL,
   `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `Id_UNIQUE` (`Id`),
-  UNIQUE KEY `UserAgentCode_UNIQUE` (`UserAgentCode`)
+  UNIQUE KEY `UX_RawUserAgent_UserAgentCode` (`UserAgentCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Subscribers` (
@@ -366,7 +366,8 @@ CREATE TABLE `TransactionDevice` (
   `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Retry` tinyint DEFAULT '0',
   `Flagged` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  PRIMARY KEY (`Id`)
+  PRIMARY KEY (`Id`),
+  KEY `IX_TransactionDevice_Retry` (`Retry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
