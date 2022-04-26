@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsService" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FPS_FP_Detect_RawUserAgent_Get`;
 DELIMITER $$
 
@@ -26,9 +26,9 @@ BEGIN
     DECLARE lv_offsetValue BIGINT;
     
     /*******LOG TEST********************/
-    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE ofs.Id = 7) = 1 THEN		
 		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
-		SELECT 'FPS_FP_Detect_RawUserAgent_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'; ip_OffsetId:',ip_OffsetId), CURRENT_TIMESTAMP();
+		SELECT 'FPS_FP_Detect_RawUserAgent_Get', NULL, CONCAT('ip_BatchSize:',ip_BatchSize,'; ip_OffsetId:',ip_OffsetId), CURRENT_TIMESTAMP();
 	END IF;
     /*******LOG TEST********************/
     

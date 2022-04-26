@@ -75,26 +75,26 @@ BEGIN
     
     INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
     SELECT  td.Id
-    , td.ServerTransId
-    , td.CustId
-    , td.SubAccId
-    , td.LoginName
-    , td.SubscriberId
-    , td.FingerPrintCode
-    , td.CookieCode
-    , td.DeviceId
-    , td.TransTime
-    , td.ClientIP
-    , td.UserAgentId
-    , td.UserAgent
-    , td.Url
-    , td.Action
-    , td.CreatedDate
-    , td.TransKey
-    , td.Retry
-    , td.Flagged
-    FROM FPS_FingerPrint.TransactionDevice td
-    INNER JOIN Temp_Transactions tmp ON td.Id = tmp.Id;
+		, td.ServerTransId
+		, td.CustId
+		, td.SubAccId
+		, td.LoginName
+		, td.SubscriberId
+		, td.FingerPrintCode
+		, td.CookieCode
+		, td.DeviceId
+		, td.TransTime
+		, td.ClientIP
+		, td.UserAgentId
+		, td.UserAgent
+		, td.Url
+		, td.Action
+		, td.CreatedDate
+		, td.TransKey
+		, td.Retry
+		, td.Flagged
+    FROM FPS_FingerPrint.TransactionDevice AS td
+    INNER JOIN Temp_Transactions AS tmp ON td.Id = tmp.Id;
     
     CREATE TEMPORARY TABLE Temp_Transactions2(
 			Id					BIGINT UNSIGNED

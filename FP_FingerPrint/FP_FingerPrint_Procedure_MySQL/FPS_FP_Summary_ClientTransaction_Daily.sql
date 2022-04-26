@@ -42,28 +42,30 @@ BEGIN
     /*******LOG TEST********************/
     
     SELECT off.OffsetValue INTO lv_ClientTransId 
-    FROM FPS_FingerPrint.Offset off 
+    FROM FPS_FingerPrint.Offset AS off 
     WHERE off.OffsetName = 'SummaryClientTransaction';
     
     INSERT INTO Temp_SumTransaction(Id, SubscriberId, TransDate)
-    SELECT cl.Id, cl.SubscriberId, DATE(cl.TransTime) as TransDate
-    FROM FPS_FingerPrint.ClientTransactionCompleted cl 
+    SELECT cl.Id, cl.SubscriberId, DATE(cl.TransTime) AS TransDate
+    FROM FPS_FingerPrint.ClientTransactionCompleted AS cl 
     WHERE cl.Id > lv_ClientTransId     
     LIMIT ip_batchSize;
     
     IF EXISTS(SELECT 1 FROM Temp_SumTransaction) THEN
     BEGIN    
-		UPDATE FPS_FingerPrint.ClientTransactionDailySum cls 
-		INNER JOIN (SELECT tmp.SubscriberId, DATE(tmp.TransDate) as TransDate, COUNT(1) as Total 
-					FROM Temp_SumTransaction tmp 
-					GROUP BY  tmp.SubscriberId, DATE(tmp.TransDate)) tmp2 ON cls.SubscriberId = tmp2.SubscriberId AND cls.TransDate = tmp2.TransDate
+		UPDATE FPS_FingerPrint.ClientTransactionDailySum AS cls 
+			INNER JOIN (
+				SELECT tmp.SubscriberId, DATE(tmp.TransDate) AS TransDate, COUNT(1) AS Total 
+				FROM Temp_SumTransaction AS tmp 
+				GROUP BY  tmp.SubscriberId, DATE(tmp.TransDate)
+			) AS tmp2 ON cls.SubscriberId = tmp2.SubscriberId AND cls.TransDate = tmp2.TransDate
 		SET cls.TotalValidTrans = cls.TotalValidTrans + tmp2.Total
 		,	cls.ModifiedDate = NOW();
 		
-		SELECT MAX(Id) INTO lv_MaxTransId 
-			FROM Temp_SumTransaction;
+		SELECT MAX(tmp.Id) INTO lv_MaxTransId 
+			FROM Temp_SumTransaction AS tmp;
 		
-		UPDATE FPS_FingerPrint.Offset off 
+		UPDATE FPS_FingerPrint.Offset AS off 
 			SET off.OffsetValue = lv_MaxTransId
 		WHERE off.OffsetName = 'SummaryClientTransaction';
     END;

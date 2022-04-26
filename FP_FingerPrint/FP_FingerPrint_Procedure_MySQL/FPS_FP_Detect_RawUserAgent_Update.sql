@@ -39,18 +39,18 @@ BEGIN
 	/* Create Temporary table */
 	CREATE TEMPORARY TABLE Temp_RawUserAgent(
 			Id 					BIGINT UNSIGNED PRIMARY KEY        
-		,	ClientType 			VARCHAR(100) NULL
+		,	ClientType 			VARCHAR(15) NULL
 		,	ClientName 			VARCHAR(100) NULL
-		,	ClientVersion 		VARCHAR(100) NULL
+		,	ClientVersion 		VARCHAR(50) NULL
 		,	OSName 				VARCHAR(100) NULL
-		,	OSShortName 		VARCHAR(100) NULL
-		,	OSVersion 			VARCHAR(100) NULL
-		,	OSPlatform 			VARCHAR(100) NULL
-		,	Device 				VARCHAR(100) NULL
-		,	Brand 				VARCHAR(100) NULL
-		,	Model 				VARCHAR(100) NULL
+		,	OSShortName 		VARCHAR(50) NULL
+		,	OSVersion 			VARCHAR(50) NULL
+		,	OSPlatform 			VARCHAR(15) NULL
+		,	Device 				VARCHAR(50) NULL
+		,	Brand 				VARCHAR(50) NULL
+		,	Model 				VARCHAR(15) NULL
 		,	BotName 			VARCHAR(100) NULL
-		,	BotCategory 		VARCHAR(100) NULL
+		,	BotCategory 		VARCHAR(50) NULL
     );
     
    INSERT INTO Temp_RawUserAgent(Id, ClientType, ClientName, ClientVersion, OSName, OSShortName, OSVersion, OSPlatform, Device, Brand, Model, BotName, BotCategory)
@@ -71,18 +71,18 @@ BEGIN
 			ip_RawUserAgentJson,
 			 "$[*]" COLUMNS(
 								Id					BIGINT			PATH "$.Id"       
-							,	ClientType			VARCHAR(100) 	PATH "$.ClientType"                        
+							,	ClientType			VARCHAR(15) 	PATH "$.ClientType"                        
 							,	ClientName			VARCHAR(100) 	PATH "$.ClientName"                        
-							,	ClientVersion		VARCHAR(100) 	PATH "$.ClientVersion"                        
+							,	ClientVersion		VARCHAR(50) 	PATH "$.ClientVersion"                        
 							,	OSName				VARCHAR(100) 	PATH "$.OSName"                        
-							,	OSShortName			VARCHAR(100) 	PATH "$.OSShortName"                        
-							,	OSVersion			VARCHAR(100) 	PATH "$.OSVersion"                        
-							,	OSPlatform			VARCHAR(100) 	PATH "$.OSPlatform"                        
-							,	Device				VARCHAR(100) 	PATH "$.Device"                        
-							,	Brand				VARCHAR(100) 	PATH "$.Brand"                        
-							,	Model				VARCHAR(100) 	PATH "$.Model"                        
+							,	OSShortName			VARCHAR(50) 	PATH "$.OSShortName"                        
+							,	OSVersion			VARCHAR(50) 	PATH "$.OSVersion"                        
+							,	OSPlatform			VARCHAR(15) 	PATH "$.OSPlatform"                        
+							,	Device				VARCHAR(50) 	PATH "$.Device"                        
+							,	Brand				VARCHAR(50) 	PATH "$.Brand"                        
+							,	Model				VARCHAR(15) 	PATH "$.Model"                        
 							,	BotName				VARCHAR(100) 	PATH "$.BotName"                        
-							,	BotCategory			VARCHAR(100) 	PATH "$.BotCategory"                        
+							,	BotCategory			VARCHAR(50) 	PATH "$.BotCategory"                        
 				)
 		   ) AS  rt;    
     

@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsService" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FPS_FP_Monitor_TransactionDailySum_Get`;
 DELIMITER $$
 
@@ -29,21 +29,21 @@ BEGIN
    -- Server daily sum
     SELECT daily.TransDate
 		, daily.SubscriberId
-		, sub.Name as SubscriberName
+		, sub.Name AS SubscriberName
         , daily.TotalTrans
         , daily.TotalValidTrans
-	FROM FPS_FingerPrint.ServerTransactionDailySum daily
-		INNER JOIN FPS_FingerPrint.Subscribers sub on sub.Id = daily.SubscriberId
+	FROM FPS_FingerPrint.ServerTransactionDailySum AS daily
+		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = daily.SubscriberId
 	WHERE daily.TransDate = lv_Date;
    
    -- Client daily sum
     SELECT daily.TransDate
 		, daily.SubscriberId
-		, sub.Name as SubscriberName
+		, sub.Name AS SubscriberName
         , daily.TotalTrans
         , daily.TotalValidTrans
-	FROM FPS_FingerPrint.ClientTransactionDailySum daily
-		INNER JOIN FPS_FingerPrint.Subscribers sub on sub.Id = daily.SubscriberId
+	FROM FPS_FingerPrint.ClientTransactionDailySum AS daily
+		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = daily.SubscriberId
 	WHERE daily.TransDate = lv_Date;
     
 END$$

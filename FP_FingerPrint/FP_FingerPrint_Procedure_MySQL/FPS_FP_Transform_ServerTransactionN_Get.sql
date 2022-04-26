@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsService" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FPS_FP_Transform_ServerTransactionN_Get`;
 
 DELIMITER $$
@@ -52,7 +52,7 @@ BEGIN
         , 	trans.Action
         ,	trans.Retry
     FROM FPS_FingerPrint.ServerTransaction AS trans 
-		INNER JOIN FPS_FingerPrint.ServerTransactionN transN ON trans.Id = transN.ServerTransId
+		INNER JOIN FPS_FingerPrint.ServerTransactionN AS transN ON trans.Id = transN.ServerTransId
     WHERE trans.Id >= lv_offsetValue 
     LIMIT ip_BatchSize;
     

@@ -65,14 +65,14 @@ BEGIN
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
                             ,	TransTime				DATETIME(4)		PATH "$.TransTime"
 				)
-		   ) AS  tmp; 
+		   ) AS tmp; 
     
     INSERT INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, Attribute, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.Attribute
         ,	NOW() AS CreatedDate
         ,	NOW() AS ModifiedDate
-	FROM Temp_FingerPrint tmp
+	FROM Temp_FingerPrint AS tmp
 	ON DUPLICATE KEY UPDATE ModifiedDate = NOW();
     
     
@@ -87,7 +87,7 @@ BEGIN
 		,	tmp.TransTime
 		,	NOW() AS CreatedDate
 		,	NOW() AS CreatedDate
-	FROM Temp_FingerPrint tmp;
+	FROM Temp_FingerPrint AS tmp;
     
 	INSERT INTO FPS_FingerPrint.ClientTransactionDailySum(
 			TransDate
@@ -97,20 +97,20 @@ BEGIN
             ,	CreateDate
             ,	ModifiedDate
     )
-    with group_data as (
-		SELECT CAST(tmp.TransTime as DATE) as TransDate
+    WITH group_data AS (
+		SELECT CAST(tmp.TransTime AS DATE) AS TransDate
 				,	tmp.SubscriberId
-				,	COUNT(tmp.SubscriberId) as CountTrans
-		FROM Temp_FingerPrint tmp
+				,	COUNT(tmp.SubscriberId) AS CountTrans
+		FROM Temp_FingerPrint AS tmp
 		GROUP BY TransDate, tmp.SubscriberId
 	)
     SELECT 	gd.TransDate
 			,	gd.SubscriberId
-			,	gd.CountTrans as TotalTrans
-			,	0 as TotalValidTrans
+			,	gd.CountTrans AS TotalTrans
+			,	0 AS TotalValidTrans
 			,	NOW() AS CreatedDate
 			,	NOW() AS ModifiedDate
-	FROM group_data gd
+	FROM group_data AS gd
     ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + gd.CountTrans,
 							ModifiedDate = NOW();
 END$$

@@ -49,7 +49,7 @@ BEGIN
 								Id						BIGINT			PATH "$.Id"       
 							,	TransKey				VARCHAR(200) 	PATH "$.TransKey"                                                 
 				)
-		   ) AS  rt; 
+		   ) AS rt; 
         
     CREATE TEMPORARY TABLE Temp_TransactionsDevice(
 			Id 				BIGINT 
@@ -94,7 +94,7 @@ BEGIN
 		, 	td.TransKey
 		, 	td.Retry
 		, 	td.Flagged
-    FROM FPS_FingerPrint.TransactionDevice td
+    FROM FPS_FingerPrint.TransactionDevice AS td
 		INNER JOIN Temp_Transactions tmp ON td.Id = tmp.Id;
     
 	INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL
@@ -130,8 +130,8 @@ BEGIN
 		, 	NULL AS URL_Old
 		, 	NULL AS Flagged_Old
 		,	transD.TransKey 
-	FROM Temp_TransactionsDevice transD   
-		INNER JOIN FPS_FingerPrint.Subscribers sub ON sub.Id = transD.SubscriberId;
+	FROM Temp_TransactionsDevice AS transD   
+		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = transD.SubscriberId;
     
 	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, FingerPrintCode,	CookieCode,	DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate,	TransKey, Flagged, Retry)
 	SELECT	transD.Id	
@@ -153,11 +153,11 @@ BEGIN
 		,	transD.TransKey
 		,	transD.Flagged    
 		,	transD.Retry    
-	FROM  Temp_TransactionsDevice transD;
+	FROM  Temp_TransactionsDevice AS transD;
     
 	DELETE transD 
-    FROM FPS_FingerPrint.TransactionDevice transD
-		INNER JOIN Temp_TransactionsDevice tmp ON transD.Id = tmp.Id; 
+    FROM FPS_FingerPrint.TransactionDevice AS transD
+		INNER JOIN Temp_TransactionsDevice AS tmp ON transD.Id = tmp.Id; 
     
 END$$
 DELIMITER ;

@@ -42,12 +42,12 @@ BEGIN
     /*******LOG TEST********************/
     
     SELECT off.OffsetValue INTO lv_TransId 
-    FROM FPS_FingerPrint.Offset off 
+    FROM FPS_FingerPrint.Offset AS off 
     WHERE off.OffsetName = 'SummaryTransaction';
     
     INSERT INTO Temp_SumTransaction(Id, SubscriberId, TransDate)
-    SELECT cl.Id, cl.SubscriberId, DATE(cl.TransTime) as TransDate
-    FROM FPS_FingerPrint.TransactionCompleted cl 
+    SELECT cl.Id, cl.SubscriberId, DATE(cl.TransTime) AS TransDate
+    FROM FPS_FingerPrint.TransactionCompleted AS cl 
     WHERE cl.Id > lv_TransId     
     LIMIT ip_batchSize;
     
@@ -55,18 +55,19 @@ BEGIN
     BEGIN
 		INSERT INTO FPS_FingerPrint.TransactionDailySum(TransDate, SubscriberId, TotalTrans, CreateDate, ModifiedDate)
 		WITH dailySum AS(
-					SELECT DATE(tmp.TransDate) as TransDate, tmp.SubscriberId, COUNT(1) as Total 
-					FROM Temp_SumTransaction tmp 
+					SELECT DATE(tmp.TransDate) AS TransDate, tmp.SubscriberId, COUNT(1) AS Total 
+					FROM Temp_SumTransaction AS tmp 
 					GROUP BY  tmp.SubscriberId, DATE(tmp.TransDate)) 
-		SELECT tmp.TransDate, tmp.SubscriberId, tmp.Total, NOW(), NOW() FROM dailySum tmp
+		SELECT tmp.TransDate, tmp.SubscriberId, tmp.Total, NOW(), NOW() 
+        FROM dailySum AS tmp
 		ON DUPLICATE KEY UPDATE 
 			TotalTrans = TotalTrans + tmp.Total,
 			ModifiedDate = NOW();    
 		
-		SELECT MAX(Id) INTO lv_MaxTransId 
-			FROM Temp_SumTransaction;
+		SELECT MAX(tmp.Id) INTO lv_MaxTransId 
+			FROM Temp_SumTransaction AS tmp;
 		
-		UPDATE FPS_FingerPrint.Offset off 
+		UPDATE FPS_FingerPrint.Offset AS off 
 			SET off.OffsetValue = lv_MaxTransId
 		WHERE off.OffsetName = 'SummaryTransaction';
     END;

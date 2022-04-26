@@ -39,13 +39,13 @@ BEGIN
     INSERT INTO FPS_FingerPrint.ClientTransactionMonthlySum(TransMonth, SubscriberId, TotalTrans, TotalValidTrans, CreateDate, ModifiedDate)
     WITH tmp_SumDaily AS
     (
-		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') as TransMonth
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
 			, 	cl.SubscriberId
-			, 	SUM(cl.TotalTrans) as TotalTrans
-			, 	SUM(cl.TotalValidTrans) as TotalValidTrans
-			, 	lv_CurrentDate as CreatedDate
-			, 	lv_CurrentDate as ModifiedDate
-		FROM FPS_FingerPrint.ClientTransactionDailySum cl 
+			, 	SUM(cl.TotalTrans) AS TotalTrans
+			, 	SUM(cl.TotalValidTrans) AS TotalValidTrans
+			, 	lv_CurrentDate AS CreatedDate
+			, 	lv_CurrentDate AS ModifiedDate
+		FROM FPS_FingerPrint.ClientTransactionDailySum AS cl 
 		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
 		GROUP BY cl.SubscriberId, TransMonth
 	)
@@ -55,7 +55,7 @@ BEGIN
             ,	tmp.TotalValidTrans	
             ,	tmp.CreatedDate	
             ,	tmp.ModifiedDate
-    FROM tmp_SumDaily tmp
+    FROM tmp_SumDaily AS tmp
     ON DUPLICATE KEY UPDATE TotalTrans = tmp.TotalTrans, 
 							TotalValidTrans = tmp.TotalValidTrans, 
 							ModifiedDate = lv_CurrentDate;
@@ -65,13 +65,13 @@ BEGIN
     INSERT INTO FPS_FingerPrint.ServerTransactionMonthlySum(TransMonth, SubscriberId, TotalTrans, TotalValidTrans, CreateDate, ModifiedDate)
     WITH tmp_SumDaily AS
     (
-		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') as TransMonth
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
 			, 	cl.SubscriberId
-			, 	SUM(cl.TotalTrans) as TotalTrans
-			, 	SUM(cl.TotalValidTrans) as TotalValidTrans
-			, 	lv_CurrentDate as CreatedDate
-			, 	lv_CurrentDate as ModifiedDate
-		FROM FPS_FingerPrint.ServerTransactionDailySum cl 
+			, 	SUM(cl.TotalTrans) AS TotalTrans
+			, 	SUM(cl.TotalValidTrans) AS TotalValidTrans
+			, 	lv_CurrentDate AS CreatedDate
+			, 	lv_CurrentDate AS ModifiedDate
+		FROM FPS_FingerPrint.ServerTransactionDailySum AS cl 
 		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
 		GROUP BY cl.SubscriberId, TransMonth
 	)
@@ -81,7 +81,7 @@ BEGIN
             ,	tmp.TotalValidTrans	
             ,	tmp.CreatedDate	
             ,	tmp.ModifiedDate
-    FROM tmp_SumDaily tmp
+    FROM tmp_SumDaily AS tmp
     ON DUPLICATE KEY UPDATE TotalTrans = tmp.TotalTrans, 
 							TotalValidTrans = tmp.TotalValidTrans, 
 							ModifiedDate = lv_CurrentDate;
@@ -91,12 +91,12 @@ BEGIN
     INSERT INTO FPS_FingerPrint.TransactionMonthlySum(TransMonth, SubscriberId, TotalTrans, CreateDate, ModifiedDate)
     WITH tmp_SumDaily AS
     (
-		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') as TransMonth
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
 			, 	cl.SubscriberId
-			, 	SUM(cl.TotalTrans) as TotalTrans       
-			, 	lv_CurrentDate as CreatedDate
-			, 	lv_CurrentDate as ModifiedDate
-		FROM FPS_FingerPrint.TransactionDailySum cl 
+			, 	SUM(cl.TotalTrans) AS TotalTrans       
+			, 	lv_CurrentDate AS CreatedDate
+			, 	lv_CurrentDate AS ModifiedDate
+		FROM FPS_FingerPrint.TransactionDailySum AS cl 
 		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
 		GROUP BY cl.SubscriberId, TransMonth
 	)
@@ -105,7 +105,7 @@ BEGIN
             ,	tmp.TotalTrans	           
             ,	tmp.CreatedDate	
             ,	tmp.ModifiedDate
-    FROM tmp_SumDaily tmp
+    FROM tmp_SumDaily AS tmp
     ON DUPLICATE KEY UPDATE TotalTrans = tmp.TotalTrans,     
 							ModifiedDate = lv_CurrentDate;
     

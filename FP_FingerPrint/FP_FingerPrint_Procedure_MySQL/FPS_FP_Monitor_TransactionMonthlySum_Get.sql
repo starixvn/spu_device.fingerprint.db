@@ -1,4 +1,4 @@
-/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsService" isFunction="0" isNested="0"></info>*/
 DROP PROCEDURE IF EXISTS `FPS_FP_Monitor_TransactionMonthlySum_Get`;
 DELIMITER $$
 
@@ -27,23 +27,23 @@ BEGIN
     SET lv_FirstDate = STR_TO_DATE(CONCAT('01/',ip_Month), '%d/%m/%Y');
 
    -- Server monthly sum
-    SELECT daily.TransMonth as TransDate
+    SELECT daily.TransMonth AS TransDate
 		, daily.SubscriberId
-		, sub.Name as SubscriberName
+		, sub.Name AS SubscriberName
         , daily.TotalTrans
         , daily.TotalValidTrans
-	FROM FPS_FingerPrint.ServerTransactionMonthlySum daily
-		INNER JOIN FPS_FingerPrint.Subscribers sub on sub.Id = daily.SubscriberId
+	FROM FPS_FingerPrint.ServerTransactionMonthlySum AS daily
+		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = daily.SubscriberId
 	WHERE daily.TransMonth = lv_FirstDate;
 
    -- Client monthly sum
     SELECT daily.TransMonth
 		, daily.SubscriberId
-		, sub.Name as SubscriberName
+		, sub.Name AS SubscriberName
         , daily.TotalTrans
         , daily.TotalValidTrans
-	FROM FPS_FingerPrint.ClientTransactionMonthlySum daily
-		INNER JOIN FPS_FingerPrint.Subscribers sub on sub.Id = daily.SubscriberId
+	FROM FPS_FingerPrint.ClientTransactionMonthlySum AS daily
+		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = daily.SubscriberId
 	WHERE daily.TransMonth = lv_FirstDate;
     
 END$$
