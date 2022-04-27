@@ -25,6 +25,7 @@ BEGIN
 	*/
     
     DECLARE lv_CurrentDate DATETIME DEFAULT NOW();
+    DECLARE lv_RawFingerPrintId BIGINT;
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
@@ -35,7 +36,8 @@ BEGIN
     
     DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;     
 	CREATE TEMPORARY TABLE Temp_FingerPrint(
-			FingerPrintCode				VARCHAR(200) 	NULL	
+			RawFingerPrintId			BIGINT		 	NULL	
+		,	FingerPrintCode				VARCHAR(200) 	NULL	
 		,	SessionKey					VARCHAR(100) 	NULL
 		,	SubscriberId				INT	 			NULL
 		,	Attribute					LONGTEXT	 	NULL
@@ -71,23 +73,24 @@ BEGIN
 				)
 		   ) AS tmp; 
     
-    INSERT INTO FPS_FingerPrint.FingerPrintAttribute(AttributeCode, AttributeDetail, CreatedDate, ModifiedDate)
-    SELECT	tmp.FingerPrintCode
-		,	tmp.Attribute
-        ,	lv_CurrentDate AS CreatedDate
-        ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_FingerPrint tmp
-	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
-    
     INSERT INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode		
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
 	FROM Temp_FingerPrint tmp
-	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;    
+	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
-    INSERT INTO FPS_FingerPrint.ClientTransaction(FingerPrintCode, SubscriberId, CookieCode, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
-	SELECT	tmp.FingerPrintCode
+    UPDATE Temp_FingerPrint tmp
+    INNER JOIN FPS_FingerPrint.RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
+    SET tmp.RawFingerPrintId = rfp.Id;
+    
+    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(RawFingerPrintId, Attribute)
+    SELECT	tmp.RawFingerPrintId
+		,	tmp.Attribute
+	FROM Temp_FingerPrint tmp;
+    
+    INSERT INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieCode, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
+	SELECT	tmp.RawFingerPrintId
 		,	tmp.SubscriberId
 		,	tmp.CookieCode
 		,	tmp.SessionKey

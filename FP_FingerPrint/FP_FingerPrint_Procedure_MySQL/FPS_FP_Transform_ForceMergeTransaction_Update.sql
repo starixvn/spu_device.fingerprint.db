@@ -52,48 +52,48 @@ BEGIN
 		   ) AS rt; 
         
     CREATE TEMPORARY TABLE Temp_TransactionsDevice(
-			Id 				BIGINT 
-		,	ServerTransId 	BIGINT
-		,	CustId 			BIGINT 
-		,	SubAccId 		BIGINT
-		,	LoginName 		VARCHAR(100) 
-		,	SubscriberId 	INT 
-		,	FingerPrintCode VARCHAR(64) 
-		,	CookieCode 		VARCHAR(64) 
-		,	DeviceId 		BIGINT
-		,	TransTime 		DATETIME(4) 
-		,	ClientIP 		VARCHAR(45) 
-		,	UserAgentId		BIGINT
-		,	UserAgent 		VARCHAR(500) 
-		,	Url 			VARCHAR(100) 
-		,	Action 			VARCHAR(100) 
-		,	CreatedDate 	DATETIME 
-		,	TransKey 		VARCHAR(200) 
-		,	Retry 			TINYINT 
-		,	Flagged 		VARCHAR(50)
-        , 	INDEX IX_Temp_Transactions_TransKey(TransKey)
+			Id 					BIGINT UNSIGNED
+		,	ServerTransId 		BIGINT UNSIGNED
+		,	CustId 				BIGINT UNSIGNED
+		,	SubAccId 			BIGINT UNSIGNED
+		,	LoginName 			VARCHAR(100) 
+		,	SubscriberId 		INT 
+		,	RawFingerPrintId 	BIGINT UNSIGNED
+		,	CookieCode 			VARCHAR(64) 
+		,	DeviceId 			BIGINT UNSIGNED
+		,	TransTime 			DATETIME(4) 
+		,	ClientIP 			VARCHAR(45) 
+		,	UserAgentId			BIGINT UNSIGNED
+		,	UserAgent 			VARCHAR(500) 
+		,	Url 				VARCHAR(100) 
+		,	Action 				VARCHAR(100) 
+		,	CreatedDate 		DATETIME 
+		,	TransKey 			VARCHAR(200) 
+		,	Retry 				TINYINT 
+		,	Flagged 			VARCHAR(50)
+        , 	INDEX IX_Temp_TransactionsDevice_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
+    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
 		SELECT  td.Id
-		, 	td.ServerTransId
-		, 	td.CustId
-		, 	td.SubAccId
-		, 	td.LoginName
-		, 	td.SubscriberId
-		, 	td.FingerPrintCode
-		, 	td.CookieCode
-		, 	td.DeviceId
-		, 	td.TransTime
-		, 	td.ClientIP
-		, 	td.UserAgentId
-		, 	td.UserAgent
-		, 	td.Url
-		, 	td.Action
-		, 	td.CreatedDate
-		, 	td.TransKey
-		, 	td.Retry
-		, 	td.Flagged
+			, 	td.ServerTransId
+			, 	td.CustId
+			, 	td.SubAccId
+			, 	td.LoginName
+			, 	td.SubscriberId
+			, 	td.RawFingerPrintId
+			, 	td.CookieCode
+			, 	td.DeviceId
+			, 	td.TransTime
+			, 	td.ClientIP
+			, 	td.UserAgentId
+			, 	td.UserAgent
+			, 	td.Url
+			, 	td.Action
+			, 	td.CreatedDate
+			, 	td.TransKey
+			, 	td.Retry
+			, 	td.Flagged
     FROM FPS_FingerPrint.TransactionDevice AS td
 		INNER JOIN Temp_Transactions tmp ON td.Id = tmp.Id;
     
@@ -133,14 +133,14 @@ BEGIN
 	FROM Temp_TransactionsDevice AS transD   
 		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = transD.SubscriberId;
     
-	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, FingerPrintCode,	CookieCode,	DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate,	TransKey, Flagged, Retry)
+	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate,	TransKey, Flagged, Retry)
 	SELECT	transD.Id	
 		,	transD.ServerTransId
 		,	transD.CustId
 		,	transD.SubAccId
 		,	transD.LoginName
 		,	transD.SubscriberId
-		,	transD.FingerPrintCode
+		,	transD.RawFingerPrintId
 		,	transD.CookieCode
 		,	transD.DeviceId
 		,	transD.TransTime

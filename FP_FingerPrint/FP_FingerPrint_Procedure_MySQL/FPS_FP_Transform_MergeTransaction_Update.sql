@@ -51,50 +51,50 @@ BEGIN
 		   ) AS  rt; 
     
     CREATE TEMPORARY TABLE Temp_TransactionsDevice(
-			Id 				BIGINT 
-		,	ServerTransId 	BIGINT
-		,	CustId 			BIGINT 
-		,	SubAccId 		BIGINT
-		,	LoginName 		VARCHAR(100) 
-		,	SubscriberId 	INT 
-		,	FingerPrintCode VARCHAR(64) 
-		,	CookieCode 		VARCHAR(64) 
-		,	DeviceId 		BIGINT
-		,	TransTime 		DATETIME(4) 
-		,	ClientIP 		VARCHAR(45) 
-		,	UserAgentId		BIGINT
-		,	UserAgent 		VARCHAR(500) 
-		,	Url 			VARCHAR(100) 
-		,	Action 			VARCHAR(100) 
-		,	CreatedDate 	DATETIME 
-		,	TransKey 		VARCHAR(200) 
-		,	Retry 			TINYINT 
-		,	Flagged 		VARCHAR(50)
+			Id 					BIGINT UNSIGNED
+		,	ServerTransId 		BIGINT UNSIGNED
+		,	CustId 				BIGINT UNSIGNED
+		,	SubAccId 			BIGINT UNSIGNED
+		,	LoginName 			VARCHAR(100) 
+		,	SubscriberId 		INT UNSIGNED
+		,	RawFingerPrintId 	BIGINT UNSIGNED
+		,	CookieCode 			VARCHAR(64) 
+		,	DeviceId 			BIGINT UNSIGNED
+		,	TransTime 			DATETIME(4) 
+		,	ClientIP 			VARCHAR(45) 
+		,	UserAgentId			BIGINT UNSIGNED
+		,	UserAgent 			VARCHAR(500) 
+		,	Url 				VARCHAR(100) 
+		,	Action 				VARCHAR(100) 
+		,	CreatedDate 		DATETIME 
+		,	TransKey 			VARCHAR(200) 
+		,	Retry 				TINYINT 
+		,	Flagged 			VARCHAR(50)
         , 	INDEX IX_Temp_Transactions_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
+    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
     SELECT  td.Id
-		, td.ServerTransId
-		, td.CustId
-		, td.SubAccId
-		, td.LoginName
-		, td.SubscriberId
-		, td.FingerPrintCode
-		, td.CookieCode
-		, td.DeviceId
-		, td.TransTime
-		, td.ClientIP
-		, td.UserAgentId
-		, td.UserAgent
-		, td.Url
-		, td.Action
-		, td.CreatedDate
-		, td.TransKey
-		, td.Retry
-		, td.Flagged
+		, 	td.ServerTransId
+		, 	td.CustId
+		, 	td.SubAccId
+		, 	td.LoginName
+		, 	td.SubscriberId
+		, 	td.RawFingerPrintId
+		, 	td.CookieCode
+		, 	td.DeviceId
+		, 	td.TransTime
+		, 	td.ClientIP
+		, 	td.UserAgentId
+		, 	td.UserAgent
+		, 	td.Url
+		, 	td.Action
+		, 	td.CreatedDate
+		, 	td.TransKey
+		, 	td.Retry
+		, 	td.Flagged
     FROM FPS_FingerPrint.TransactionDevice AS td
-    INNER JOIN Temp_Transactions AS tmp ON td.Id = tmp.Id;
+		INNER JOIN Temp_Transactions AS tmp ON td.Id = tmp.Id;
     
     CREATE TEMPORARY TABLE Temp_Transactions2(
 			Id					BIGINT UNSIGNED
@@ -106,21 +106,21 @@ BEGIN
 		,	DeviceCode 			VARCHAR(32) 
 		,	FingerprintCode 	VARCHAR(620) 
 		,	FingerprintMoreInfo VARCHAR(250) 
-		,	UserAgentId			BIGINT 
+		,	UserAgentId			BIGINT UNSIGNED
 		,	UserAgent 			VARCHAR(500) 
 		,	IP 					VARCHAR(50) 
 		,	IPID 				DECIMAL(50,0) 
-		,	PluginID 			BIGINT 
+		,	PluginID 			BIGINT UNSIGNED
 		,	URL 				VARCHAR(500) 
 		,	Action 				VARCHAR(100) 
 		,	ActionResult 		VARCHAR(100) 
 		,	InvalidDevice 		VARCHAR(1000) 
 		,	TransStatus 		BIT(16) 
-		,	FPSTransID 			BIGINT 
+		,	FPSTransID 			BIGINT UNSIGNED
 		,	Flagged 			SMALLINT 
 		,	IsProcessed 		TINYINT 
-		,	TransID 			BIGINT
-		,	FPDeviceID 			BIGINT 
+		,	TransID 			BIGINT UNSIGNED
+		,	FPDeviceID 			BIGINT UNSIGNED
 		,	SubscriberID 		INT 
 		,	CustID 				INT 
 		,	CustSubID 			INT 
@@ -171,7 +171,7 @@ BEGIN
 		,	transO.Flagged
         ,	transD.TransKey
 	FROM Temp_TransactionsDevice AS transD
-	INNER JOIN FPSTesting.FP_RawTransaction_Old AS transO ON transD.TransKey = transO.TransKey;
+		INNER JOIN FPSTesting.FP_RawTransaction_Old AS transO ON transD.TransKey = transO.TransKey;
     
     INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	tmp.LoginName	
@@ -205,14 +205,14 @@ BEGIN
        ,	tmp.TransKey
    FROM Temp_Transactions2 AS tmp;
       
-   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, FingerPrintCode, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Flagged, Retry)
+   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Flagged, Retry)
    SELECT	transD.Id
 		,	transD.ServerTransId
 		,	transD.CustId
 		,	transD.SubAccId
 		,	transD.LoginName
 		,	transD.SubscriberId
-		,	transD.FingerPrintCode
+		,	transD.RawFingerPrintId
 		,	transD.CookieCode
 		,	transD.DeviceId
 		,	transD.TransTime
@@ -239,32 +239,33 @@ BEGIN
 	SET transD.Retry = transD.Retry + 1;
       
 	INSERT INTO FPSTesting.FP_RawTransaction_Old_Completed(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, Flagged, IsProcessed, TransID, TransKey)
-	SELECT trans.LoginName
-    , 	trans.SubscriberName
-    , 	trans.TransTime
-    , 	trans.CreatedDate
-    , 	trans.DeviceCode
-    , 	trans.FingerprintCode
-    , 	trans.FingerprintMoreInfo
-    , 	trans.UserAgent
-    , 	trans.IP
-    , 	trans.IPID
-    , 	trans.PluginID
-    , 	trans.URL
-    , 	trans.Action
-    , 	trans.ActionResult
-    , 	trans.InvalidDevice
-    , 	trans.TransStatus
-    , 	trans.FPSTransID
-    , 	trans.Flagged
-    , 	trans.IsProcessed
-    , 	trans.TransID
-    , 	trans.TransKey 
+	SELECT 	trans.LoginName
+		, 	trans.SubscriberName
+		, 	trans.TransTime
+		, 	trans.CreatedDate
+		, 	trans.DeviceCode
+		, 	trans.FingerprintCode
+		, 	trans.FingerprintMoreInfo
+		, 	trans.UserAgent
+		, 	trans.IP
+		, 	trans.IPID
+		, 	trans.PluginID
+		, 	trans.URL
+		, 	trans.Action
+		, 	trans.ActionResult
+		, 	trans.InvalidDevice
+		, 	trans.TransStatus
+		, 	trans.FPSTransID
+		, 	trans.Flagged
+		, 	trans.IsProcessed
+		, 	trans.TransID
+		, 	trans.TransKey 
 	FROM FPSTesting.FP_RawTransaction_Old AS trans 
 		INNER JOIN Temp_Transactions2 AS tmp ON trans.TransID = tmp.Id_Old;
    
-	DELETE trans FROM FPSTesting.FP_RawTransaction_Old AS trans
-	INNER JOIN Temp_Transactions2 AS tmp ON trans.TransID = tmp.Id_Old;       
+	DELETE trans 
+    FROM FPSTesting.FP_RawTransaction_Old AS trans
+		INNER JOIN Temp_Transactions2 AS tmp ON trans.TransID = tmp.Id_Old;       
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions; 
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions2; 
