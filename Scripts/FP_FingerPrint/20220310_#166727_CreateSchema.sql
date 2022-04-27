@@ -9,60 +9,62 @@
 CREATE SCHEMA `FPS_FingerPrint` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci; 
 USE FPS_FingerPrint;
 
-CREATE TABLE Device (
-  Id bigint unsigned NOT NULL AUTO_INCREMENT,
-  FirstFingerprintCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  CreatedDate datetime DEFAULT NULL,
-  ModifiedDate datetime DEFAULT NULL,
-  PRIMARY KEY (Id),
-  UNIQUE KEY UX_Device_FirstFingerprintCode (FirstFingerprintCode)
+CREATE TABLE `Device` (
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `FirstRawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `UX_Device_FirstRawFingerPrintId` (`FirstRawFingerPrintId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE DeviceCookie (
-  Id bigint unsigned NOT NULL AUTO_INCREMENT,
-  CookieCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  DeviceId bigint unsigned DEFAULT NULL,
-  CreatedDate datetime DEFAULT NULL,
-  ModifiedDate datetime DEFAULT NULL,
+  Id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  CookieCode VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  DeviceId BIGINT UNSIGNED DEFAULT NULL,
+  CreatedDate DATETIME DEFAULT NULL,
+  ModifiedDate DATETIME DEFAULT NULL,
   PRIMARY KEY (Id),
   UNIQUE KEY UX_DeviceCookie_CookieCode (CookieCode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE DeviceFingerPrint (
-  Id bigint unsigned NOT NULL AUTO_INCREMENT,
-  FingerPrintCode varchar(64) COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  DeviceId bigint unsigned DEFAULT NULL,
-  CreatedDate datetime DEFAULT NULL,
-  ModifiedDate datetime DEFAULT NULL,
-  PRIMARY KEY (Id),
-  UNIQUE KEY UX_DeviceFingerPrint_FingerPrintCode (FingerPrintCode)
+CREATE TABLE `DeviceFingerPrint` (
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `DeviceId` BIGINT UNSIGNED DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `UX_DeviceFingerPrint_RawFingerPrintId` (`RawFingerPrintId`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ClientTransaction` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `SessionKey` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `FingerPrintCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CookieCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` int DEFAULT NULL,
-  `Flagged` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Used headless to check data from js:\n- human\n- bot',
-  `RobotDetail` varchar(300) DEFAULT NULL,
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `CreatedDate` datetime NOT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
-  PRIMARY KEY (`Id`)
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `SessionKey` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CookieCode` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `RobotDetail` VARCHAR(300) DEFAULT NULL,
+  `Flagged` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Used headless to check data from js:\\\\n- human\\\\n- bot',
+  `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `CreatedDate` DATETIME NOT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `IX_ClientTransaction_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
  CREATE TABLE `ClientTransactionCompleted` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `FingerPrintCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `CookieCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` int DEFAULT NULL,
-  `SessionKey` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Flagged` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Used headless to check data from js:\n- human\n- bot',
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `CreatedDate` datetime NOT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CookieCode` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `SessionKey` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `RobotDetail` VARCHAR(300) DEFAULT NULL,
+  `Flagged` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'Used headless to check data from js:\n- human\n- bot',
+  `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `CreatedDate` DATETIME NOT NULL,
   PRIMARY KEY (`Id`,`CreatedDate`),
   KEY `IX_ClientTransactionCompleted_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -113,60 +115,61 @@ CREATE TABLE `ClientTransaction` (
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 
 CREATE TABLE `Offset` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `OffsetName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `OffsetValue` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `CreatedDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `OffsetName` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `OffsetValue` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `UX_Offset_OffsetName` (`OffsetName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `RawFingerPrint` (
-  `FingerPrintCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `Attribute` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `CreatedDate` datetime(4) DEFAULT NULL,
-  `ModifiedDate` datetime(4) DEFAULT NULL,
-  PRIMARY KEY (`FingerPrintCode`)
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `FingerPrintCode` VARCHAR(64) DEFAULT NULL,
+  `CreatedDate` DATETIME(4) DEFAULT NULL,
+  `ModifiedDate` DATETIME(4) DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `UX_RawFingerPrint_FingerPrintCode` (`FingerPrintCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ServerTransaction` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `SessionKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `CustId` bigint unsigned DEFAULT NULL,
-  `SubAccId` bigint unsigned DEFAULT NULL,
-  `LoginName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` int DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `ClientIP` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `SessionKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `CustId` BIGINT UNSIGNED DEFAULT NULL,
+  `SubAccId` BIGINT UNSIGNED DEFAULT NULL,
+  `LoginName` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `UserAgentId` bigint DEFAULT NULL,
-  `UserAgent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `ModifiedDate` datetime(4) DEFAULT NULL,
-  `CreatedDate` datetime(4) DEFAULT NULL,
-  `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Retry` tinyint DEFAULT '0' COMMENT 'Số lần retry khi execute SP FP_UpdateTransaction',
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `ModifiedDate` DATETIME(4) DEFAULT NULL,
+  `CreatedDate` DATETIME(4) DEFAULT NULL,
+  `TransKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Retry` TINYINT DEFAULT '0' COMMENT 'Số lần retry khi execute SP FP_UpdateTransaction',
+  `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ServerTransactionCompleted` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `SessionKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `CustId` bigint unsigned DEFAULT NULL,
-  `SubAccId` bigint unsigned DEFAULT NULL,
-  `LoginName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` int DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `ClientIP` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `SessionKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `CustId` BIGINT UNSIGNED DEFAULT NULL,
+  `SubAccId` BIGINT UNSIGNED DEFAULT NULL,
+  `LoginName` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `UserAgentId` bigint DEFAULT NULL,
-  `UserAgent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
-  `CreatedDate` datetime NOT NULL,
-  `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Retry` tinyint DEFAULT '0',
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  `CreatedDate` DATETIME NOT NULL,
+  `TransKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Retry` TINYINT DEFAULT '0',
+  `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`Id`,`CreatedDate`),
   KEY `IX_ServerTransactionCompleted_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -217,87 +220,87 @@ CREATE TABLE `ServerTransactionCompleted` (
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 
 CREATE TABLE `ServerTransactionN` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `ServerTransId` bigint unsigned NOT NULL,
-  `SessionKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT CURRENT_TIMESTAMP,
-  `CreatedDate` datetime DEFAULT CURRENT_TIMESTAMP,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ServerTransId` BIGINT UNSIGNED NOT NULL,
+  `SessionKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `CreatedDate` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `RawUserAgent` (
-  `Id` bigint NOT NULL AUTO_INCREMENT,
-  `UserAgentCode` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `UserAgentCode` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `UserAgent` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `ClientType` varchar(15) DEFAULT NULL,
-  `ClientName` varchar(100) DEFAULT NULL,
-  `ClientVersion` varchar(50) DEFAULT NULL,
-  `OSName` varchar(100) DEFAULT NULL,
-  `OSShortName` varchar(50) DEFAULT NULL,
-  `OSVersion` varchar(50) DEFAULT NULL,
-  `OSPlatform` varchar(15) DEFAULT NULL,
-  `Device` varchar(50) DEFAULT NULL,
-  `Brand` varchar(50) DEFAULT NULL,
-  `Model` varchar(15) DEFAULT NULL,
-  `BotName` varchar(100) DEFAULT NULL,
-  `BotCategory` varchar(50) DEFAULT NULL,
-  `CreatedDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `ClientType` VARCHAR(15) DEFAULT NULL,
+  `ClientName` VARCHAR(100) DEFAULT NULL,
+  `ClientVersion` VARCHAR(50) DEFAULT NULL,
+  `OSName` VARCHAR(100) DEFAULT NULL,
+  `OSShortName` VARCHAR(50) DEFAULT NULL,
+  `OSVersion` VARCHAR(50) DEFAULT NULL,
+  `OSPlatform` VARCHAR(15) DEFAULT NULL,
+  `Device` VARCHAR(50) DEFAULT NULL,
+  `Brand` VARCHAR(50) DEFAULT NULL,
+  `Model` VARCHAR(15) DEFAULT NULL,
+  `BotName` VARCHAR(100) DEFAULT NULL,
+  `BotCategory` VARCHAR(50) DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `UX_RawUserAgent_UserAgentCode` (`UserAgentCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Subscribers` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `Name` varchar(45) NOT NULL,
-  `IsActive` tinyint DEFAULT NULL,
-  `CreatedDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `Name` VARCHAR(45) NOT NULL,
+  `IsActive` TINYINT DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Name_UNIQUE` (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Transaction` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `ServerTransId` bigint unsigned DEFAULT NULL,
-  `CustId` bigint unsigned DEFAULT NULL,
-  `SubAccId` bigint unsigned DEFAULT NULL,
-  `LoginName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` int DEFAULT NULL,
-  `FingerPrintCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CookieCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `ClientIP` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ServerTransId` BIGINT UNSIGNED DEFAULT NULL,
+  `CustId` BIGINT UNSIGNED DEFAULT NULL,
+  `SubAccId` BIGINT UNSIGNED DEFAULT NULL,
+  `LoginName` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CookieCode` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `UserAgentId` bigint DEFAULT NULL,
-  `UserAgent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CreatedDate` datetime DEFAULT NULL,
-  `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Flagged` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `TransKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Flagged` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `TransactionCompleted` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `ServerTransId` bigint unsigned DEFAULT NULL,
-  `CustId` bigint unsigned DEFAULT NULL,
-  `SubAccId` bigint unsigned DEFAULT NULL,
-  `LoginName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` int DEFAULT NULL,
-  `FingerPrintCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CookieCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `DeviceId` bigint unsigned DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `ClientIP` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ServerTransId` BIGINT UNSIGNED DEFAULT NULL,
+  `CustId` BIGINT UNSIGNED DEFAULT NULL,
+  `SubAccId` BIGINT UNSIGNED DEFAULT NULL,
+  `LoginName` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CookieCode` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `DeviceId` BIGINT UNSIGNED DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `UserAgentId` bigint DEFAULT NULL,
-  `UserAgent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CreatedDate` datetime NOT NULL,
-  `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Flagged` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Retry` tinyint DEFAULT '0',
+  `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `CreatedDate` DATETIME NOT NULL,
+  `TransKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Flagged` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Retry` TINYINT DEFAULT '0',
   PRIMARY KEY (`Id`,`CreatedDate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(`CreatedDate`,0))
@@ -347,115 +350,115 @@ CREATE TABLE `TransactionCompleted` (
  PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 
 CREATE TABLE `TransactionDevice` (
-  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `ServerTransId` bigint unsigned DEFAULT NULL,
-  `CustId` bigint unsigned DEFAULT NULL,
-  `SubAccId` bigint unsigned DEFAULT NULL,
-  `LoginName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` int DEFAULT NULL,
-  `FingerPrintCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CookieCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `DeviceId` bigint unsigned DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `ClientIP` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `UserAgentId` bigint DEFAULT NULL,
-  `UserAgent` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CreatedDate` datetime DEFAULT NULL,
-  `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Retry` tinyint DEFAULT '0',
-  `Flagged` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ServerTransId` BIGINT UNSIGNED DEFAULT NULL,
+  `CustId` BIGINT UNSIGNED DEFAULT NULL,
+  `SubAccId` BIGINT UNSIGNED DEFAULT NULL,
+  `LoginName` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CookieCode` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `DeviceId` BIGINT UNSIGNED DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `UserAgentId` BIGINT UNSIGNED DEFAULT NULL,
+  `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `TransKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Retry` TINYINT DEFAULT '0',
+  `Flagged` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`Id`),
   KEY `IX_TransactionDevice_Retry` (`Retry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 CREATE TABLE Transaction_TestData (
-  Id bigint unsigned NOT NULL DEFAULT '0',
-  ServerTransId bigint unsigned DEFAULT NULL,
-  CustId bigint unsigned DEFAULT NULL,
-  SubAccId bigint unsigned DEFAULT NULL,
-  LoginName varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  SubscriberId int DEFAULT NULL,
-  FingerPrintCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  CookieCode varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  TransTime datetime(4) DEFAULT NULL,
-  ClientIP varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  UserAgent varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  Url varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  CreatedDate datetime DEFAULT NULL,
-  TransKey varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  Flagged varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
+  Id BIGINT UNSIGNED NOT NULL DEFAULT '0',
+  ServerTransId BIGINT UNSIGNED DEFAULT NULL,
+  CustId BIGINT UNSIGNED DEFAULT NULL,
+  SubAccId BIGINT UNSIGNED DEFAULT NULL,
+  LoginName VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  SubscriberId INT DEFAULT NULL,
+  FingerPrintCode VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  CookieCode VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  TransTime DATETIME(4) DEFAULT NULL,
+  ClientIP VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  UserAgent VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  Url VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  CreatedDate DATETIME DEFAULT NULL,
+  TransKey VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  Flagged VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ClientTransactionDailySum` (
-  `TransDate` date NOT NULL,
-  `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0',
-  `TotalValidTrans` int DEFAULT '0',
-  `CreateDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `TransDate` DATE NOT NULL,
+  `SubscriberId` INT NOT NULL,
+  `TotalTrans` INT DEFAULT '0',
+  `TotalValidTrans` INT DEFAULT '0',
+  `CreateDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`TransDate`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ClientTransactionMonthlySum` (
-  `TransMonth` date NOT NULL,
-  `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0',
-  `TotalValidTrans` int DEFAULT '0',
-  `CreateDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `TransMonth` DATE NOT NULL,
+  `SubscriberId` INT NOT NULL,
+  `TotalTrans` INT DEFAULT '0',
+  `TotalValidTrans` INT DEFAULT '0',
+  `CreateDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`TransMonth`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ServerTransactionDailySum` (
-  `TransDate` date NOT NULL,
-  `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0',
-  `TotalValidTrans` int DEFAULT '0',
-  `CreateDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `TransDate` DATE NOT NULL,
+  `SubscriberId` INT NOT NULL,
+  `TotalTrans` INT DEFAULT '0',
+  `TotalValidTrans` INT DEFAULT '0',
+  `CreateDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`TransDate`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ServerTransactionMonthlySum` (
-  `TransMonth` date NOT NULL,
-  `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0',
-  `TotalValidTrans` int DEFAULT '0',
-  `CreateDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `TransMonth` DATE NOT NULL,
+  `SubscriberId` INT NOT NULL,
+  `TotalTrans` INT DEFAULT '0',
+  `TotalValidTrans` INT DEFAULT '0',
+  `CreateDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`TransMonth`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `TransactionMonthlySum` (
-  `TransMonth` date NOT NULL,
-  `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0',  
-  `CreateDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `TransMonth` DATE NOT NULL,
+  `SubscriberId` INT NOT NULL,
+  `TotalTrans` INT DEFAULT '0',  
+  `CreateDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`TransMonth`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `TransactionDailySum` (
-  `TransDate` date NOT NULL,
-  `SubscriberId` int NOT NULL,
-  `TotalTrans` int DEFAULT '0', 
-  `CreateDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
+  `TransDate` DATE NOT NULL,
+  `SubscriberId` INT NOT NULL,
+  `TotalTrans` INT DEFAULT '0', 
+  `CreateDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`TransDate`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 #============================================================================================================================
 USE CTS_Log;
 CREATE TABLE `FPSLog` (
-  `Id` int NOT NULL AUTO_INCREMENT,
-  `SPName` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `InsertTime` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `OtherText` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `JsonString` json DEFAULT NULL,  
+  `Id` INT NOT NULL AUTO_INCREMENT,
+  `SPName` VARCHAR(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `InsertTime` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `OtherText` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  `JsonString` JSON DEFAULT NULL,  
   PRIMARY KEY (`Id`),
   INDEX IX_FPSLog_SPName(SPName)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
