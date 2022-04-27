@@ -124,11 +124,19 @@ CREATE TABLE `Offset` (
   UNIQUE KEY `UX_Offset_OffsetName` (`OffsetName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `FingerPrintAttribute` (
+  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `RawFingerPrintId` bigint unsigned NOT NULL,
+  `Attribute` longtext,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `UX_FingerPrintAttribute_RawFingerPrintId` (`RawFingerPrintId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE `RawFingerPrint` (
-  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `FingerPrintCode` VARCHAR(64) DEFAULT NULL,
-  `CreatedDate` DATETIME(4) DEFAULT NULL,
-  `ModifiedDate` DATETIME(4) DEFAULT NULL,
+  `Id` bigint NOT NULL AUTO_INCREMENT,
+  `FingerPrintCode` varchar(64) DEFAULT NULL,
+  `CreatedDate` datetime(4) DEFAULT NULL,
+  `ModifiedDate` datetime(4) DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `UX_RawFingerPrint_FingerPrintCode` (`FingerPrintCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -139,10 +147,10 @@ CREATE TABLE `ServerTransaction` (
   `CustId` BIGINT UNSIGNED DEFAULT NULL,
   `SubAccId` BIGINT UNSIGNED DEFAULT NULL,
   `LoginName` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `SubscriberId` INT DEFAULT NULL,
+  `SubscriberId` INT UNSIGNED DEFAULT NULL,
   `TransTime` DATETIME(4) DEFAULT NULL,
   `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `UserAgentId` bigint DEFAULT NULL,
+  `UserAgentId` BIGINT UNSIGNED DEFAULT NULL,
   `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `ModifiedDate` DATETIME(4) DEFAULT NULL,
@@ -271,7 +279,7 @@ CREATE TABLE `Transaction` (
   `CookieCode` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `TransTime` DATETIME(4) DEFAULT NULL,
   `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `UserAgentId` bigint DEFAULT NULL,
+  `UserAgentId` BIGINT UNSIGNED DEFAULT NULL,
   `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -293,7 +301,7 @@ CREATE TABLE `TransactionCompleted` (
   `DeviceId` BIGINT UNSIGNED DEFAULT NULL,
   `TransTime` DATETIME(4) DEFAULT NULL,
   `ClientIP` VARCHAR(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `UserAgentId` bigint DEFAULT NULL,
+  `UserAgentId` BIGINT UNSIGNED DEFAULT NULL,
   `UserAgent` VARCHAR(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Url` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Action` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -301,7 +309,7 @@ CREATE TABLE `TransactionCompleted` (
   `TransKey` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Flagged` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Retry` TINYINT DEFAULT '0',
-  PRIMARY KEY (`Id`,`CreatedDate`)
+  PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(`CreatedDate`,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
