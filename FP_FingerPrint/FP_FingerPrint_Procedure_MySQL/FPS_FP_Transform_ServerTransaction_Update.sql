@@ -197,12 +197,13 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmpT2.Id 
     WHERE tmpT2.RawFingerPrintId IS NOT NULL;
     
-    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, Flagged, Url, TransTime, CreatedDate)
+    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, RobotDetail, Flagged, Url, TransTime, CreatedDate)
     SELECT	fp.Id
 		,	fp.RawFingerPrintId
 		,	fp.CookieId
 		,	fp.SubscriberId
 		,	fp.SessionKey
+		,	fp.RobotDetail
 		,	fp.Flagged
 		,	fp.Url
 		,	fp.TransTime
