@@ -59,7 +59,7 @@ BEGIN
 		,	LoginName 			VARCHAR(100) 
 		,	SubscriberId 		INT 
 		,	RawFingerPrintId 	BIGINT UNSIGNED
-		,	CookieCode 			VARCHAR(64) 
+		,	CookieId 			BIGINT UNSIGNED
 		,	DeviceId 			BIGINT UNSIGNED
 		,	TransTime 			DATETIME(4) 
 		,	ClientIP 			VARCHAR(45) 
@@ -74,7 +74,7 @@ BEGIN
         , 	INDEX IX_Temp_TransactionsDevice_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
+    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
 		SELECT  td.Id
 			, 	td.ServerTransId
 			, 	td.CustId
@@ -82,20 +82,21 @@ BEGIN
 			, 	td.LoginName
 			, 	td.SubscriberId
 			, 	td.RawFingerPrintId
-			, 	td.CookieCode
+			, 	td.CookieId
 			, 	td.DeviceId
 			, 	td.TransTime
 			, 	td.ClientIP
 			, 	td.UserAgentId
-			, 	td.UserAgent
+			, 	ua.UserAgent
 			, 	td.Url
 			, 	td.Action
 			, 	td.CreatedDate
 			, 	td.TransKey
 			, 	td.Retry
 			, 	td.Flagged
-    FROM FPS_FingerPrint.TransactionDevice AS td
-		INNER JOIN Temp_Transactions tmp ON td.Id = tmp.Id;
+    FROM Temp_Transactions AS tmp
+		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
+        INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = tmp.UserAgentId;
     
 	INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL
 		, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old,	IP_Old,	UserAgent_Old, URL_Old,	Flagged_Old, TransKey)
@@ -133,7 +134,7 @@ BEGIN
 	FROM Temp_TransactionsDevice AS transD   
 		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = transD.SubscriberId;
     
-	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate,	TransKey, Flagged, Retry)
+	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate,	TransKey, Flagged, Retry)
 	SELECT	transD.Id	
 		,	transD.ServerTransId
 		,	transD.CustId
@@ -141,12 +142,11 @@ BEGIN
 		,	transD.LoginName
 		,	transD.SubscriberId
 		,	transD.RawFingerPrintId
-		,	transD.CookieCode
+		,	transD.CookieId
 		,	transD.DeviceId
 		,	transD.TransTime
 		,	transD.ClientIP
 		,	transD.UserAgentId
-		,	transD.UserAgent
 		,	transD.Url
 		,	transD.Action
 		,	transD.CreatedDate

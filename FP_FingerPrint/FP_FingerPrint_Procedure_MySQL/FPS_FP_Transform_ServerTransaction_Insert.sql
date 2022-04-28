@@ -23,6 +23,7 @@ BEGIN
 			- CALL FPS_FP_Transform_ServerTransaction_Insert(100);
 			
 	*/
+    DECLARE lv_CurrentDate DATETIME DEFAULT NOW();
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
@@ -96,20 +97,20 @@ BEGIN
 		   ) AS tmp; 
            
      
-	
+	/*******RawUserAgent********************/
     INSERT INTO FPS_FingerPrint.RawUserAgent (UserAgentCode, UserAgent, CreatedDate, ModifiedDate)	
 	SELECT	tmp.UserAgentCode
 		,	tmp.UserAgent
-        ,	NOW() AS CreatedDate
-        ,	NOW() AS ModifiedDate
+        ,	lv_CurrentDate AS CreatedDate
+        ,	lv_CurrentDate AS ModifiedDate
 	FROM Temp_Transactions AS tmp
-		LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.UserAgentCode = tmp.UserAgentCode
-	WHERE ua.Id IS NULL;
+	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
     UPDATE Temp_Transactions AS tmp
-		LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.UserAgentCode = tmp.UserAgentCode
+		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.UserAgentCode = tmp.UserAgentCode
 	SET tmp.UserAgentId = ua.Id;
 		
+        
     INSERT INTO FPS_FingerPrint.ServerTransaction(
 						LoginName
 					,	SubscriberId                    
@@ -117,25 +118,24 @@ BEGIN
 					,	TransTime
 					,	ClientIP
 					,	UserAgentId
-					,	UserAgent
                     ,	Url                    
                     ,	Action                    
 					,	ModifiedDate
 					,	CreatedDate
                     ,	TransKey
                     ,	CustId
-                    ,	SubAccId)
+                    ,	SubAccId
+	)
 	SELECT			tmp.LoginName
 					,	tmp.SubscriberId					
-                     ,	tmp.SessionKey
+					,	tmp.SessionKey
 					,	tmp.TransTime
 					,	tmp.ClientIp
 					,	tmp.UserAgentId
-					,	tmp.UserAgent
                     ,	tmp.Url                   
                     ,	tmp.Action                   
-					, 	NOW()
-					, 	NOW()
+					, 	lv_CurrentDate
+					, 	lv_CurrentDate
                     ,	tmp.TransKey
                     ,	tmp.CustId
                     ,	tmp.SubAccId
@@ -150,21 +150,21 @@ BEGIN
             ,	ModifiedDate
     )
     WITH group_data AS (
-		SELECT CAST(tmp.TransTime AS DATE) AS TransDate
-				,	tmp.SubscriberId
-				,	COUNT(tmp.SubscriberId) AS CountTrans
+		SELECT 	CAST(tmp.TransTime AS DATE) AS TransDate
+			,	tmp.SubscriberId
+			,	COUNT(tmp.SubscriberId) AS CountTrans
 		FROM Temp_Transactions AS tmp
 		GROUP BY TransDate, tmp.SubscriberId
 	)
     SELECT 	gd.TransDate
-			,	gd.SubscriberId
-			,	gd.CountTrans AS TotalTrans
-			,	0 AS TotalValidTrans
-			,	NOW() AS CreatedDate
-			,	NOW() AS ModifiedDate
+		,	gd.SubscriberId
+		,	gd.CountTrans AS TotalTrans
+		,	0 AS TotalValidTrans
+		,	lv_CurrentDate AS CreatedDate
+		,	lv_CurrentDate AS ModifiedDate
 	FROM group_data AS gd
     ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + gd.CountTrans,
-							ModifiedDate = NOW();
+							ModifiedDate = lv_CurrentDate;
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
 END$$

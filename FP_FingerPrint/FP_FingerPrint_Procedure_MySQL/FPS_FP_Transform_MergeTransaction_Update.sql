@@ -58,7 +58,7 @@ BEGIN
 		,	LoginName 			VARCHAR(100) 
 		,	SubscriberId 		INT UNSIGNED
 		,	RawFingerPrintId 	BIGINT UNSIGNED
-		,	CookieCode 			VARCHAR(64) 
+		,	CookieId 			BIGINT UNSIGNED
 		,	DeviceId 			BIGINT UNSIGNED
 		,	TransTime 			DATETIME(4) 
 		,	ClientIP 			VARCHAR(45) 
@@ -73,7 +73,7 @@ BEGIN
         , 	INDEX IX_Temp_Transactions_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
+    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
     SELECT  td.Id
 		, 	td.ServerTransId
 		, 	td.CustId
@@ -81,20 +81,21 @@ BEGIN
 		, 	td.LoginName
 		, 	td.SubscriberId
 		, 	td.RawFingerPrintId
-		, 	td.CookieCode
+		, 	td.CookieId
 		, 	td.DeviceId
 		, 	td.TransTime
 		, 	td.ClientIP
 		, 	td.UserAgentId
-		, 	td.UserAgent
+		, 	ua.UserAgent
 		, 	td.Url
 		, 	td.Action
 		, 	td.CreatedDate
 		, 	td.TransKey
 		, 	td.Retry
 		, 	td.Flagged
-    FROM FPS_FingerPrint.TransactionDevice AS td
-		INNER JOIN Temp_Transactions AS tmp ON td.Id = tmp.Id;
+    FROM Temp_Transactions AS tmp
+		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
+		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
     
     CREATE TEMPORARY TABLE Temp_Transactions2(
 			Id					BIGINT UNSIGNED
@@ -205,7 +206,7 @@ BEGIN
        ,	tmp.TransKey
    FROM Temp_Transactions2 AS tmp;
       
-   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieCode, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Flagged, Retry)
+   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, Flagged, Retry)
    SELECT	transD.Id
 		,	transD.ServerTransId
 		,	transD.CustId
@@ -213,12 +214,11 @@ BEGIN
 		,	transD.LoginName
 		,	transD.SubscriberId
 		,	transD.RawFingerPrintId
-		,	transD.CookieCode
+		,	transD.CookieId
 		,	transD.DeviceId
 		,	transD.TransTime
 		,	transD.ClientIP
 		,	transD.UserAgentId
-		,	transD.UserAgent
 		,	transD.Url
 		,	transD.Action
 		,	transD.CreatedDate
