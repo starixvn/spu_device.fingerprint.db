@@ -34,7 +34,9 @@ BEGIN
 	END IF;
     /*******LOG TEST********************/
     
-    DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;     
+    DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;
+    DROP TEMPORARY TABLE IF EXISTS Temp_RawFingerPrint;
+    
 	CREATE TEMPORARY TABLE Temp_FingerPrint(
 			RawFingerPrintId			BIGINT UNSIGNED 	NULL	
 		,	FingerPrintCode				VARCHAR(200) 		NULL	
@@ -47,7 +49,23 @@ BEGIN
 		,	RobotDetail					VARCHAR(300)		NULL	
         ,	Url							VARCHAR(100)		NULL
 		,	TransTime					DATETIME(4)	 		NULL	
+        , 	INDEX IX_Temp_FingerPrint_FingerPrintCode(FingerPrintCode)
     );     
+    
+	CREATE TEMPORARY TABLE Temp_RawFingerPrint(
+			RawFingerPrintId			BIGINT UNSIGNED 	NOT NULL	
+		,	FingerPrintCode				VARCHAR(64) 		NOT NULL
+        ,	PRIMARY KEY (RawFingerPrintId)	
+        , 	INDEX IX_Temp_RawFingerPrint_FingerPrintCode(FingerPrintCode)
+    );   
+    
+	CREATE TEMPORARY TABLE Temp_Cookie(
+			CookieId					BIGINT UNSIGNED 	NOT NULL	
+		,	CookieCode					VARCHAR(64) 		NOT NULL
+        ,	PRIMARY KEY (CookieId)	
+        , 	INDEX IX_Temp_Cookie_CookieCode(CookieCode)
+    );   
+
     
     INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, Attribute, CookieCode, Flagged, RobotDetail, Url, TransTime)
 	SELECT	tmp.FingerPrintCode
@@ -62,7 +80,7 @@ BEGIN
 	FROM	JSON_TABLE(
 			ip_FingerPrint,
 			 "$[*]" COLUMNS(
-								FingerPrintCode			VARCHAR(200)	PATH "$.FingerPrintCode"       
+								FingerPrintCode			VARCHAR(64)	PATH "$.FingerPrintCode"       
 							,	SessionKey				VARCHAR(100) 	PATH "$.SessionKey"   
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
 							,	Attribute				LONGTEXT		PATH "$.Attribute"
@@ -82,9 +100,14 @@ BEGIN
 	FROM Temp_FingerPrint AS tmp
 	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
+    INSERT INTO Temp_RawFingerPrint(RawFingerPrintId, FingerPrintCode)
+    SELECT rfp.Id AS RawFingerPrintId, tmp.FingerPrintCode
+    FROM Temp_FingerPrint AS tmp
+		INNER JOIN FPS_FingerPrint.RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode;
+    
     UPDATE Temp_FingerPrint AS tmp
-		INNER JOIN FPS_FingerPrint.RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
-    SET tmp.RawFingerPrintId = rfp.Id;
+		INNER JOIN Temp_RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
+    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;
     
     INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(RawFingerPrintId, Attribute)
     SELECT	tmp.RawFingerPrintId
@@ -100,9 +123,14 @@ BEGIN
 	FROM Temp_FingerPrint AS tmp
 	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
+    INSERT INTO Temp_Cookie(CookieId, CookieCode)
+    SELECT c.Id AS CookieId, tmp.CookieCode
+    FROM Temp_FingerPrint AS tmp
+		INNER JOIN FPS_FingerPrint.Cookie AS c ON c.CookieCode = tmp.CookieCode;
+        
     UPDATE Temp_FingerPrint AS tmp
-		INNER JOIN FPS_FingerPrint.Cookie AS c ON c.CookieCode = tmp.CookieCode
-    SET tmp.CookieId = c.Id;
+		INNER JOIN Temp_Cookie AS c ON c.CookieCode = tmp.CookieCode
+    SET tmp.CookieId = c.CookieId;
     
     
     /*******ClientTransaction********************/

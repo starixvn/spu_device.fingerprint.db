@@ -33,6 +33,8 @@ BEGIN
     /*******LOG TEST********************/
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
+    DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
+    
     
 	CREATE TEMPORARY TABLE Temp_Transactions(
 			Id 							BIGINT UNSIGNED 		NOT NULL AUTO_INCREMENT
@@ -41,17 +43,24 @@ BEGIN
 		,	SessionKey					VARCHAR(200)	 		NOT NULL
 		,	TransTime					DATETIME(4)	 			NULL		
 		,	ClientIp					VARCHAR(45)				NULL	
-		,	UserAgentId					BIGINT					NULL
+		,	UserAgentId					BIGINT UNSIGNED			NULL
 		,	UserAgent					VARCHAR(500)			NULL
 		,	UserAgentCode				VARCHAR(200)			NULL
 		,	Url							VARCHAR(100)			NULL
 		,	Action						VARCHAR(100)			NULL
 		,	TransKey					VARCHAR(500)			NULL
-        ,	CustId						BIGINT					NULL
-        ,	SubAccId					BIGINT					NULL
+        ,	CustId						BIGINT UNSIGNED			NULL
+        ,	SubAccId					BIGINT UNSIGNED			NULL
         ,	PRIMARY KEY (Id)
         , 	INDEX IX_Temp_Transactions_UserAgentCode(UserAgentCode)
     );     
+    
+	CREATE TEMPORARY TABLE Temp_RawUserAgent(
+			TransactionsId 				BIGINT UNSIGNED 		NOT NULL 
+		,	UserAgentId					BIGINT UNSIGNED			NOT NULL
+        ,	PRIMARY KEY (TransactionsId)
+        , 	INDEX IX_Temp_RawUserAgent_TransactionsId(TransactionsId)
+    );   
     
     INSERT INTO Temp_Transactions(
 			LoginName
@@ -105,11 +114,15 @@ BEGIN
         ,	lv_CurrentDate AS ModifiedDate
 	FROM Temp_Transactions AS tmp
 	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+        
+    INSERT INTO Temp_RawUserAgent(TransactionsId, UserAgentId)
+    SELECT tmp.Id AS TransactionsId, ua.Id AS UserAgentId
+    FROM Temp_Transactions AS tmp
+		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON tmp.UserAgentCode = ua.UserAgentCode;
     
     UPDATE Temp_Transactions AS tmp
-		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.UserAgentCode = tmp.UserAgentCode
-	SET tmp.UserAgentId = ua.Id;
-		
+		INNER JOIN Temp_RawUserAgent AS ua ON ua.TransactionsId = tmp.Id
+	SET tmp.UserAgentId = ua.UserAgentId;
         
     INSERT INTO FPS_FingerPrint.ServerTransaction(
 						LoginName
