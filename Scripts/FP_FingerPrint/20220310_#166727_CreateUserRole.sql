@@ -21,6 +21,9 @@ GRANT SELECT, INSERT, UPDATE, DELETE, CREATE TEMPORARY TABLES, EXECUTE ON `FPSTe
 
 
 /*Create User Role*/
+CREATE USER 'fpsOwner'@'%' IDENTIFIED WITH mysql_native_password BY 'xxxxx';
+GRANT `RoleFPSOwner`@`%`,`CTSLogWriter`@`%`  TO `fpsOwner`@`%`;
+
 CREATE USER 'fpsWeb'@'%' IDENTIFIED WITH mysql_native_password BY 'xxxxx';
 GRANT `RoleFPSReader`@`%`,`CTSLogWriter`@`%`  TO `fpsWeb`@`%`;
 CREATE USER 'fpsWebAdmin'@'%' IDENTIFIED WITH mysql_native_password BY 'xxxxx';
