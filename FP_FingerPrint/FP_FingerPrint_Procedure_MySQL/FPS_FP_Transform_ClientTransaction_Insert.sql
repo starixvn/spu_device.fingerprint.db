@@ -36,6 +36,7 @@ BEGIN
     
     DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrint;
     DROP TEMPORARY TABLE IF EXISTS Temp_RawFingerPrint;
+    DROP TEMPORARY TABLE IF EXISTS Temp_Cookie;
     
 	CREATE TEMPORARY TABLE Temp_FingerPrint(
 			RawFingerPrintId			BIGINT UNSIGNED 	NULL	
@@ -101,7 +102,7 @@ BEGIN
 	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
     INSERT INTO Temp_RawFingerPrint(RawFingerPrintId, FingerPrintCode)
-    SELECT rfp.Id AS RawFingerPrintId, tmp.FingerPrintCode
+    SELECT DISTINCT rfp.Id AS RawFingerPrintId, tmp.FingerPrintCode
     FROM Temp_FingerPrint AS tmp
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode;
     
@@ -124,7 +125,7 @@ BEGIN
 	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
     INSERT INTO Temp_Cookie(CookieId, CookieCode)
-    SELECT c.Id AS CookieId, tmp.CookieCode
+    SELECT DISTINCT c.Id AS CookieId, tmp.CookieCode
     FROM Temp_FingerPrint AS tmp
 		INNER JOIN FPS_FingerPrint.Cookie AS c ON c.CookieCode = tmp.CookieCode;
         
