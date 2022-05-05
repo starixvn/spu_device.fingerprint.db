@@ -35,7 +35,7 @@ CREATE TABLE `DeviceCookie` (
   `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `UX_DeviceCookie_CookieId` (`CookieId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `DeviceFingerPrint` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -415,16 +415,6 @@ CREATE TABLE `ClientTransactionDailySum` (
   PRIMARY KEY (`TransDate`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `ClientTransactionMonthlySum` (
-  `TransMonth` DATE NOT NULL,
-  `SubscriberId` INT NOT NULL,
-  `TotalTrans` INT DEFAULT '0',
-  `TotalValidTrans` INT DEFAULT '0',
-  `CreateDate` DATETIME DEFAULT NULL,
-  `ModifiedDate` DATETIME DEFAULT NULL,
-  PRIMARY KEY (`TransMonth`,`SubscriberId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE `ServerTransactionDailySum` (
   `TransDate` DATE NOT NULL,
   `SubscriberId` INT NOT NULL,
@@ -433,16 +423,6 @@ CREATE TABLE `ServerTransactionDailySum` (
   `CreateDate` DATETIME DEFAULT NULL,
   `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`TransDate`,`SubscriberId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-CREATE TABLE `ServerTransactionMonthlySum` (
-  `TransMonth` DATE NOT NULL,
-  `SubscriberId` INT NOT NULL,
-  `TotalTrans` INT DEFAULT '0',
-  `TotalValidTrans` INT DEFAULT '0',
-  `CreateDate` DATETIME DEFAULT NULL,
-  `ModifiedDate` DATETIME DEFAULT NULL,
-  PRIMARY KEY (`TransMonth`,`SubscriberId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `TransactionMonthlySum` (
