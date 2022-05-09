@@ -34,7 +34,7 @@ BEGIN
     /*******LOG TEST********************/
 	DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
 	CREATE TEMPORARY TABLE Temp_Transactions(
-			LoginName					VARCHAR(100) CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' NOT NULL	
+			LoginName					VARCHAR(100) 						NOT NULL	
 		,	SubscriberName				VARCHAR(50) 						NOT NULL
 		,	TransTime					TIMESTAMP(4)	 					NOT NULL
 		,	DeviceCode					VARCHAR(32) 						NULL		COMMENT 'Device Inject Code: 32 characters is auto generated'
@@ -47,7 +47,7 @@ BEGIN
 		,	URL							VARCHAR(500) 						NULL
         ,	`Action`					VARCHAR(100) 						NULL
 		,	ActionResult				VARCHAR(100) 						NULL
-		,	InvalidDevice				VARCHAR(1000)						CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' NULL
+		,	InvalidDevice				VARCHAR(1000)						NULL
 		,	TransStatus					BIT(16)								NULL
         ,	TransKey					VARCHAR(32)							NULL
     );     
@@ -72,7 +72,7 @@ BEGIN
 	FROM	JSON_TABLE(
 			ip_RawTransJson,
 			 "$[*]" COLUMNS(
-								LoginName				VARCHAR(100)	CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' PATH "$.LoginName"       
+								LoginName				VARCHAR(100)	PATH "$.LoginName"       
 							,	SubscriberName			VARCHAR(50) 	PATH "$.SubscriberName"   
 							,	TransTime				TIMESTAMP(4) 	PATH "$.TransTime"
 							,	DeviceCode				VARCHAR(32)		PATH "$.DeviceCode"
@@ -85,7 +85,7 @@ BEGIN
 							,	URL						VARCHAR(500) 	PATH "$.URL"
                             ,	Action					VARCHAR(100)	PATH "$.Action"
 							,	ActionResult			VARCHAR(100) 	PATH "$.ActionResult"
-                            ,	InvalidDevice			TEXT			CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' PATH "$.InvalidDevice"
+                            ,	InvalidDevice			TEXT			PATH "$.InvalidDevice"
                             ,	TransStatus				BIT(16)			PATH "$.TransStatus"
                             ,	TransKey				VARCHAR(32)		PATH "$.TransKey"
 				)

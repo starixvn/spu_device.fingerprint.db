@@ -36,7 +36,7 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction;
 	CREATE TEMPORARY TABLE IF NOT EXISTS Temp_RawTransaction (
 		    TransID					BIGINT UNSIGNED NOT NULL
-		,   LoginName				VARCHAR(100)  CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' NOT NULL
+		,   LoginName				VARCHAR(100) NOT NULL
 		,   TransTime				TIMESTAMP(4) NOT NULL
         ,   AccountID				BIGINT	UNSIGNED 	
         ,   SubscriberType		    TINYINT	UNSIGNED	
@@ -57,7 +57,7 @@ BEGIN
         ,   SubscriberID			INT
         ,	CustID					INT
         ,	CustSubID				INT
-        ,	LoginName_Old			VARCHAR(100)  CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' 
+        ,	LoginName_Old			VARCHAR(100)
         ,	TransTime_Old			DATETIME(3)
         ,	IP_Old					VARCHAR(50)
         ,	UserAgent_Old			VARCHAR(1000)
@@ -75,7 +75,7 @@ BEGIN
 
     DROP TEMPORARY TABLE IF EXISTS Temp_Account;
 	CREATE TEMPORARY TABLE  Temp_Account(
-		    LoginName				VARCHAR(100) CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' NOT NULL
+		    LoginName				VARCHAR(100) NOT NULL
 		,   SubscriberID			INT 
         ,   SubscriberType		    TINYINT	UNSIGNED	
     );

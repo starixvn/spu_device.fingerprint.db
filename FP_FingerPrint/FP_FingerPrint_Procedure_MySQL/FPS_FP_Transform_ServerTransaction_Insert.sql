@@ -38,7 +38,7 @@ BEGIN
     
 	CREATE TEMPORARY TABLE Temp_Transactions(
 			Id 							BIGINT UNSIGNED 		NOT NULL AUTO_INCREMENT
-		,	LoginName					VARCHAR(100) CHARACTER SET 'UTF8MB4' COLLATE 'UTF8MB4_UNICODE_CI' NOT NULL	
+		,	LoginName					VARCHAR(100) 			NOT NULL	
 		,	SubscriberId				INT						NOT NULL
 		,	SessionKey					VARCHAR(200)	 		NOT NULL
 		,	TransTime					DATETIME(4)	 			NULL		
