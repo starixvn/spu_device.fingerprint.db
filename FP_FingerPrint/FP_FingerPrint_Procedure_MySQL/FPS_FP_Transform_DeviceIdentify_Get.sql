@@ -98,7 +98,7 @@ BEGIN
                     GROUP BY tmpTg.CookieId
                     HAVING COUNT(1) > 1) AS tmp ON tmpTs.CookieId = tmp.CookieId
 	SET tmpTs.GroupCk = tmp.GroupCk;
-    
+  
     DELETE tmpTs
     FROM Temp_Transaction2 AS tmpTs
     WHERE GroupFp = 0 AND GroupCk = 0;    
@@ -142,7 +142,7 @@ BEGIN
 		INNER JOIN Temp_Transaction2 AS tmpTs2 ON tmpTs.Id = tmpTs2.Id
     SET tmpTs.GroupId = tmpTs2.GroupId;
     
-    #====RETURN 1: RawFingerPrintId IS NOT NULL===========================
+    #====1. RawFingerPrintId IS NOT NULL===========================
     SET @rowNo = 0; 
     SET @BatchNo = 1; 
     SET @GroupId = (SELECT tmpTs.GroupID FROM Temp_Transaction AS tmpTs WHERE tmpTs.GroupId > 0 ORDER BY tmpTs.GroupId ASC LIMIT 1) ;
@@ -155,7 +155,7 @@ BEGIN
     ORDER BY tmpTs.GroupId ASC 
     LIMIT 1;
     
-    #====RETURN 1: Group By (RawFingerPrintId OR CookieId)*/
+    #====RETURN 1.1: Group By (RawFingerPrintId OR CookieId)*/ ---> CALL FPS_FP_Transform_DeviceIdentify WITH ip_GroupType = 1
     SELECT	tmpTs.Id
 		,	tmpTs.TransTime
 		,	tmpTs.RawFingerPrintId
@@ -168,7 +168,7 @@ BEGIN
     WHERE tmpTs.RawFingerPrintId IS NOT NULL AND tmpTs.GroupId > 0
     ORDER BY tmpTs.GroupId ASC;
     
-    #====RETURN 2: Trans: NOT Group By (RawFingerPrintId OR CookieId)*/
+    #====RETURN 1.2: Trans: NOT Group By (RawFingerPrintId OR CookieId)*/ --> CALL FPS_FP_Transform_DeviceIdentify WITH ip_GroupType = 0
     SET @rowNo = 0;
     SET @BatchNo = @BatchNo + 1;  
     SELECT	tmpTs.Id
@@ -182,7 +182,7 @@ BEGIN
     WHERE tmpTs.RawFingerPrintId IS NOT NULL AND tmpTs.GroupId = 0
     ORDER BY tmpTs.GroupId ASC;    
     
-	#====RETURN 3: RawFingerPrintId IS NULL===========================
+	#====RETUNR 2. RawFingerPrintId IS NULL===========================
     SELECT	tmpTs.Id
 	FROM Temp_Transaction AS tmpTs
     WHERE tmpTs.RawFingerPrintId IS NULL;   

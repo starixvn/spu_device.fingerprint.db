@@ -188,7 +188,7 @@ BEGIN
     
     /*====NEW DEVICE */
     IF (ip_GroupType = 0) THEN	
-
+    
 		INSERT IGNORE INTO FPS_FingerPrint.Device(FirstRawFingerPrintId, CreatedDate, ModifiedDate)
 		SELECT 	tmpIt.RawFingerPrintId
 			,	lv_CreatedDate
@@ -205,7 +205,7 @@ BEGIN
             ,	tmpIt.RecoverType
             ,	tmpIt.GroupId
 		FROM Temp_InputTrans AS tmpIt
-			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstRawFingerPrintId = tmpIt.RawFingerPrintId;
+			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstRawFingerPrintId = tmpIt.RawFingerPrintId;           
         
         INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(RawFingerPrintId, DeviceId,  CreatedDate, ModifiedDate)
         SELECT 	tmpTd.RawFingerPrintId
@@ -222,7 +222,6 @@ BEGIN
 		FROM Temp_TransDevice AS tmpTd;
     
     ELSE		
-        
 		INSERT IGNORE INTO FPS_FingerPrint.Device(FirstRawFingerPrintId, CreatedDate, ModifiedDate)
 		SELECT 	tmpIt.RawFingerPrintId
 			,	lv_CreatedDate
@@ -240,23 +239,23 @@ BEGIN
             ,	tmpIt.GroupId
 		FROM Temp_InputTrans AS tmpIt
 			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpGd.GroupId = tmpIt.GroupId
-			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstRawFingerPrintId = tmpGd.RawFingerPrintId;            
+			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstRawFingerPrintId = tmpGd.RawFingerPrintId;		
   
         INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(RawFingerPrintId, DeviceId,  CreatedDate, ModifiedDate)
         SELECT 	tmpTd.RawFingerPrintId
 			,	tmpTd.DeviceId 
 			,	lv_CreatedDate
 			,	tmpTd.TransTime AS ModifiedDate        
-		FROM Temp_TransDevice AS tmpTd
-        WHERE tmpTd.Id != tmpTd.GroupId; 
+		FROM Temp_TransDevice AS tmpTd;
+        #WHERE tmpTd.Id != tmpTd.GroupId; 
         
 		INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieId, DeviceId,  CreatedDate, ModifiedDate)
         SELECT 	tmpTd.CookieId
 			,	tmpTd.DeviceId AS DeviceId
 			,	lv_CreatedDate
 			,	tmpTd.TransTime AS ModifiedDate              
-		FROM Temp_TransDevice AS tmpTd
-        WHERE tmpTd.Id != tmpTd.GroupId;  
+		FROM Temp_TransDevice AS tmpTd;
+       # WHERE tmpTd.Id != tmpTd.GroupId;  
         
 	END IF;
     
