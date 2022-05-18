@@ -1,0 +1,113 @@
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+DROP PROCEDURE IF EXISTS `FPS_FP_Summary_ClientServerTransaction_Monthly`;
+DELIMITER $$
+
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Summary_ClientServerTransaction_Monthly`(
+)
+    SQL SECURITY INVOKER
+BEGIN
+	/*
+		Created:	20220218@Terry.Nguyen
+		Task :		
+		DB:			FPS_FingerPrint
+		Original:
+
+		Revisions: 
+			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]			
+            
+		Param's Explanation (filtered by):	
+
+		Example:
+			- CALL FPS_FP_Summary_ClientServerTransaction_Monthly();
+			
+	*/
+    DECLARE lv_CurrentDate DATETIME DEFAULT NULL;
+    DECLARE lv_FirstDate DATETIME DEFAULT NULL;
+    DECLARE lv_LastDate DATETIME DEFAULT NULL;
+    
+    /*******LOG TEST********************/
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FPS_FP_Summary_ClientServerTransaction_Monthly', NULL, NULL, CURRENT_TIMESTAMP();
+	END IF;
+    /*******LOG TEST********************/
+    
+    SET lv_CurrentDate = NOW();
+    SET lv_FirstDate = CAST(DATE_FORMAT(lv_CurrentDate, '%Y-%m-01') AS DATE);
+    SET lv_LastDate = DATE_ADD(lv_FirstDate, INTERVAL 1 MONTH);
+	
+    INSERT INTO FPS_FingerPrint.ClientTransactionMonthlySum(TransMonth, SubscriberId, TotalTrans, TotalValidTrans, CreateDate, ModifiedDate)
+    WITH tmp_SumDaily AS
+    (
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
+			, 	cl.SubscriberId
+			, 	SUM(cl.TotalTrans) AS TotalTrans
+			, 	SUM(cl.TotalValidTrans) AS TotalValidTrans
+			, 	lv_CurrentDate AS CreatedDate
+			, 	lv_CurrentDate AS ModifiedDate
+		FROM FPS_FingerPrint.ClientTransactionDailySum AS cl 
+		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
+		GROUP BY cl.SubscriberId, TransMonth
+	)
+    SELECT 		tmp.TransMonth
+			,	tmp.SubscriberId	
+            ,	tmp.TotalTrans	
+            ,	tmp.TotalValidTrans	
+            ,	tmp.CreatedDate	
+            ,	tmp.ModifiedDate
+    FROM tmp_SumDaily AS tmp
+    ON DUPLICATE KEY UPDATE TotalTrans = tmp.TotalTrans, 
+							TotalValidTrans = tmp.TotalValidTrans, 
+							ModifiedDate = lv_CurrentDate;
+    
+    #==================================
+    
+    INSERT INTO FPS_FingerPrint.ServerTransactionMonthlySum(TransMonth, SubscriberId, TotalTrans, TotalValidTrans, CreateDate, ModifiedDate)
+    WITH tmp_SumDaily AS
+    (
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
+			, 	cl.SubscriberId
+			, 	SUM(cl.TotalTrans) AS TotalTrans
+			, 	SUM(cl.TotalValidTrans) AS TotalValidTrans
+			, 	lv_CurrentDate AS CreatedDate
+			, 	lv_CurrentDate AS ModifiedDate
+		FROM FPS_FingerPrint.ServerTransactionDailySum AS cl 
+		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
+		GROUP BY cl.SubscriberId, TransMonth
+	)
+    SELECT 		tmp.TransMonth
+			,	tmp.SubscriberId	
+            ,	tmp.TotalTrans	
+            ,	tmp.TotalValidTrans	
+            ,	tmp.CreatedDate	
+            ,	tmp.ModifiedDate
+    FROM tmp_SumDaily AS tmp
+    ON DUPLICATE KEY UPDATE TotalTrans = tmp.TotalTrans, 
+							TotalValidTrans = tmp.TotalValidTrans, 
+							ModifiedDate = lv_CurrentDate;
+    
+    #==================================
+    
+    INSERT INTO FPS_FingerPrint.TransactionMonthlySum(TransMonth, SubscriberId, TotalTrans, CreateDate, ModifiedDate)
+    WITH tmp_SumDaily AS
+    (
+		SELECT 	DATE_FORMAT(cl.TransDate,'%Y-%m-01') AS TransMonth
+			, 	cl.SubscriberId
+			, 	SUM(cl.TotalTrans) AS TotalTrans       
+			, 	lv_CurrentDate AS CreatedDate
+			, 	lv_CurrentDate AS ModifiedDate
+		FROM FPS_FingerPrint.TransactionDailySum AS cl 
+		WHERE cl.TransDate BETWEEN lv_FirstDate AND lv_LastDate
+		GROUP BY cl.SubscriberId, TransMonth
+	)
+    SELECT 		tmp.TransMonth
+			,	tmp.SubscriberId	
+            ,	tmp.TotalTrans	           
+            ,	tmp.CreatedDate	
+            ,	tmp.ModifiedDate
+    FROM tmp_SumDaily AS tmp
+    ON DUPLICATE KEY UPDATE TotalTrans = tmp.TotalTrans,     
+							ModifiedDate = lv_CurrentDate;
+    
+END$$
+DELIMITER ;
