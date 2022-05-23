@@ -94,12 +94,11 @@ BEGIN
 		   ) AS tmp; 
     
     /*******RawFingerPrint********************/
-    INSERT INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode		
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_FingerPrint AS tmp
-	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+	FROM Temp_FingerPrint AS tmp;
     
     INSERT INTO Temp_RawFingerPrint(RawFingerPrintId, FingerPrintCode)
     SELECT DISTINCT rfp.Id AS RawFingerPrintId, tmp.FingerPrintCode
@@ -117,12 +116,11 @@ BEGIN
     
     
     /*******Cookie********************/
-    INSERT INTO FPS_FingerPrint.Cookie(CookieCode, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.Cookie(CookieCode, CreatedDate, ModifiedDate)
 	SELECT	tmp.CookieCode		
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_FingerPrint AS tmp
-	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+	FROM Temp_FingerPrint AS tmp;
     
     INSERT INTO Temp_Cookie(CookieId, CookieCode)
     SELECT DISTINCT c.Id AS CookieId, tmp.CookieCode
@@ -135,7 +133,7 @@ BEGIN
     
     
     /*******ClientTransaction********************/
-    INSERT INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.RawFingerPrintId
 		,	tmp.SubscriberId
 		,	tmp.CookieId

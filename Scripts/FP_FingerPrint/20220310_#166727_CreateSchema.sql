@@ -48,7 +48,7 @@ CREATE TABLE `DeviceFingerPrint` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `ClientTransaction` (
-   `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `SessionKey` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `RawFingerPrintId` bigint unsigned DEFAULT NULL,
   `CookieId` bigint unsigned DEFAULT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE `ClientTransaction` (
   `CreatedDate` datetime NOT NULL,
   `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  KEY `IX_ClientTransaction_SessionKey` (`SessionKey`)
+  UNIQUE KEY `UX_ClientTransaction_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
  CREATE TABLE `ClientTransactionCompleted` (
@@ -75,7 +75,7 @@ CREATE TABLE `ClientTransaction` (
   `TransTime` datetime(4) DEFAULT NULL,
   `CreatedDate` datetime NOT NULL,
   PRIMARY KEY (`Id`,`CreatedDate`),
-  KEY `IX_ClientTransactionCompleted_SessionKey` (`SessionKey`)
+  UNIQUE KEY `UX_ClientTransaction_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(`CreatedDate`,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
