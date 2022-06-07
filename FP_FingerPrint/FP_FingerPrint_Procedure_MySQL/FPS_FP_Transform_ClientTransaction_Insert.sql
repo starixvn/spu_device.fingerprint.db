@@ -107,13 +107,7 @@ BEGIN
     
     UPDATE Temp_FingerPrint AS tmp
 		INNER JOIN Temp_RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
-    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;
-    
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(RawFingerPrintId, Attribute)
-    SELECT	tmp.RawFingerPrintId
-		,	tmp.Attribute
-	FROM Temp_FingerPrint AS tmp;
-    
+    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;    
     
     /*******Cookie********************/
     INSERT IGNORE INTO FPS_FingerPrint.Cookie(CookieCode, CreatedDate, ModifiedDate)
