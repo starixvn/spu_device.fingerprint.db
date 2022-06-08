@@ -16,6 +16,7 @@ BEGIN
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
 			- 20220318@Jonathan.Doan: Add TransTime for ClientTransaction and Insert ClientTransactionDailySum [Redmine ID: #162668]
+			- 20220608@Jonathan.Doan: Remove ServerTransactionDailySum [Redmine ID: #173803]
             
 		Param's Explanation (filtered by):	
 
@@ -125,7 +126,6 @@ BEGIN
 		INNER JOIN Temp_Cookie AS c ON c.CookieCode = tmp.CookieCode
     SET tmp.CookieId = c.CookieId;
     
-    
     /*******ClientTransaction********************/
     INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.RawFingerPrintId
@@ -140,29 +140,5 @@ BEGIN
 		,	lv_CurrentDate AS CreatedDate
 	FROM Temp_FingerPrint AS tmp;
     
-	INSERT INTO FPS_FingerPrint.ClientTransactionDailySum(
-			TransDate
-		,	SubscriberId
-		,	TotalTrans
-		,	TotalValidTrans
-		,	CreateDate
-		,	ModifiedDate
-    )
-    WITH group_data AS (
-		SELECT CAST(tmp.TransTime AS DATE) AS TransDate
-				,	tmp.SubscriberId
-				,	COUNT(tmp.SubscriberId) AS CountTrans
-		FROM Temp_FingerPrint AS tmp
-		GROUP BY TransDate, tmp.SubscriberId
-	)
-    SELECT 	gd.TransDate
-			,	gd.SubscriberId
-			,	gd.CountTrans AS TotalTrans
-			,	0 AS TotalValidTrans
-			,	lv_CurrentDate AS CreatedDate
-			,	lv_CurrentDate AS ModifiedDate
-	FROM group_data AS gd
-    ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + gd.CountTrans,
-							ModifiedDate = lv_CurrentDate;
 END$$
 DELIMITER ;
