@@ -19,7 +19,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Monitor_ClientTransactionDailySum_Insert('[{"TransDate":"2022-06-08","SubscriberId":2,"CountTrans":2}]');
+			- CALL FPS_FP_Monitor_ClientTransactionDailySum_Insert('[{"mdyDate": "06/08/2022", "CountTrans": 1, "SubscriberId": 1}]');
 			
 	*/
     
@@ -44,17 +44,17 @@ BEGIN
     );
     
     INSERT INTO Temp_Data(TransDate, SubscriberId, CountTrans)
-	SELECT	tmp.TransDate
+	SELECT	STR_TO_DATE(tmp.mdyDate, '%m/%d/%Y') AS TransDate
 		,	tmp.SubscriberId
 		,	tmp.CountTrans
 	FROM	JSON_TABLE(
 			ip_Data,
 			 "$[*]" COLUMNS(
-							TransDate			DATE		PATH "$.TransDate"       
-						,	SubscriberId		INT	 		PATH "$.SubscriberId"   
-						,	CountTrans			INT	 		PATH "$.CountTrans"
+							mdyDate				VARCHAR(10)		PATH "$.mdyDate"        
+						,	SubscriberId		INT	 			PATH "$.SubscriberId"   
+						,	CountTrans			INT	 			PATH "$.CountTrans"
 				)
-		   ) AS tmp; 
+		   ) AS tmp;
     
 	INSERT INTO FPS_FingerPrint.ClientTransactionDailySum(
 			TransDate
