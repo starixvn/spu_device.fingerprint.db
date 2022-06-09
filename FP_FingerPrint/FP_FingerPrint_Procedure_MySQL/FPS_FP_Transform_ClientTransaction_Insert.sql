@@ -16,11 +16,12 @@ BEGIN
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
 			- 20220318@Jonathan.Doan: Add TransTime for ClientTransaction and Insert ClientTransactionDailySum [Redmine ID: #162668]
+			- 20220608@Jonathan.Doan: Remove ServerTransactionDailySum [Redmine ID: #173803]
             
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","CookieId":1,"Flagged":"Human","Url":"fdsafdsaf"}]');
+			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"CookieId":1,"Flagged":"Human","Url":"fdsafdsaf"}]');
 			
 	*/
     
@@ -43,7 +44,6 @@ BEGIN
 		,	FingerPrintCode				VARCHAR(200) 		NULL	
 		,	SessionKey					VARCHAR(100) 		NULL
 		,	SubscriberId				INT	UNSIGNED		NULL
-		,	Attribute					LONGTEXT	 		NULL
 		,	CookieId 					BIGINT UNSIGNED 	NULL
 		,	CookieCode 					VARCHAR(64)			NULL		
         ,	Flagged						VARCHAR(50)			NULL
@@ -68,11 +68,10 @@ BEGIN
     );   
 
     
-    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, Attribute, CookieCode, Flagged, RobotDetail, Url, TransTime)
+    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, CookieCode, Flagged, RobotDetail, Url, TransTime)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SessionKey
 		,	tmp.SubscriberId
-		,	tmp.Attribute
         ,	tmp.CookieCode
         ,	tmp.Flagged
         ,	tmp.RobotDetail
@@ -84,7 +83,6 @@ BEGIN
 								FingerPrintCode			VARCHAR(64)	PATH "$.FingerPrintCode"       
 							,	SessionKey				VARCHAR(100) 	PATH "$.SessionKey"   
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
-							,	Attribute				LONGTEXT		PATH "$.Attribute"
 							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"							
                             ,	Flagged					VARCHAR(50) 	PATH "$.Flagged"
                             ,	RobotDetail				VARCHAR(300) 	PATH "$.RobotDetail"
@@ -94,12 +92,11 @@ BEGIN
 		   ) AS tmp; 
     
     /*******RawFingerPrint********************/
-    INSERT INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
 	SELECT	tmp.FingerPrintCode		
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_FingerPrint AS tmp
-	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+	FROM Temp_FingerPrint AS tmp;
     
     INSERT INTO Temp_RawFingerPrint(RawFingerPrintId, FingerPrintCode)
     SELECT DISTINCT rfp.Id AS RawFingerPrintId, tmp.FingerPrintCode
@@ -108,21 +105,14 @@ BEGIN
     
     UPDATE Temp_FingerPrint AS tmp
 		INNER JOIN Temp_RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
-    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;
-    
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(RawFingerPrintId, Attribute)
-    SELECT	tmp.RawFingerPrintId
-		,	tmp.Attribute
-	FROM Temp_FingerPrint AS tmp;
-    
+    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;    
     
     /*******Cookie********************/
-    INSERT INTO FPS_FingerPrint.Cookie(CookieCode, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.Cookie(CookieCode, CreatedDate, ModifiedDate)
 	SELECT	tmp.CookieCode		
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_FingerPrint AS tmp
-	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+	FROM Temp_FingerPrint AS tmp;
     
     INSERT INTO Temp_Cookie(CookieId, CookieCode)
     SELECT DISTINCT c.Id AS CookieId, tmp.CookieCode
@@ -133,9 +123,8 @@ BEGIN
 		INNER JOIN Temp_Cookie AS c ON c.CookieCode = tmp.CookieCode
     SET tmp.CookieId = c.CookieId;
     
-    
     /*******ClientTransaction********************/
-    INSERT INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.RawFingerPrintId
 		,	tmp.SubscriberId
 		,	tmp.CookieId
@@ -148,29 +137,5 @@ BEGIN
 		,	lv_CurrentDate AS CreatedDate
 	FROM Temp_FingerPrint AS tmp;
     
-	INSERT INTO FPS_FingerPrint.ClientTransactionDailySum(
-			TransDate
-		,	SubscriberId
-		,	TotalTrans
-		,	TotalValidTrans
-		,	CreateDate
-		,	ModifiedDate
-    )
-    WITH group_data AS (
-		SELECT CAST(tmp.TransTime AS DATE) AS TransDate
-				,	tmp.SubscriberId
-				,	COUNT(tmp.SubscriberId) AS CountTrans
-		FROM Temp_FingerPrint AS tmp
-		GROUP BY TransDate, tmp.SubscriberId
-	)
-    SELECT 	gd.TransDate
-			,	gd.SubscriberId
-			,	gd.CountTrans AS TotalTrans
-			,	0 AS TotalValidTrans
-			,	lv_CurrentDate AS CreatedDate
-			,	lv_CurrentDate AS ModifiedDate
-	FROM group_data AS gd
-    ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + gd.CountTrans,
-							ModifiedDate = lv_CurrentDate;
 END$$
 DELIMITER ;

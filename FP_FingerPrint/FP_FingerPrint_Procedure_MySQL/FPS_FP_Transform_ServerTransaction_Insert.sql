@@ -16,6 +16,7 @@ BEGIN
 		Revisions: 
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
 			- 20220318@Jonathan.Doan: Insert ServerTransactionDailySum [Redmine ID: #162668]
+			- 20220608@Jonathan.Doan: Remove ServerTransactionDailySum [Redmine ID: #173803]
             
 		Param's Explanation (filtered by):	
 
@@ -34,7 +35,6 @@ BEGIN
     
     DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
     DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
-    
     
 	CREATE TEMPORARY TABLE Temp_Transactions(
 			Id 							BIGINT UNSIGNED 		NOT NULL AUTO_INCREMENT
@@ -124,6 +124,7 @@ BEGIN
 		INNER JOIN Temp_RawUserAgent AS ua ON ua.TransactionsId = tmp.Id
 	SET tmp.UserAgentId = ua.UserAgentId;
         
+    /*******ServerTransaction********************/
     INSERT INTO FPS_FingerPrint.ServerTransaction(
 						LoginName
 					,	SubscriberId                    
@@ -152,33 +153,7 @@ BEGIN
                     ,	tmp.TransKey
                     ,	tmp.CustId
                     ,	tmp.SubAccId
-	FROM Temp_Transactions AS tmp; 
+	FROM Temp_Transactions AS tmp;
     
-	INSERT INTO FPS_FingerPrint.ServerTransactionDailySum(
-			TransDate
-            ,	SubscriberId
-            ,	TotalTrans
-            ,	TotalValidTrans
-            ,	CreateDate
-            ,	ModifiedDate
-    )
-    WITH group_data AS (
-		SELECT 	CAST(tmp.TransTime AS DATE) AS TransDate
-			,	tmp.SubscriberId
-			,	COUNT(tmp.SubscriberId) AS CountTrans
-		FROM Temp_Transactions AS tmp
-		GROUP BY TransDate, tmp.SubscriberId
-	)
-    SELECT 	gd.TransDate
-		,	gd.SubscriberId
-		,	gd.CountTrans AS TotalTrans
-		,	0 AS TotalValidTrans
-		,	lv_CurrentDate AS CreatedDate
-		,	lv_CurrentDate AS ModifiedDate
-	FROM group_data AS gd
-    ON DUPLICATE KEY UPDATE TotalTrans = TotalTrans + gd.CountTrans,
-							ModifiedDate = lv_CurrentDate;
-    
-    DROP TEMPORARY TABLE IF EXISTS Temp_Transactions;
 END$$
 DELIMITER ;
