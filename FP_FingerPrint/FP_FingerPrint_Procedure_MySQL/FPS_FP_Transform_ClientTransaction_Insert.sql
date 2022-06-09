@@ -21,7 +21,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"Attribute":"dfsfsafsaf","CookieId":1,"Flagged":"Human","Url":"fdsafdsaf"}]');
+			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"CookieId":1,"Flagged":"Human","Url":"fdsafdsaf"}]');
 			
 	*/
     
@@ -44,7 +44,6 @@ BEGIN
 		,	FingerPrintCode				VARCHAR(200) 		NULL	
 		,	SessionKey					VARCHAR(100) 		NULL
 		,	SubscriberId				INT	UNSIGNED		NULL
-		,	Attribute					LONGTEXT	 		NULL
 		,	CookieId 					BIGINT UNSIGNED 	NULL
 		,	CookieCode 					VARCHAR(64)			NULL		
         ,	Flagged						VARCHAR(50)			NULL
@@ -69,11 +68,10 @@ BEGIN
     );   
 
     
-    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, Attribute, CookieCode, Flagged, RobotDetail, Url, TransTime)
+    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, CookieCode, Flagged, RobotDetail, Url, TransTime)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SessionKey
 		,	tmp.SubscriberId
-		,	tmp.Attribute
         ,	tmp.CookieCode
         ,	tmp.Flagged
         ,	tmp.RobotDetail
@@ -85,7 +83,6 @@ BEGIN
 								FingerPrintCode			VARCHAR(64)	PATH "$.FingerPrintCode"       
 							,	SessionKey				VARCHAR(100) 	PATH "$.SessionKey"   
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
-							,	Attribute				LONGTEXT		PATH "$.Attribute"
 							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"							
                             ,	Flagged					VARCHAR(50) 	PATH "$.Flagged"
                             ,	RobotDetail				VARCHAR(300) 	PATH "$.RobotDetail"
