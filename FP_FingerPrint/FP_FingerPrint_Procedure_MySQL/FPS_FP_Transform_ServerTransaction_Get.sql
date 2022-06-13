@@ -46,14 +46,13 @@ BEGIN
         , 	trans.SubscriberId
         , 	trans.Transtime
         , 	trans.ClientIP
-        , 	trans.UserAgentId
         , 	trans.Url
         , 	trans.TransKey
         , 	trans.Action
         ,	trans.Retry
-    FROM FPS_FingerPrint.ServerTransaction AS trans 
-    WHERE trans.Id >= lv_offsetValue 
-        AND trans.Retry < ip_Retry 
+    FROM FPS_FingerPrint.ServerTransaction AS trans
+    WHERE trans.Id >= lv_offsetValue
+        AND trans.Retry < ip_Retry
     LIMIT ip_BatchSize;
     
 END$$

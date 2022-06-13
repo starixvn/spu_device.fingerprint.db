@@ -17,6 +17,7 @@ BEGIN
 
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
+			- 20220601@Jonathan.Doan: Update BrowserInfo [Redmine ID: #172167]
             
 		Param's Explanation (filtered by):	
 
@@ -32,10 +33,10 @@ BEGIN
 	END IF;
     /*******LOG TEST********************/
     
-    SELECT off.OffsetValue 
+    SELECT off.OffsetValue
     INTO lv_offsetValue
     FROM FPS_FingerPrint.Offset AS off
-    WHERE off.Id = ip_OffsetId;	
+    WHERE off.Id = ip_OffsetId;
    
     SELECT  trans.Id
         , 	trans.SessionKey
@@ -46,14 +47,13 @@ BEGIN
         , 	trans.SubscriberId
         , 	trans.TransTime
         , 	trans.ClientIP
-        , 	trans.UserAgentId
         , 	trans.Url
         , 	trans.TransKey
         , 	trans.Action
         ,	trans.Retry
-    FROM FPS_FingerPrint.ServerTransaction AS trans 
+    FROM FPS_FingerPrint.ServerTransaction AS trans
 		INNER JOIN FPS_FingerPrint.ServerTransactionN AS transN ON trans.Id = transN.ServerTransId
-    WHERE trans.Id >= lv_offsetValue 
+    WHERE trans.Id >= lv_offsetValue
 			AND transN.Retry >= ip_Retry
     LIMIT ip_BatchSize;
     
