@@ -17,6 +17,7 @@ BEGIN
 
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
+			- 20220614@Jonathan.Doan: Hot fix [Redmine ID: #174020]
             
 		Param's Explanation (filtered by):	
 
@@ -158,35 +159,37 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpRt2;
 
 	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
-    SELECT 	ts.Id
-		, 	ts.SessionKey
-		, 	ts.CustId
-		, 	ts.SubAccId
-		, 	ts.LoginName
-		, 	ts.SubscriberId
-		, 	ts.TransTime
-		, 	ts.ClientIP
-		, 	ts.UserAgentId
-		, 	ts.Url
-		, 	ts.ModifiedDate
-		, 	ts.CreatedDate
-		, 	ts.TransKey
-		, 	ts.Retry
-		, 	ts.Action
-    FROM FPS_FingerPrint.ServerTransaction AS ts 
-		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON ts.Id = tmpRt2.Id;
+    SELECT	rt.Id
+		,	rt.SessionKey
+        ,	rt.CustId
+        ,	rt.SubAccId
+        ,	rt.LoginName
+        ,	rt.SubscriberId
+        ,	rt.TransTime
+        ,	rt.ClientIP
+        ,	rt.UserAgentId
+        ,	rt.Url
+        ,	rt.ModifiedDate
+        ,	rt.CreatedDate
+        ,	rt.TransKey
+        ,	rt.Retry
+        ,	rt.Action
+    FROM Temp_RawTransaction2 AS tmpT2 
+		INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmpT2.Id;
     
-    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, Flagged, Url, CreatedDate)
-    SELECT 	fp.Id
+    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, RobotDetail, Flagged, Url, TransTime, CreatedDate)
+    SELECT	fp.Id
 		,	fp.RawFingerPrintId
 		,	fp.CookieId
 		,	fp.SubscriberId
 		,	fp.SessionKey
+		,	fp.RobotDetail
 		,	fp.Flagged
 		,	fp.Url
+		,	fp.TransTime
 		,	fp.CreatedDate
     FROM FPS_FingerPrint.ClientTransaction AS fp
-		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON tmpRt2.SessionKey = fp.SessionKey;
+		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON tmpT2.SessionKey = fp.SessionKey;
     
     DELETE fp FROM FPS_FingerPrint.ClientTransaction AS fp
 		INNER JOIN Temp_RawTransaction2 AS tmpRt2 ON tmpRt2.SessionKey = fp.SessionKey;   

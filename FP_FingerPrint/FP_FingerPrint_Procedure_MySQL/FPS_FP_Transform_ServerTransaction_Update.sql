@@ -142,23 +142,7 @@ BEGIN
 		LEFT JOIN FPS_FingerPrint.ClientTransaction AS fp ON fp.SessionKey = tmpTs.SessionKey;
   
 	-- Insert data completed
-    INSERT INTO FPS_FingerPrint.Transaction(
-			ServerTransId
-		,	CustId
-		,	SubAccId
-		,	LoginName
-		,	SubscriberId
-		,	RawFingerPrintId
-		,	CookieId
-		,	TransTime
-		,	ClientIP
-		,	UserAgentId
-		,	Url
-		,	Action		
-		,	CreatedDate
-		,	TransKey
-		,	Flagged
-	)
+    INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, Flagged)
     SELECT	tmpTs2.Id
 		,	tmpTs2.CustId
         ,	tmpTs2.SubAccId
@@ -170,7 +154,7 @@ BEGIN
         ,	tmpTs2.ClientIP
         ,	tmpTs2.UserAgentId
         ,	tmpTs2.Url
-        ,	tmpTs2.Action        
+        ,	tmpTs2.Action
         ,	tmpTs2.CreatedDate
         ,	tmpTs2.TransKey
         ,	tmpTs2.Flagged
@@ -221,12 +205,14 @@ BEGIN
     DELETE tmpT2 FROM Temp_RawTransaction2 AS tmpT2
     WHERE tmpT2.RawFingerPrintId IS NOT NULL;
     	   
-    INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionN(SessionKey, ServerTransId, CreatedDate)
+    INSERT INTO FPS_FingerPrint.ServerTransactionN(SessionKey, ServerTransId, CreatedDate, Retry)
     SELECT tmpT2.SessionKey
 		,	tmpT2.Id
-        ,	tmpT2.CreatedDate 
+        ,	tmpT2.CreatedDate
+        ,	tmpT2.Retry
     FROM Temp_RawTransaction2 AS tmpT2 
-    WHERE tmpT2.RawFingerPrintId IS NULL AND tmpT2.Retry >= ip_Retry;
+    WHERE tmpT2.RawFingerPrintId IS NULL AND tmpT2.Retry >= ip_Retry
+    ON DUPLICATE KEY UPDATE Retry = tmpT2.Retry;
     
     UPDATE FPS_FingerPrint.ServerTransaction AS rawTrans
 		INNER JOIN Temp_RawTransaction2 tmp ON tmp.Id = rawTrans.Id

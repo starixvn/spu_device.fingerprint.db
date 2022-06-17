@@ -5,6 +5,7 @@ DELIMITER $$
 CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_ServerTransactionN_Get`(
 		    ip_BatchSize 	INT
     ,       ip_OffsetId		INT
+    ,		ip_Retry		INT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -53,6 +54,7 @@ BEGIN
     FROM FPS_FingerPrint.ServerTransaction AS trans 
 		INNER JOIN FPS_FingerPrint.ServerTransactionN AS transN ON trans.Id = transN.ServerTransId
     WHERE trans.Id >= lv_offsetValue 
+			AND transN.Retry >= ip_Retry
     LIMIT ip_BatchSize;
     
 END$$
