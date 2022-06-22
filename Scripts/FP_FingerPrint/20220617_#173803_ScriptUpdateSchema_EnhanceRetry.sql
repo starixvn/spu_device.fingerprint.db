@@ -7,4 +7,4 @@
 
 ALTER TABLE `FPS_FingerPrint`.`ServerTransactionN` 
 ADD COLUMN `Retry` INT NULL DEFAULT 0 AFTER `CreatedDate`,
-ADD UNIQUE INDEX `ServerTransId_UNIQUE` (`ServerTransId` ASC) VISIBLE;
+ADD UNIQUE INDEX `UX_ServerTransactionN_ServerTransId` (`ServerTransId` ASC) VISIBLE;
