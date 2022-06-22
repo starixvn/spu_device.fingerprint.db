@@ -153,7 +153,7 @@ BEGIN
         ,	tmpRt2.UserAgentId
         ,	tmpRt2.Url
         ,	tmpRt2.Action
-        ,	tmpRt2.CreatedDate
+        ,	lv_currentDate
         ,	tmpRt2.TransKey
         ,	tmpRt2.Flagged
     FROM Temp_RawTransaction2 AS tmpRt2;
