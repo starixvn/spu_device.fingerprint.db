@@ -39,8 +39,11 @@ BEGIN
 			SessionKey					VARCHAR(100) 		NOT NULL
 		,	UserAgentId					BIGINT	 			NULL
 		,	UserAgentCode				VARCHAR(100)		NULL
+		,	UserAgentData				VARCHAR(500)		NULL
 		,	UserAgent					LONGTEXT 			NULL
 		,	BrowserInfo					LONGTEXT			NULL
+		,	browserInfoAttribute		LONGTEXT			NULL
+		,	browserInfoAttributeCode	VARCHAR(64)			NULL
 		,	HeadlessScore				VARCHAR(300)		NULL
         ,	PRIMARY KEY (SessionKey)
     );      
@@ -51,20 +54,26 @@ BEGIN
         ,	PRIMARY KEY (SessionKey)
     );  
     
-    INSERT IGNORE INTO Temp_BrowserInfo(SessionKey, UserAgent, UserAgentCode, BrowserInfo, HeadlessScore)
+    INSERT IGNORE INTO Temp_BrowserInfo(SessionKey, UserAgent, UserAgentCode, UserAgentData, BrowserInfo, browserInfoAttribute, browserInfoAttributeCode, HeadlessScore)
     SELECT 	tmp.SessionKey
 		,	tmp.UserAgent
 		,	tmp.UserAgentCode
+		,	tmp.UserAgentData
 		,	tmp.BrowserInfo
+		,	tmp.browserInfoAttribute
+		,	tmp.browserInfoAttributeCode
 		,	tmp.HeadlessScore
 	FROM	JSON_TABLE(
 			ip_BrowserInfo,
 			 "$[*]" COLUMNS(
-								SessionKey				VARCHAR(100) 	PATH "$.SessionKey"   
-							,	UserAgent				LONGTEXT		PATH "$.UserAgent"
-							,	UserAgentCode			VARCHAR(100) 	PATH "$.UserAgentCode"
-							,	BrowserInfo				LONGTEXT		PATH "$.BrowserInfo"
-							,	HeadlessScore			VARCHAR(300) 	PATH "$.HeadlessScore"
+								SessionKey					VARCHAR(100) 	PATH "$.SessionKey"   
+							,	UserAgent					LONGTEXT		PATH "$.UserAgent"
+							,	UserAgentCode				VARCHAR(100) 	PATH "$.UserAgentCode"
+							,	UserAgentData				VARCHAR(500) 	PATH "$.UserAgentData"
+							,	BrowserInfo					LONGTEXT		PATH "$.BrowserInfo"
+							,	browserInfoAttribute		LONGTEXT		PATH "$.browserInfoAttribute"
+							,	browserInfoAttributeCode	VARCHAR(64)		PATH "$.browserInfoAttributeCode"
+							,	HeadlessScore				VARCHAR(300) 	PATH "$.HeadlessScore"
 				)
 		   ) AS tmp; 
     
@@ -90,16 +99,26 @@ BEGIN
      
      
     /*******BrowserInfo********************/
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, HeadlessScore, BrowserName, OSName, ClientIp, CreatedDate, ModifiedDate)
+    
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfoAttribute(Code, SecChUa, BrowserInfoJs, UserAgentData)
+    SELECT 	tmp.browserInfoAttributeCode
+		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUa')) AS SecChUa
+		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.BrowserInfoJs')) AS BrowserInfoJs
+		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.UserAgentData')) AS UserAgentData
+    FROM Temp_BrowserInfo tmp;
+        
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, ClientIp, CreatedDate, ModifiedDate)
     SELECT 	tmp.SessionKey
-		, 	tmp.UserAgentId AS UserAgentId
+		, 	tmp.UserAgentId
+		, 	bia.Id AS BrowserInfoAttributeId
 		, 	tmp.HeadlessScore
 		, 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.BrowserName')) AS BrowserName
         , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.OSName')) AS OSName
         , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.ClientIp')) AS ClientIp
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-    FROM Temp_BrowserInfo AS tmp;        
-    
+    FROM Temp_BrowserInfo AS tmp
+		LEFT JOIN FPS_FingerPrint.BrowserInfoAttribute bia ON bia.Code = tmp.browserInfoAttributeCode;
+	
 END$$
 DELIMITER ;

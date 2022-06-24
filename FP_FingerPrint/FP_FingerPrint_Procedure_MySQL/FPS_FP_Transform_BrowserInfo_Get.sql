@@ -49,7 +49,7 @@ BEGIN
 				ELSE 0
 			END AS IsParsed
     FROM FPS_FingerPrint.BrowserInfo AS bi
-		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = bi.RawUserAgentId
+		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = bi.UserAgentId
     WHERE bi.Id >= lv_offsetValue
     LIMIT ip_BatchSize;
     
