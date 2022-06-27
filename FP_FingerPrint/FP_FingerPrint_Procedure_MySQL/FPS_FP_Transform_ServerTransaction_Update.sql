@@ -89,12 +89,6 @@ BEGIN
 				Id 				BIGINT UNSIGNED NOT NULL PRIMARY KEY	
 			, 	SessionKey 		VARCHAR(200)
 			, 	UserAgentId 	BIGINT UNSIGNED
-			, 	HeadlessScore 	LONGTEXT
-			, 	ClientIP 		VARCHAR(45)
-			, 	BrowserName 	VARCHAR(100)
-			, 	OSName 			VARCHAR(100)
-			, 	Flagged 		VARCHAR(50)
-			, 	CreatedDate 	DATETIME(4)
             , 	UNIQUE INDEX UX_Temp_BrowserInfo_SessionKey(SessionKey)   
     );
     
@@ -149,29 +143,17 @@ BEGIN
    FROM Temp_RawTransaction AS tmpTs 
 		LEFT JOIN FPS_FingerPrint.ClientTransaction AS fp ON fp.SessionKey = tmpTs.SessionKey;
       
-	INSERT INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, Flagged, CreatedDate)
+	INSERT INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
     SELECT 	bi.Id
 		,	bi.SessionKey
 		,	bi.UserAgentId
-		,	bi.HeadlessScore
-		,	bi.ClientIP
-		,	bi.BrowserName
-		,	bi.OSName
-		,	bi.Flagged
-		,	bi.CreatedDate
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey;
         
-	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, Flagged, CreatedDate)
+	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
     SELECT 	bi.Id
 		,	bi.SessionKey
 		,	bi.UserAgentId
-		,	bi.HeadlessScore
-		,	bi.ClientIP
-		,	bi.BrowserName
-		,	bi.OSName
-		,	bi.Flagged
-		,	bi.CreatedDate
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfoCompleted AS bi ON bi.SessionKey = tmp.SessionKey;    
 	

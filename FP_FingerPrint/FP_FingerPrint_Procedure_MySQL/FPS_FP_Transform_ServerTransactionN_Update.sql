@@ -54,8 +54,7 @@ BEGIN
 		,	Action 				VARCHAR(100) DEFAULT NULL
 		,	ModifiedDate 		DATETIME DEFAULT NULL
 		,	CreatedDate 		DATETIME DEFAULT NULL
-		,	TransKey 			VARCHAR(200) DEFAULT NULL
-		,	Flagged 			VARCHAR(50) DEFAULT NULL		
+		,	TransKey 			VARCHAR(200) DEFAULT NULL	
 		,	Retry 				TINYINT DEFAULT '0'
 		,	RawFingerPrintId 	BIGINT UNSIGNED DEFAULT NULL
 		,	CookieId 			BIGINT UNSIGNED DEFAULT NULL
@@ -78,7 +77,6 @@ BEGIN
 		,	ModifiedDate 		DATETIME DEFAULT NULL
 		,	CreatedDate 		DATETIME DEFAULT NULL
 		,	TransKey 			VARCHAR(200) DEFAULT NULL
-		,	Flagged 			VARCHAR(50) DEFAULT NULL
 		,	Retry 				TINYINT DEFAULT 0
 		,	RawFingerPrintId 	BIGINT UNSIGNED DEFAULT NULL
 		,	CookieId 			BIGINT UNSIGNED DEFAULT NULL
@@ -96,7 +94,6 @@ BEGIN
 			, 	ClientIP 		VARCHAR(45)
 			, 	BrowserName 	VARCHAR(100)
 			, 	OSName 			VARCHAR(100)
-			, 	Flagged 		VARCHAR(50)
 			, 	CreatedDate 	DATETIME(4)
             , 	UNIQUE INDEX UX_Temp_BrowserInfo_SessionKey(SessionKey)
     );
@@ -150,7 +147,7 @@ BEGIN
     FROM Temp_RawTransaction AS tmpRt
 		LEFT JOIN FPS_FingerPrint.ClientTransaction fp ON fp.SessionKey = tmpRt.SessionKey;
       
-	INSERT INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, Flagged, CreatedDate)
+	INSERT INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, CreatedDate)
     SELECT 	bi.Id
 		,	bi.SessionKey
 		,	bi.UserAgentId
@@ -158,12 +155,11 @@ BEGIN
 		,	bi.ClientIP
 		,	bi.BrowserName
 		,	bi.OSName
-		,	bi.Flagged
 		,	bi.CreatedDate
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey;
         
-	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, Flagged, CreatedDate)
+	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, CreatedDate)
     SELECT 	bi.Id
 		,	bi.SessionKey
 		,	bi.UserAgentId
@@ -171,7 +167,6 @@ BEGIN
 		,	bi.ClientIP
 		,	bi.BrowserName
 		,	bi.OSName
-		,	bi.Flagged
 		,	bi.CreatedDate
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfoCompleted AS bi ON bi.SessionKey = tmp.SessionKey;

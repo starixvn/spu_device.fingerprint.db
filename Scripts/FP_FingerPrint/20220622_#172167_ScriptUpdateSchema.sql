@@ -34,6 +34,7 @@ CREATE TABLE `BrowserInfoCompleted` (
   `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `SessionKey` varchar(100) NOT NULL,
   `UserAgentId` bigint unsigned DEFAULT NULL,
+  `BrowserInfoAttributeId` bigint unsigned DEFAULT NULL,
   `HeadlessScore` longtext,
   `ClientIp` varchar(45) DEFAULT NULL,
   `BrowserName` varchar(100) DEFAULT NULL,
@@ -46,7 +47,7 @@ CREATE TABLE `BrowserInfoCompleted` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 /*!50100 PARTITION BY RANGE (yearweek(`CreatedDate`,0))
 (PARTITION pw202210 VALUES LESS THAN (202211) ENGINE = InnoDB,
- PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */
+ PARTITION pw999999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
 
 ALTER TABLE `FPS_FingerPrint`.`ClientTransaction` 
 DROP COLUMN `Flagged`,

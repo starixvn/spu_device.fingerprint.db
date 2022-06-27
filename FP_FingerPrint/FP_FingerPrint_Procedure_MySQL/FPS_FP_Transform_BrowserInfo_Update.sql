@@ -54,10 +54,11 @@ BEGIN
 				)
 		   ) AS tmp; 
         
-	INSERT INTO FPS_FingerPrint.BrowserInfoCompleted(Id, SessionKey, UserAgentId, HeadlessScore, ClientIp, BrowserName, OSName, Flagged, Reason, CreatedDate)
+	INSERT INTO FPS_FingerPrint.BrowserInfoCompleted(Id, SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, ClientIp, BrowserName, OSName, Flagged, Reason, CreatedDate)
     SELECT 	bi.Id
 		, 	bi.SessionKey
         , 	bi.UserAgentId
+        , 	bi.BrowserInfoAttributeId
         , 	bi.HeadlessScore
         , 	bi.ClientIp
         , 	bi.BrowserName

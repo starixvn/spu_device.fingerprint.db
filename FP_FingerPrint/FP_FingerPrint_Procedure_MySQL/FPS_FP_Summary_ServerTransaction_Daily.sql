@@ -38,7 +38,7 @@ BEGIN
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
 		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
-		SELECT 'FPS_FP_Summary_ServerTransaction_Daily', NULL, NULL, CURRENT_TIMESTAMP();
+		SELECT 'FPS_FP_Summary_ServerTransaction_Daily', NULL, CONCAT('ip_BatchSize:',ip_BatchSize), CURRENT_TIMESTAMP();
 	END IF;
     /*******LOG TEST********************/
     
