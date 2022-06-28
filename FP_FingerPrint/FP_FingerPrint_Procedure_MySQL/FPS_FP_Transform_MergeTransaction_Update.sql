@@ -95,7 +95,7 @@ BEGIN
 		, 	td.Flagged
     FROM Temp_Transactions AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
-		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
+		LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
     
     CREATE TEMPORARY TABLE Temp_Transactions2(
 			Id					BIGINT UNSIGNED
@@ -227,7 +227,7 @@ BEGIN
         ,	transD.Retry
 	FROM  Temp_TransactionsDevice AS transD 
 		INNER JOIN Temp_Transactions2 AS tmp ON transD.Id = tmp.Id;
-   
+    
 	DELETE transD FROM FPS_FingerPrint.TransactionDevice AS transD
 		INNER JOIN Temp_Transactions2 AS tmp ON transD.Id = tmp.Id;
    
@@ -237,7 +237,7 @@ BEGIN
 	UPDATE FPS_FingerPrint.TransactionDevice AS transD
 		INNER JOIN Temp_TransactionsDevice AS tmp ON transD.Id = tmp.Id
 	SET transD.Retry = transD.Retry + 1;
-      
+
 	INSERT INTO FPSTesting.FP_RawTransaction_Old_Completed(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, Flagged, IsProcessed, TransID, TransKey)
 	SELECT 	trans.LoginName
 		, 	trans.SubscriberName
@@ -262,7 +262,7 @@ BEGIN
 		, 	trans.TransKey 
 	FROM FPSTesting.FP_RawTransaction_Old AS trans 
 		INNER JOIN Temp_Transactions2 AS tmp ON trans.TransID = tmp.Id_Old;
-   
+    
 	DELETE trans 
     FROM FPSTesting.FP_RawTransaction_Old AS trans
 		INNER JOIN Temp_Transactions2 AS tmp ON trans.TransID = tmp.Id_Old;       
