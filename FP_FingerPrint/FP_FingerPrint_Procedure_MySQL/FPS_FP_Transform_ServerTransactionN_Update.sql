@@ -8,7 +8,7 @@ CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_ServerTransactionN_Upd
 	,       ip_OffsetValue	BIGINT
 )
     SQL SECURITY INVOKER
-BEGIN
+BEGIN  
 	/*
 		Created:	20220221@Terry.Nguyen
 		Task :		
@@ -153,7 +153,7 @@ BEGIN
         ,	tmpRt2.UserAgentId
         ,	tmpRt2.Url
         ,	tmpRt2.Action
-        ,	tmpRt2.CreatedDate
+        ,	lv_currentDate
         ,	tmpRt2.TransKey
         ,	tmpRt2.Flagged
     FROM Temp_RawTransaction2 AS tmpRt2;
