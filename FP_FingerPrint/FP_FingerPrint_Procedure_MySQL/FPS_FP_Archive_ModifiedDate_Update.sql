@@ -116,9 +116,12 @@ BEGIN
 		INNER JOIN Temp_DeviceCookie AS tmp ON dc.CookieId = tmp.CookieId
 	SET dc.ModifiedDate = tmp.TransTime;
     
-    UPDATE FPS_FingerPrint.Offset
-    SET OffsetValue = lv_maxOffsetValue
-    WHERE Id = lv_offsetId;
+    IF lv_maxOffsetValue IS NOT NULL
+    THEN
+		UPDATE FPS_FingerPrint.Offset
+		SET OffsetValue = lv_maxOffsetValue
+		WHERE Id = lv_offsetId;
+    END IF;
 
 END$$
 DELIMITER ;

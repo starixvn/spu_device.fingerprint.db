@@ -8,7 +8,7 @@ CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_ServerTransactionN_Get
     ,		ip_Retry		INT
 )
     SQL SECURITY INVOKER
-BEGIN
+BEGIN  
 	/*
 		Created:	20220221@Terry.Nguyen
 		Task :		
