@@ -8,7 +8,7 @@ CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_ServerTransactionN_Upd
 	,       ip_OffsetValue	BIGINT
 )
     SQL SECURITY INVOKER
-BEGIN
+BEGIN  
 	/*
 		Created:	20220221@Terry.Nguyen
 		Task :		
