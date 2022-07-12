@@ -87,15 +87,10 @@ BEGIN
     );
     
     CREATE TEMPORARY TABLE Temp_BrowserInfo(
-				Id 				BIGINT UNSIGNED NOT NULL PRIMARY KEY
+				Id 				BIGINT UNSIGNED NOT NULL PRIMARY KEY	
 			, 	SessionKey 		VARCHAR(200)
 			, 	UserAgentId 	BIGINT UNSIGNED
-			, 	HeadlessScore 	LONGTEXT
-			, 	ClientIP 		VARCHAR(45)
-			, 	BrowserName 	VARCHAR(100)
-			, 	OSName 			VARCHAR(100)
-			, 	CreatedDate 	DATETIME(4)
-            , 	UNIQUE INDEX UX_Temp_BrowserInfo_SessionKey(SessionKey)
+            , 	UNIQUE INDEX UX_Temp_BrowserInfo_SessionKey(SessionKey)   
     );
     
    INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, Url, TransKey, Retry, Action)
@@ -147,27 +142,17 @@ BEGIN
     FROM Temp_RawTransaction AS tmpRt
 		LEFT JOIN FPS_FingerPrint.ClientTransaction fp ON fp.SessionKey = tmpRt.SessionKey;
       
-	INSERT INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, CreatedDate)
+	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
     SELECT 	bi.Id
 		,	bi.SessionKey
 		,	bi.UserAgentId
-		,	bi.HeadlessScore
-		,	bi.ClientIP
-		,	bi.BrowserName
-		,	bi.OSName
-		,	bi.CreatedDate
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey;
         
-	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId, HeadlessScore, ClientIP, BrowserName, OSName, CreatedDate)
+	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
     SELECT 	bi.Id
 		,	bi.SessionKey
 		,	bi.UserAgentId
-		,	bi.HeadlessScore
-		,	bi.ClientIP
-		,	bi.BrowserName
-		,	bi.OSName
-		,	bi.CreatedDate
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfoCompleted AS bi ON bi.SessionKey = tmp.SessionKey;
       

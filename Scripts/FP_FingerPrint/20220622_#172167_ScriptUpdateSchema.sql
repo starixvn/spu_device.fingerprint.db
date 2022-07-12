@@ -4,6 +4,7 @@
 	Task: Srcipt update Schema
 	DB: FPS_FingerPrint
 */
+USE FPS_FingerPrint;
 
 CREATE TABLE `BrowserInfo` (
   `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -11,19 +12,22 @@ CREATE TABLE `BrowserInfo` (
   `UserAgentId` bigint unsigned DEFAULT NULL,
   `BrowserInfoAttributeId` bigint unsigned DEFAULT NULL,
   `HeadlessScore` longtext,
-  `ClientIp` varchar(45) DEFAULT NULL,
   `BrowserName` varchar(100) DEFAULT NULL,
   `OSName` varchar(100) DEFAULT NULL,
+  `Platform` varchar(50) DEFAULT NULL,
+  `Vendor` varchar(50) DEFAULT NULL,
   `CreatedDate` datetime(4) DEFAULT NULL,
   `ModifiedDate` datetime(4) DEFAULT NULL,
+  `ClientIPDNS` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `UX_BrowserInfo_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `BrowserInfoAttribute` (
   `Id` bigint NOT NULL AUTO_INCREMENT,
-  `Code` varchar(64) DEFAULT NULL,
+  `BrowserInfoAttributeCode` varchar(64) DEFAULT NULL,
   `SecChUa` varchar(100) DEFAULT NULL,
+  `SecChUaPlatform` varchar(100) DEFAULT NULL,
   `BrowserInfoJs` varchar(500) DEFAULT NULL,
   `UserAgentData` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`Id`),
@@ -36,12 +40,14 @@ CREATE TABLE `BrowserInfoCompleted` (
   `UserAgentId` bigint unsigned DEFAULT NULL,
   `BrowserInfoAttributeId` bigint unsigned DEFAULT NULL,
   `HeadlessScore` longtext,
-  `ClientIp` varchar(45) DEFAULT NULL,
   `BrowserName` varchar(100) DEFAULT NULL,
   `OSName` varchar(100) DEFAULT NULL,
+  `Platform` varchar(50) DEFAULT NULL,
+  `Vendor` varchar(50) DEFAULT NULL,
   `Flagged` varchar(50) DEFAULT NULL,
   `Reason` varchar(50) DEFAULT NULL,
   `CreatedDate` datetime(4) NOT NULL,
+  `ClientIPDNS` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`Id`,`CreatedDate`),
   KEY `IX_BrowserInfoCompleted_SessionKey` (`SessionKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

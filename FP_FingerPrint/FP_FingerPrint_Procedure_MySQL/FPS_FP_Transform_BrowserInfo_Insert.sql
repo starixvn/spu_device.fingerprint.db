@@ -100,25 +100,29 @@ BEGIN
      
     /*******BrowserInfo********************/
     
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfoAttribute(Code, SecChUa, BrowserInfoJs, UserAgentData)
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfoAttribute(BrowserInfoAttributeCode, SecChUa, SecChUaPlatform, SecChUaMobile, BrowserInfoJs, UserAgentData)
     SELECT 	tmp.browserInfoAttributeCode
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUa')) AS SecChUa
+		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUaPlatform')) AS SecChUaPlatform
+		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUaMobile')) AS SecChUaMobile
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.BrowserInfoJs')) AS BrowserInfoJs
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.UserAgentData')) AS UserAgentData
     FROM Temp_BrowserInfo tmp;
         
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, ClientIp, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, Platform, Vendor, ClientIPDNS, CreatedDate, ModifiedDate)
     SELECT 	tmp.SessionKey
 		, 	tmp.UserAgentId
 		, 	bia.Id AS BrowserInfoAttributeId
 		, 	tmp.HeadlessScore
 		, 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.BrowserName')) AS BrowserName
         , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.OSName')) AS OSName
-        , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.ClientIp')) AS ClientIp
+        , 	JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.Platform')) AS Platform
+        , 	JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.Vendor')) AS Vendor
+        , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.ClientIPDNS')) AS ClientIPDNS
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
     FROM Temp_BrowserInfo AS tmp
-		LEFT JOIN FPS_FingerPrint.BrowserInfoAttribute bia ON bia.Code = tmp.browserInfoAttributeCode;
+		LEFT JOIN FPS_FingerPrint.BrowserInfoAttribute bia ON bia.BrowserInfoAttributeCode = tmp.browserInfoAttributeCode;
 	
 END$$
 DELIMITER ;

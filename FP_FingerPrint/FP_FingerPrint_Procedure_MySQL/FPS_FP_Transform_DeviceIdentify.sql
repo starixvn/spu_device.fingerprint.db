@@ -325,7 +325,7 @@ BEGIN
 	SET tmpIt.DeviceId = tmpTd.DeviceId
 	WHERE tmpIt.DeviceId IS NULL;
 
-	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey)
     SELECT  	ts.ServerTransId
             ,	ts.TransTime
 			, 	ts.CustId
@@ -336,6 +336,7 @@ BEGIN
 			, 	ts.CookieId
 			, 	tmpIt.DeviceId
 			, 	ts.ClientIP
+			, 	ts.BrowserInfoId
 			, 	ts.UserAgentId
 			, 	ts.Url
 			, 	ts.Action
