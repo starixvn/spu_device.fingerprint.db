@@ -28,6 +28,7 @@ CREATE TABLE `BrowserInfoAttribute` (
   `BrowserInfoAttributeCode` varchar(64) DEFAULT NULL,
   `SecChUa` varchar(100) DEFAULT NULL,
   `SecChUaPlatform` varchar(100) DEFAULT NULL,
+  `SecChUaMobile` varchar(100) DEFAULT NULL,
   `BrowserInfoJs` varchar(500) DEFAULT NULL,
   `UserAgentData` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`Id`),
@@ -90,13 +91,3 @@ ADD COLUMN `BrowserInfoId` BIGINT UNSIGNED NULL AFTER `ClientIP`;
 
 INSERT IGNORE INTO `FPS_FingerPrint`.`Offset` (`Id`, `OffsetName`, `OffsetValue`) VALUES ('10', 'UpdateBrowserInfo', '0');
 
-
-ALTER TABLE `FPS_FingerPrint`.`ServerTransaction` 
-DROP INDEX `IX_ServerTransaction_SessionKey`,
-ADD UNIQUE INDEX `UX_ServerTransaction_SessionKey` (`SessionKey` ASC);
-;
-
-ALTER TABLE `FPS_FingerPrint`.`ClientTransaction` 
-DROP INDEX `IX_ClientTransaction_SessionKey`,
-ADD UNIQUE INDEX `UX_ClientTransaction_SessionKey` (`SessionKey` ASC);
-;

@@ -39,7 +39,6 @@ BEGIN
 			SessionKey					VARCHAR(100) 		NOT NULL
 		,	UserAgentId					BIGINT	 			NULL
 		,	UserAgentCode				VARCHAR(100)		NULL
-		,	UserAgentData				VARCHAR(500)		NULL
 		,	UserAgent					LONGTEXT 			NULL
 		,	BrowserInfo					LONGTEXT			NULL
 		,	browserInfoAttribute		LONGTEXT			NULL
@@ -54,11 +53,10 @@ BEGIN
         ,	PRIMARY KEY (SessionKey)
     );  
     
-    INSERT IGNORE INTO Temp_BrowserInfo(SessionKey, UserAgent, UserAgentCode, UserAgentData, BrowserInfo, browserInfoAttribute, browserInfoAttributeCode, HeadlessScore)
+    INSERT IGNORE INTO Temp_BrowserInfo(SessionKey, UserAgent, UserAgentCode, BrowserInfo, browserInfoAttribute, browserInfoAttributeCode, HeadlessScore)
     SELECT 	tmp.SessionKey
 		,	tmp.UserAgent
 		,	tmp.UserAgentCode
-		,	tmp.UserAgentData
 		,	tmp.BrowserInfo
 		,	tmp.browserInfoAttribute
 		,	tmp.browserInfoAttributeCode
@@ -69,7 +67,6 @@ BEGIN
 								SessionKey					VARCHAR(100) 	PATH "$.SessionKey"   
 							,	UserAgent					LONGTEXT		PATH "$.UserAgent"
 							,	UserAgentCode				VARCHAR(100) 	PATH "$.UserAgentCode"
-							,	UserAgentData				VARCHAR(500) 	PATH "$.UserAgentData"
 							,	BrowserInfo					LONGTEXT		PATH "$.BrowserInfo"
 							,	browserInfoAttribute		LONGTEXT		PATH "$.browserInfoAttribute"
 							,	browserInfoAttributeCode	VARCHAR(64)		PATH "$.browserInfoAttributeCode"
@@ -109,7 +106,7 @@ BEGIN
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.UserAgentData')) AS UserAgentData
     FROM Temp_BrowserInfo tmp;
         
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, Platform, Vendor, ClientIPDNS, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, Platform, Vendor, IsMobileDevice, ClientIPDNS, CreatedDate, ModifiedDate)
     SELECT 	tmp.SessionKey
 		, 	tmp.UserAgentId
 		, 	bia.Id AS BrowserInfoAttributeId
@@ -118,6 +115,7 @@ BEGIN
         , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.OSName')) AS OSName
         , 	JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.Platform')) AS Platform
         , 	JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.Vendor')) AS Vendor
+        , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUaMobile')) || JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.IsMobileDevice')) AS IsMobileDevice
         , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.ClientIPDNS')) AS ClientIPDNS
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
