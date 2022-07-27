@@ -53,7 +53,7 @@ BEGIN
 		,	BotCategory 		VARCHAR(50) NULL
     );
     
-   INSERT INTO Temp_RawUserAgent(Id, ClientType, ClientName, ClientVersion, OSName, OSShortName, OSVersion, OSPlatform, Device, Brand, Model, BotName, BotCategory)
+   INSERT IGNORE INTO Temp_RawUserAgent(Id, ClientType, ClientName, ClientVersion, OSName, OSShortName, OSVersion, OSPlatform, Device, Brand, Model, BotName, BotCategory)
 	SELECT	rt.Id
 		,	rt.ClientType
 		,	rt.ClientName

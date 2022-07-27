@@ -17,6 +17,7 @@ BEGIN
 
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
+			- 20220601@Jonathan.Doan: Update BrowserInfo [Redmine ID: #172167]
             
 		Param's Explanation (filtered by):	
 
@@ -28,14 +29,14 @@ BEGIN
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
 		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
-		SELECT 'FPS_FP_Transform_ServerTransactionN_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'; ip_OffsetId:',ip_OffsetId), CURRENT_TIMESTAMP();
+		SELECT 'FPS_FP_Transform_ServerTransactionN_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'; ip_OffsetId:',ip_OffsetId,'; ip_Retry:',ip_Retry), CURRENT_TIMESTAMP();
 	END IF;
     /*******LOG TEST********************/
     
-    SELECT off.OffsetValue 
+    SELECT off.OffsetValue
     INTO lv_offsetValue
     FROM FPS_FingerPrint.Offset AS off
-    WHERE off.Id = ip_OffsetId;	
+    WHERE off.Id = ip_OffsetId;
    
     SELECT  trans.Id
         , 	trans.SessionKey
@@ -46,14 +47,13 @@ BEGIN
         , 	trans.SubscriberId
         , 	trans.TransTime
         , 	trans.ClientIP
-        , 	trans.UserAgentId
         , 	trans.Url
         , 	trans.TransKey
         , 	trans.Action
         ,	trans.Retry
-    FROM FPS_FingerPrint.ServerTransaction AS trans 
+    FROM FPS_FingerPrint.ServerTransaction AS trans
 		INNER JOIN FPS_FingerPrint.ServerTransactionN AS transN ON trans.Id = transN.ServerTransId
-    WHERE trans.Id >= lv_offsetValue 
+    WHERE trans.Id >= lv_offsetValue
 			AND transN.Retry >= ip_Retry
     LIMIT ip_BatchSize;
     

@@ -21,7 +21,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"CookieId":1,"Flagged":"Human","Url":"fdsafdsaf"}]');
+			- CALL FPS_FP_Transform_ClientTransaction_Insert('[{"FingerPrintCode":"53b9f5d0e59645d09cfb56690a7b0916","SessionKey":"ddddd","SubscriberId":2,"CookieId":1,"Url":"fdsafdsaf"}]');
 			
 	*/
     
@@ -45,36 +45,32 @@ BEGIN
 		,	SessionKey					VARCHAR(100) 		NULL
 		,	SubscriberId				INT	UNSIGNED		NULL
 		,	CookieId 					BIGINT UNSIGNED 	NULL
-		,	CookieCode 					VARCHAR(64)			NULL		
-        ,	Flagged						VARCHAR(50)			NULL
-		,	RobotDetail					VARCHAR(300)		NULL	
+		,	CookieCode 					VARCHAR(64)			NULL
         ,	Url							VARCHAR(100)		NULL
 		,	TransTime					DATETIME(4)	 		NULL	
         , 	INDEX IX_Temp_FingerPrint_FingerPrintCode(FingerPrintCode)
-    );     
+    );
     
 	CREATE TEMPORARY TABLE Temp_RawFingerPrint(
 			RawFingerPrintId			BIGINT UNSIGNED 	NOT NULL	
 		,	FingerPrintCode				VARCHAR(64) 		NOT NULL
         ,	PRIMARY KEY (RawFingerPrintId)	
         , 	INDEX IX_Temp_RawFingerPrint_FingerPrintCode(FingerPrintCode)
-    );   
+    );
     
 	CREATE TEMPORARY TABLE Temp_Cookie(
 			CookieId					BIGINT UNSIGNED 	NOT NULL	
 		,	CookieCode					VARCHAR(64) 		NOT NULL
         ,	PRIMARY KEY (CookieId)	
         , 	INDEX IX_Temp_Cookie_CookieCode(CookieCode)
-    );   
+    );
 
     
-    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, CookieCode, Flagged, RobotDetail, Url, TransTime)
+    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, CookieCode, Url, TransTime)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SessionKey
 		,	tmp.SubscriberId
         ,	tmp.CookieCode
-        ,	tmp.Flagged
-        ,	tmp.RobotDetail
         ,	tmp.Url
         ,	tmp.TransTime
 	FROM	JSON_TABLE(
@@ -83,9 +79,7 @@ BEGIN
 								FingerPrintCode			VARCHAR(64)	PATH "$.FingerPrintCode"       
 							,	SessionKey				VARCHAR(100) 	PATH "$.SessionKey"   
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
-							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"							
-                            ,	Flagged					VARCHAR(50) 	PATH "$.Flagged"
-                            ,	RobotDetail				VARCHAR(300) 	PATH "$.RobotDetail"
+							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
                             ,	TransTime				DATETIME(4)		PATH "$.TransTime"
 				)
@@ -105,7 +99,7 @@ BEGIN
     
     UPDATE Temp_FingerPrint AS tmp
 		INNER JOIN Temp_RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
-    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;    
+    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;
     
     /*******Cookie********************/
     INSERT IGNORE INTO FPS_FingerPrint.Cookie(CookieCode, CreatedDate, ModifiedDate)
@@ -124,13 +118,11 @@ BEGIN
     SET tmp.CookieId = c.CookieId;
     
     /*******ClientTransaction********************/
-    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Flagged, RobotDetail, Url, TransTime, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Url, TransTime, CreatedDate, ModifiedDate)
 	SELECT	tmp.RawFingerPrintId
 		,	tmp.SubscriberId
 		,	tmp.CookieId
 		,	tmp.SessionKey
-		,	tmp.Flagged
-        ,	tmp.RobotDetail
 		,	tmp.Url
 		,	tmp.TransTime
 		,	lv_CurrentDate AS CreatedDate

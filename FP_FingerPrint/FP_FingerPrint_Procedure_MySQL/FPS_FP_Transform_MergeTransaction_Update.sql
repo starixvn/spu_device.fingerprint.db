@@ -55,25 +55,25 @@ BEGIN
 		,	ServerTransId 		BIGINT UNSIGNED
 		,	CustId 				BIGINT UNSIGNED
 		,	SubAccId 			BIGINT UNSIGNED
-		,	LoginName 			VARCHAR(100) 
+		,	LoginName 			VARCHAR(100)
 		,	SubscriberId 		INT UNSIGNED
 		,	RawFingerPrintId 	BIGINT UNSIGNED
 		,	CookieId 			BIGINT UNSIGNED
 		,	DeviceId 			BIGINT UNSIGNED
-		,	TransTime 			DATETIME(4) 
-		,	ClientIP 			VARCHAR(45) 
+		,	TransTime 			DATETIME(4)
+		,	ClientIP 			VARCHAR(45)
+		,	BrowserInfoId		BIGINT UNSIGNED
 		,	UserAgentId			BIGINT UNSIGNED
-		,	UserAgent 			VARCHAR(500) 
-		,	Url 				VARCHAR(100) 
-		,	Action 				VARCHAR(100) 
-		,	CreatedDate 		DATETIME 
-		,	TransKey 			VARCHAR(200) 
-		,	Retry 				TINYINT 
-		,	Flagged 			VARCHAR(50)
+		,	UserAgent 			VARCHAR(500)
+		,	Url 				VARCHAR(100)
+		,	Action 				VARCHAR(100)
+		,	CreatedDate 		DATETIME
+		,	TransKey 			VARCHAR(200)
+		,	Retry 				TINYINT
         , 	INDEX IX_Temp_Transactions_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, Flagged)
+    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry)
     SELECT  td.Id
 		, 	td.ServerTransId
 		, 	td.CustId
@@ -85,6 +85,7 @@ BEGIN
 		, 	td.DeviceId
 		, 	td.TransTime
 		, 	td.ClientIP
+		, 	td.BrowserInfoId
 		, 	td.UserAgentId
 		, 	ua.UserAgent
 		, 	td.Url
@@ -92,7 +93,6 @@ BEGIN
 		, 	td.CreatedDate
 		, 	td.TransKey
 		, 	td.Retry
-		, 	td.Flagged
     FROM Temp_Transactions AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
 		LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
@@ -118,7 +118,7 @@ BEGIN
 		,	InvalidDevice 		VARCHAR(1000) 
 		,	TransStatus 		BIT(16) 
 		,	FPSTransID 			BIGINT UNSIGNED
-		,	Flagged 			SMALLINT 
+		,	Flagged 			SMALLINT
 		,	IsProcessed 		TINYINT 
 		,	TransID 			BIGINT UNSIGNED
 		,	FPDeviceID 			BIGINT UNSIGNED
@@ -155,9 +155,7 @@ BEGIN
 		,	transO.InvalidDevice 		
 		,	transO.TransStatus 		
 		,	transO.FPSTransID 			
-		, 	(CASE WHEN transD.Flagged = 'human' THEN 1
-			WHEN transD.Flagged = 'bot' THEN 9 
-            ELSE 6 END) AS Flagged			
+		, 	1 AS Flagged   /*******Waiting for the DCS team to accept the solution********************/		
 		,	transO.IsProcessed 		
 		,	transO.TransID 			
 		,	transD.DeviceId 			
@@ -206,7 +204,7 @@ BEGIN
        ,	tmp.TransKey
    FROM Temp_Transactions2 AS tmp;
       
-   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, Flagged, Retry)
+   INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry)
    SELECT	transD.Id
 		,	transD.ServerTransId
 		,	transD.CustId
@@ -218,12 +216,12 @@ BEGIN
 		,	transD.DeviceId
 		,	transD.TransTime
 		,	transD.ClientIP
+		,	transD.BrowserInfoId
 		,	transD.UserAgentId
 		,	transD.Url
 		,	transD.Action
 		,	transD.CreatedDate
 		,	transD.TransKey
-		,	transD.Flagged
         ,	transD.Retry
 	FROM  Temp_TransactionsDevice AS transD 
 		INNER JOIN Temp_Transactions2 AS tmp ON transD.Id = tmp.Id;
