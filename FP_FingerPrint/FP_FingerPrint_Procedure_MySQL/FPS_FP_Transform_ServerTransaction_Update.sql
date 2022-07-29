@@ -20,6 +20,7 @@ BEGIN
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
 			- 20220318@Jonathan.Doan: Update TotalValidTrans in table TransactionDailySum [Redmine ID: #162668]
             - 20220601@Jonathan.Doan: Update BrowserInfo [Redmine ID: #172167]
+            - 20220729@Terry.Nguyen: Ignore and check exist in table ServerTransactionCompleted and ClientTransactionCompleted [Redmine ID: #175065]
             
 		Param's Explanation (filtered by):	
 
@@ -182,7 +183,7 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpTs2
     WHERE tmpTs2.RawFingerPrintId IS NOT NULL;
 
-	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
+	INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
     SELECT	rt.Id
 		,	rt.SessionKey
         ,	rt.CustId
@@ -199,9 +200,9 @@ BEGIN
         ,	rt.Action
     FROM Temp_RawTransaction2 AS tmpT2 
 		INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmpT2.Id 
-    WHERE tmpT2.RawFingerPrintId IS NOT NULL;
+    WHERE tmpT2.RawFingerPrintId IS NOT NULL AND NOT EXISTS(SELECT 1 FROM FPS_FingerPrint.ServerTransactionCompleted sc WHERE sc.Id = tmpT2.Id);
     
-    INSERT INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, Url, TransTime, CreatedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, Url, TransTime, CreatedDate)
     SELECT	fp.Id
 		,	fp.RawFingerPrintId
 		,	fp.CookieId
@@ -211,7 +212,8 @@ BEGIN
 		,	fp.TransTime
 		,	fp.CreatedDate
     FROM Temp_RawTransaction2 AS tmpT2
-		INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON tmpT2.SessionKey = fp.SessionKey;
+		INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON tmpT2.SessionKey = fp.SessionKey
+	WHERE NOT EXISTS(SELECT 1 FROM FPS_FingerPrint.ClientTransactionCompleted cc WHERE cc.Id = tmpT2.Id);
         
     DELETE fp FROM FPS_FingerPrint.ClientTransaction AS fp
 		INNER JOIN Temp_RawTransaction2 AS tmpT2 ON tmpT2.SessionKey = fp.SessionKey;
