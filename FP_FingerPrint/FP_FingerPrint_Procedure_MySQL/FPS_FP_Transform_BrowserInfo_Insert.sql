@@ -45,9 +45,9 @@ BEGIN
 		,	browserInfoAttributeCode	VARCHAR(64)			NULL
 		,	HeadlessScore				VARCHAR(300)		NULL
         ,	PRIMARY KEY (SessionKey)
-    );      
+    );
     
-	CREATE TEMPORARY TABLE Temp_RawUserAgent(
+    CREATE TEMPORARY TABLE Temp_RawUserAgent(
 			SessionKey 					VARCHAR(100) 			NOT NULL 
 		,	UserAgentId					BIGINT UNSIGNED			NOT NULL
         ,	PRIMARY KEY (SessionKey)
@@ -64,7 +64,7 @@ BEGIN
 	FROM	JSON_TABLE(
 			ip_BrowserInfo,
 			 "$[*]" COLUMNS(
-								SessionKey					VARCHAR(100) 	PATH "$.SessionKey"   
+								SessionKey					VARCHAR(100) 	PATH "$.SessionKey"
 							,	UserAgent					LONGTEXT		PATH "$.UserAgent"
 							,	UserAgentCode				VARCHAR(100) 	PATH "$.UserAgentCode"
 							,	BrowserInfo					LONGTEXT		PATH "$.BrowserInfo"
@@ -73,18 +73,19 @@ BEGIN
 							,	HeadlessScore				VARCHAR(300) 	PATH "$.HeadlessScore"
 				)
 		   ) AS tmp; 
+
     
-    
-     
 	/*******RawUserAgent********************/
     INSERT IGNORE INTO FPS_FingerPrint.RawUserAgent (UserAgentCode, UserAgent, CreatedDate, ModifiedDate)	
-	SELECT	tmp.UserAgentCode
+	SELECT	DISTINCT
+			tmp.UserAgentCode
 		,	tmp.UserAgent
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_BrowserInfo AS tmp;
+	FROM Temp_BrowserInfo AS tmp
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.RawUserAgent ua WHERE ua.UserAgentCode = tmp.UserAgentCode);
         
-    INSERT INTO Temp_RawUserAgent(SessionKey, UserAgentId)
+    INSERT IGNORE INTO Temp_RawUserAgent(SessionKey, UserAgentId)
     SELECT 	tmp.SessionKey
 		, 	ua.Id AS UserAgentId
     FROM Temp_BrowserInfo AS tmp
@@ -95,18 +96,18 @@ BEGIN
 	SET tmp.UserAgentId = ua.UserAgentId;
      
      
+
     /*******BrowserInfo********************/
     
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfoAttribute(BrowserInfoAttributeCode, SecChUa, SecChUaPlatform, SecChUaMobile, BrowserInfoJs, UserAgentData)
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfoAttribute(BrowserInfoAttributeCode, SecChUa, SecChUaPlatform, SecChUaMobile, BrowserInfoJs)
     SELECT 	tmp.browserInfoAttributeCode
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUa')) AS SecChUa
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUaPlatform')) AS SecChUaPlatform
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUaMobile')) AS SecChUaMobile
 		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.BrowserInfoJs')) AS BrowserInfoJs
-		,	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.UserAgentData')) AS UserAgentData
     FROM Temp_BrowserInfo tmp;
         
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, Platform, Vendor, IsMobileDevice, ClientIPDNS, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, Platform, Vendor, IsMobileDevice, CreatedDate, ModifiedDate)
     SELECT 	tmp.SessionKey
 		, 	tmp.UserAgentId
 		, 	bia.Id AS BrowserInfoAttributeId
@@ -116,7 +117,6 @@ BEGIN
         , 	JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.Platform')) AS Platform
         , 	JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.Vendor')) AS Vendor
         , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.browserInfoAttribute, '$.SecChUaMobile')) || JSON_UNQUOTE(JSON_EXTRACT(bia.BrowserInfoJs, '$.IsMobileDevice')) AS IsMobileDevice
-        , 	JSON_UNQUOTE(JSON_EXTRACT(tmp.BrowserInfo, '$.ClientIPDNS')) AS ClientIPDNS
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
     FROM Temp_BrowserInfo AS tmp

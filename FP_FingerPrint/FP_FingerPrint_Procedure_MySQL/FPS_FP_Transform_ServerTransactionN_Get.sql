@@ -47,6 +47,7 @@ BEGIN
         , 	trans.SubscriberId
         , 	trans.TransTime
         , 	trans.ClientIP
+        , 	trans.UserAgentId
         , 	trans.Url
         , 	trans.TransKey
         , 	trans.Action
