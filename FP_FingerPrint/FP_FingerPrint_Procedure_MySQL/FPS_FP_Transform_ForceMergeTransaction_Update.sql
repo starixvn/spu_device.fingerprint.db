@@ -96,7 +96,7 @@ BEGIN
 			, 	td.Retry
     FROM Temp_Transactions AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
-        INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
+        LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
     
 	INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL
 		, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old,	IP_Old,	UserAgent_Old, URL_Old,	Flagged_Old, TransKey)

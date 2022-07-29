@@ -51,6 +51,7 @@ BEGIN
 		,	SubscriberId 		INT DEFAULT NULL
 		,	TransTime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
+		,	UserAgentId 		BIGINT UNSIGNED DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
 		,	Action 				VARCHAR(100) DEFAULT NULL
 		,	CreatedDate 		DATETIME DEFAULT NULL
@@ -72,6 +73,7 @@ BEGIN
 		,	SubscriberId 		INT DEFAULT NULL
 		,	TransTime 			DATETIME(4) DEFAULT NULL
 		,	ClientIP 			VARCHAR(45) DEFAULT NULL
+		,	UserAgentId 		BIGINT UNSIGNED DEFAULT NULL
 		,	Url 				VARCHAR(100) DEFAULT NULL
 		,	Action 				VARCHAR(100) DEFAULT NULL
 		,	CreatedDate 		DATETIME DEFAULT NULL
@@ -80,7 +82,6 @@ BEGIN
 		,	RawFingerPrintId 	BIGINT UNSIGNED DEFAULT NULL
 		,	CookieId 			BIGINT UNSIGNED DEFAULT NULL
 		,	BrowserInfoId 		BIGINT UNSIGNED DEFAULT NULL
-		,	UserAgentId 		BIGINT UNSIGNED DEFAULT NULL
         
         ,	INDEX IX_Temp_RawTransaction2_RawFingerPrintId (RawFingerPrintId)
     );    
@@ -88,11 +89,10 @@ BEGIN
     CREATE TEMPORARY TABLE Temp_BrowserInfo(
 				Id 				BIGINT UNSIGNED NOT NULL PRIMARY KEY	
 			, 	SessionKey 		VARCHAR(200)
-			, 	UserAgentId 	BIGINT UNSIGNED
             , 	UNIQUE INDEX UX_Temp_BrowserInfo_SessionKey(SessionKey)   
     );
     
-   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, Url, TransKey, Retry, Action, CreatedDate)
+   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, CreatedDate)
 	SELECT	rt.Id
 		,	rt.SessionKey
 		,	rt.CustId
@@ -101,6 +101,7 @@ BEGIN
 		,	rt.SubscriberId
 		,	rt.TransTime
 		,	rt.ClientIP
+		,	rt.UserAgentId
 		,	rt.Url
         ,	rt.TransKey
         ,	rt.Retry
@@ -117,6 +118,7 @@ BEGIN
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
 							,	TransTime				DATETIME(4)	 	PATH "$.TransTime"
                             ,	ClientIP				VARCHAR(45)		PATH "$.ClientIP"
+                            ,	UserAgentId				BIGINT UNSIGNED	PATH "$.UserAgentId"
 							,	Url						VARCHAR(100) 	PATH "$.Url"
 							,	TransKey				VARCHAR(200) 	PATH "$.TransKey"
                             ,	Retry					TINYINT			PATH "$.Retry"
@@ -124,7 +126,7 @@ BEGIN
 				)
 		   ) AS  rt;    
     
-   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, CreatedDate)
+   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, CreatedDate)
    SELECT 	tmpTs.Id
 	   , 	tmpTs.SessionKey
 	   , 	tmpTs.CustId
@@ -133,6 +135,7 @@ BEGIN
 	   , 	tmpTs.SubscriberId
 	   , 	tmpTs.TransTime
 	   , 	tmpTs.ClientIP
+	   , 	tmpTs.UserAgentId
 	   , 	IFNULL(tmpTs.Url, fp.Url)
 	   , 	tmpTs.TransKey
 	   ,	tmpTs.retry + 1
@@ -143,24 +146,21 @@ BEGIN
    FROM Temp_RawTransaction AS tmpTs 
 		LEFT JOIN FPS_FingerPrint.ClientTransaction AS fp ON fp.SessionKey = tmpTs.SessionKey;
       
-	INSERT INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
+	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey)
     SELECT 	bi.Id
 		,	bi.SessionKey
-		,	bi.UserAgentId
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey;
         
-	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
+	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey)
     SELECT 	bi.Id
 		,	bi.SessionKey
-		,	bi.UserAgentId
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfoCompleted AS bi ON bi.SessionKey = tmp.SessionKey;    
 	
 	UPDATE Temp_RawTransaction2 tmp
 		INNER JOIN Temp_BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey
-    SET tmp.BrowserInfoId = bi.Id,
-		tmp.UserAgentId = bi.UserAgentId; 
+    SET tmp.BrowserInfoId = bi.Id; 
         
 	-- Insert data completed
     INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
@@ -182,7 +182,7 @@ BEGIN
     FROM Temp_RawTransaction2 AS tmpTs2
     WHERE tmpTs2.RawFingerPrintId IS NOT NULL;
 
-	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
+	INSERT INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
     SELECT	rt.Id
 		,	rt.SessionKey
         ,	rt.CustId
@@ -191,6 +191,7 @@ BEGIN
         ,	rt.SubscriberId
         ,	rt.TransTime
         ,	rt.ClientIP
+        ,	rt.UserAgentId
         ,	rt.Url
         ,	rt.ModifiedDate
         ,	rt.CreatedDate
