@@ -15,6 +15,7 @@ BEGIN
 
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
+            - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
             
 		Param's Explanation (filtered by):	
 
@@ -71,10 +72,11 @@ BEGIN
 		,	CreatedDate 		DATETIME 
 		,	TransKey 			VARCHAR(200) 
 		,	Retry 				TINYINT
+		,	AddonId 			BIGINT UNSIGNED
         , 	INDEX IX_Temp_TransactionsDevice_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry)
+    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId)
 		SELECT  td.Id
 			, 	td.ServerTransId
 			, 	td.CustId
@@ -94,6 +96,7 @@ BEGIN
 			, 	td.CreatedDate
 			, 	td.TransKey
 			, 	td.Retry
+			, 	td.AddonId
     FROM Temp_Transactions AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
         LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
@@ -132,7 +135,7 @@ BEGIN
 	FROM Temp_TransactionsDevice AS transD   
 		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = transD.SubscriberId;
     
-	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry)
+	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId)
 	SELECT	transD.Id	
 		,	transD.ServerTransId
 		,	transD.CustId
@@ -150,7 +153,8 @@ BEGIN
 		,	transD.Action
 		,	transD.CreatedDate
 		,	transD.TransKey   
-		,	transD.Retry    
+		,	transD.Retry
+		,	transD.AddonId
 	FROM  Temp_TransactionsDevice AS transD;
     
 	DELETE transD 

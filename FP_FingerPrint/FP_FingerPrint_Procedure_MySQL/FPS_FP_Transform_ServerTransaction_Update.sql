@@ -21,6 +21,7 @@ BEGIN
 			- 20220318@Jonathan.Doan: Update TotalValidTrans in table TransactionDailySum [Redmine ID: #162668]
             - 20220601@Jonathan.Doan: Update BrowserInfo [Redmine ID: #172167]
             - 20220729@Terry.Nguyen: Ignore and check exist in table ServerTransactionCompleted and ClientTransactionCompleted [Redmine ID: #175065]
+            - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
             
 		Param's Explanation (filtered by):	
 
@@ -83,6 +84,7 @@ BEGIN
 		,	RawFingerPrintId 	BIGINT UNSIGNED DEFAULT NULL
 		,	CookieId 			BIGINT UNSIGNED DEFAULT NULL
 		,	BrowserInfoId 		BIGINT UNSIGNED DEFAULT NULL
+		,	AddonId		 		BIGINT UNSIGNED DEFAULT NULL
         
         ,	INDEX IX_Temp_RawTransaction2_RawFingerPrintId (RawFingerPrintId)
     );    
@@ -127,7 +129,7 @@ BEGIN
 				)
 		   ) AS  rt;    
     
-   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, CreatedDate)
+   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, AddonId, CreatedDate)
    SELECT 	tmpTs.Id
 	   , 	tmpTs.SessionKey
 	   , 	tmpTs.CustId
@@ -143,6 +145,7 @@ BEGIN
 	   ,	tmpTs.Action
 	   ,	fp.RawFingerPrintId
 	   ,	fp.CookieId
+	   ,	fp.AddonId
 	   ,	lv_currentDate
    FROM Temp_RawTransaction AS tmpTs 
 		LEFT JOIN FPS_FingerPrint.ClientTransaction AS fp ON fp.SessionKey = tmpTs.SessionKey;
@@ -164,7 +167,7 @@ BEGIN
     SET tmp.BrowserInfoId = bi.Id; 
         
 	-- Insert data completed
-    INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+    INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
     SELECT	tmpTs2.Id
 		,	tmpTs2.CustId
         ,	tmpTs2.SubAccId
@@ -180,6 +183,7 @@ BEGIN
         ,	tmpTs2.CreatedDate
         ,	tmpTs2.TransKey
         ,	tmpTs2.BrowserInfoId
+        ,	tmpTs2.AddonId
     FROM Temp_RawTransaction2 AS tmpTs2
     WHERE tmpTs2.RawFingerPrintId IS NOT NULL;
 
@@ -203,7 +207,7 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmpT2.Id 
     WHERE tmpT2.RawFingerPrintId IS NOT NULL AND NOT EXISTS(SELECT 1 FROM FPS_FingerPrint.ServerTransactionCompleted sc WHERE sc.Id = tmpT2.Id);
     
-    INSERT IGNORE INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, Url, TransTime, CreatedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, Url, TransTime, AddonId, CreatedDate)
     SELECT	fp.Id
 		,	fp.RawFingerPrintId
 		,	fp.CookieId
@@ -211,6 +215,7 @@ BEGIN
 		,	fp.SessionKey
 		,	fp.Url
 		,	fp.TransTime
+		,	fp.AddonId
 		,	fp.CreatedDate
     FROM Temp_RawTransaction2 AS tmpT2
 		INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON tmpT2.SessionKey = fp.SessionKey

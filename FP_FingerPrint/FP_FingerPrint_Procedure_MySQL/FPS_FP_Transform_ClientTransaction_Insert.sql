@@ -17,6 +17,7 @@ BEGIN
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
 			- 20220318@Jonathan.Doan: Add TransTime for ClientTransaction and Insert ClientTransactionDailySum [Redmine ID: #162668]
 			- 20220608@Jonathan.Doan: Remove ServerTransactionDailySum [Redmine ID: #173803]
+			- 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
             
 		Param's Explanation (filtered by):	
 
@@ -48,6 +49,8 @@ BEGIN
 		,	CookieCode 					VARCHAR(64)			NULL
         ,	Url							VARCHAR(100)		NULL
 		,	TransTime					DATETIME(4)	 		NULL	
+		,	AddonId						BIGINT UNSIGNED		NULL
+		,	AddonCode					VARCHAR(45)	 		NULL
         , 	INDEX IX_Temp_FingerPrint_FingerPrintCode(FingerPrintCode)
     );
     
@@ -66,13 +69,14 @@ BEGIN
     );
 
     
-    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, CookieCode, Url, TransTime)
+    INSERT INTO Temp_FingerPrint(FingerPrintCode, SessionKey, SubscriberId, CookieCode, Url, TransTime, AddonCode)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.SessionKey
 		,	tmp.SubscriberId
         ,	tmp.CookieCode
         ,	tmp.Url
         ,	tmp.TransTime
+        ,	tmp.AddonCode
 	FROM	JSON_TABLE(
 			ip_FingerPrint,
 			 "$[*]" COLUMNS(
@@ -82,6 +86,7 @@ BEGIN
 							,	CookieCode				VARCHAR(64) 	PATH "$.CookieCode"
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
                             ,	TransTime				DATETIME(4)		PATH "$.TransTime"
+                            ,	AddonCode				VARCHAR(45)		PATH "$.AddonCode"
 				)
 		   ) AS tmp; 
     
@@ -101,6 +106,10 @@ BEGIN
 		INNER JOIN Temp_RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
     SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;
     
+    UPDATE Temp_FingerPrint AS tmp
+		INNER JOIN FPS_FingerPrint.Addon AS ao ON ao.AddonCode = tmp.AddonCode
+    SET tmp.AddonId = ao.Id;
+    
     /*******Cookie********************/
     INSERT IGNORE INTO FPS_FingerPrint.Cookie(CookieCode, CreatedDate, ModifiedDate)
 	SELECT	tmp.CookieCode		
@@ -118,13 +127,14 @@ BEGIN
     SET tmp.CookieId = c.CookieId;
     
     /*******ClientTransaction********************/
-    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Url, TransTime, CreatedDate, ModifiedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction(RawFingerPrintId, SubscriberId, CookieId, SessionKey, Url, TransTime, AddonId, CreatedDate, ModifiedDate)
 	SELECT	tmp.RawFingerPrintId
 		,	tmp.SubscriberId
 		,	tmp.CookieId
 		,	tmp.SessionKey
 		,	tmp.Url
 		,	tmp.TransTime
+		,	tmp.AddonId
 		,	lv_CurrentDate AS CreatedDate
 		,	lv_CurrentDate AS CreatedDate
 	FROM Temp_FingerPrint AS tmp;

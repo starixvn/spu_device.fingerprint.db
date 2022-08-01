@@ -38,31 +38,23 @@ BEGIN
 	CREATE TEMPORARY TABLE Temp_FingerPrintAttributes(
 			FingerPrintCode				VARCHAR(200) 		NULL
 		,	Attribute					LONGTEXT	 		NULL
-		,	CheckCanvasDefender			BOOLEAN	 			NULL
-		,	CheckWebGLDefender			BOOLEAN 			NULL
         , 	INDEX IX_Temp_FingerPrintAttributes_FingerPrintCode(FingerPrintCode)
     );
     
-    INSERT INTO Temp_FingerPrintAttributes(FingerPrintCode, Attribute, CheckCanvasDefender, CheckWebGLDefender)
+    INSERT INTO Temp_FingerPrintAttributes(FingerPrintCode, Attribute)
 	SELECT	tmp.FingerPrintCode
 		,	tmp.Attribute
-		,	tmp.CheckCanvasDefender
-		,	tmp.CheckWebGLDefender
 	FROM	JSON_TABLE(
 			ip_FingerprintAttributes,
 			 "$[*]" COLUMNS(
-						FingerPrintCode			VARCHAR(64)	PATH "$.FingerPrintCode"
-					,	Attribute				LONGTEXT	PATH "$.Attribute"
-					,	CheckCanvasDefender		BOOLEAN		PATH "$.CheckCanvasDefender"
-					,	CheckWebGLDefender		BOOLEAN		PATH "$.CheckWebGLDefender"
+						FingerPrintCode				VARCHAR(64)	PATH "$.FingerPrintCode"
+					,	Attribute					LONGTEXT	PATH "$.Attribute"
 				)
 		   ) AS tmp; 
     
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, Attribute, CanvasDefender, WebGLDefender)
+    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, Attribute)
     SELECT	tmp.FingerPrintCode
 		,	tmp.Attribute
-		,	tmp.CheckCanvasDefender
-		,	tmp.CheckWebGLDefender
 	FROM Temp_FingerPrintAttributes AS tmp;
     
 END$$
