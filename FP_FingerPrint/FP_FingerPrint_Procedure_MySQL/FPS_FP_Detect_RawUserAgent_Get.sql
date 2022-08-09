@@ -16,6 +16,7 @@ BEGIN
 
 		Revisions:
 			- 20220406@Jonathan.Doan: Created [Redmine ID: #162668]
+			- 20220809@Jonathan.Doan: HF - Add service parse UA [Redmine ID: #176448]
             
 		Param's Explanation (filtered by):	
 
@@ -32,7 +33,7 @@ BEGIN
 	END IF;
     /*******LOG TEST********************/
     
-    SELECT off.OffsetValue 
+    SELECT off.OffsetValue
     INTO lv_offsetValue
     FROM FPS_FingerPrint.Offset AS off
     WHERE off.Id = ip_OffsetId;	
@@ -42,6 +43,7 @@ BEGIN
 			ua.UserAgent
     FROM FPS_FingerPrint.RawUserAgent AS ua 
     WHERE ua.Id > lv_offsetValue
+		AND ua.Brand IS NULL
     LIMIT ip_BatchSize;
           
 END$$

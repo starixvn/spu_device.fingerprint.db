@@ -16,6 +16,7 @@ BEGIN
 
 		Revisions:
 			- 20220601@Jonathan.Doan: Created [Redmine ID: #172167]
+			- 20220809@Jonathan.Doan: HF - Add service parse UA [Redmine ID: #176448]
             
 		Param's Explanation (filtered by):	
 
@@ -45,12 +46,10 @@ BEGIN
 		,	ua.UserAgent
 		,	ua.ClientName AS UABrowserName
 		,	ua.OSName AS UAOSName
-		,	CASE WHEN ua.Brand IS NOT NULL THEN 1
-				ELSE 0
-			END AS IsParsed
     FROM FPS_FingerPrint.BrowserInfo AS bi
 		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = bi.UserAgentId
     WHERE bi.Id >= lv_offsetValue
+		AND ua.Brand IS NOT NULL
     LIMIT ip_BatchSize;
     
 END$$
