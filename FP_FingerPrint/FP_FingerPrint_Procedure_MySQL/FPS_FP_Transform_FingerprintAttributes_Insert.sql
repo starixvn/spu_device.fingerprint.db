@@ -15,6 +15,7 @@ BEGIN
 
 		Revisions:
 			- 20220607@Jonathan.Doan: Created [Redmine ID: #173803]
+			- 20220711@Jonathan.Doan: Update Canvas & WebGL Defender [Redmine ID: #175155]
             
 		Param's Explanation (filtered by):	
 
@@ -46,8 +47,8 @@ BEGIN
 	FROM	JSON_TABLE(
 			ip_FingerprintAttributes,
 			 "$[*]" COLUMNS(
-						FingerPrintCode			VARCHAR(64)	PATH "$.FingerPrintCode" 
-					,	Attribute				LONGTEXT		PATH "$.Attribute"
+						FingerPrintCode				VARCHAR(64)	PATH "$.FingerPrintCode"
+					,	Attribute					LONGTEXT	PATH "$.Attribute"
 				)
 		   ) AS tmp; 
     

@@ -16,6 +16,7 @@ BEGIN
 
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
+            - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
             
 		Param's Explanation (filtered by):	
 			ip_GroupType: 0- Not a group, 1- Trans Group(the same RawFingerPrintId or Cookie);
@@ -325,7 +326,7 @@ BEGIN
 	SET tmpIt.DeviceId = tmpTd.DeviceId
 	WHERE tmpIt.DeviceId IS NULL;
 
-	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId)
     SELECT  	ts.ServerTransId
             ,	ts.TransTime
 			, 	ts.CustId
@@ -342,6 +343,7 @@ BEGIN
 			, 	ts.Action
 			, 	lv_CreatedDate
 			, 	ts.TransKey
+			, 	ts.AddonId
 	FROM Temp_InputTrans AS tmpIt
 		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpIt.Id = ts.Id;
 
