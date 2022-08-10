@@ -4,7 +4,6 @@ DELIMITER $$
 
 CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Transform_BrowserInfo_Get`(
 		ip_BatchSize 	INT
-    ,   ip_OffsetId		INT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -24,19 +23,13 @@ BEGIN
 			- CALL FPS_FP_Transform_BrowserInfo_Get(1, 9);
 			
 	*/
-    DECLARE lv_offsetValue BIGINT;
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
 		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
-		SELECT 'FPS_FP_Transform_BrowserInfo_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize,'; ip_OffsetId:',ip_OffsetId), CURRENT_TIMESTAMP();
+		SELECT 'FPS_FP_Transform_BrowserInfo_Get', NULL,CONCAT('ip_BatchSize:',ip_BatchSize), CURRENT_TIMESTAMP();
 	END IF;
     /*******LOG TEST********************/
-    
-    SELECT off.OffsetValue 
-    INTO lv_offsetValue
-    FROM FPS_FingerPrint.Offset AS off
-    WHERE off.Id = ip_OffsetId;	
 	   
     SELECT 	bi.Id
 		,	bi.HeadlessScore
@@ -48,8 +41,7 @@ BEGIN
 		,	ua.OSName AS UAOSName
     FROM FPS_FingerPrint.BrowserInfo AS bi
 		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = bi.UserAgentId
-    WHERE bi.Id >= lv_offsetValue
-		AND ua.Brand IS NOT NULL
+    WHERE ua.Brand IS NOT NULL
     LIMIT ip_BatchSize;
     
 END$$
