@@ -22,6 +22,7 @@ BEGIN
             - 20220601@Jonathan.Doan: Update BrowserInfo [Redmine ID: #172167]
             - 20220729@Terry.Nguyen: Ignore and check exist in table ServerTransactionCompleted and ClientTransactionCompleted [Redmine ID: #175065]
             - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
+            - 20220811@Jonathan.Doan: Update UserAgentId into BrowserInfo [Redmine ID: #176448]
             
 		Param's Explanation (filtered by):	
 
@@ -43,7 +44,7 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_RawTransaction2;
     DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInfo; 
     
-	-- Create Temporary table
+    /*******Create Temporary table********************/
 	CREATE TEMPORARY TABLE Temp_RawTransaction(
 			Id 					BIGINT UNSIGNED PRIMARY KEY
 		,	SessionKey 			VARCHAR(200) NULL
@@ -92,6 +93,7 @@ BEGIN
     CREATE TEMPORARY TABLE Temp_BrowserInfo(
 				Id 				BIGINT UNSIGNED NOT NULL PRIMARY KEY	
 			, 	SessionKey 		VARCHAR(200)
+			, 	UserAgentId 	BIGINT UNSIGNED DEFAULT NULL
             , 	UNIQUE INDEX UX_Temp_BrowserInfo_SessionKey(SessionKey)   
     );
     
@@ -150,23 +152,24 @@ BEGIN
    FROM Temp_RawTransaction AS tmpTs 
 		LEFT JOIN FPS_FingerPrint.ClientTransaction AS fp ON fp.SessionKey = tmpTs.SessionKey;
       
-	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey)
+	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
     SELECT 	bi.Id
 		,	bi.SessionKey
+		,	tmp.UserAgentId
     FROM Temp_RawTransaction2 tmp
-		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey;
-        
-	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey)
-    SELECT 	bi.Id
-		,	bi.SessionKey
-    FROM Temp_RawTransaction2 tmp
-		INNER JOIN FPS_FingerPrint.BrowserInfoCompleted AS bi ON bi.SessionKey = tmp.SessionKey;    
+		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey;    
+    
+    /*******Update BrowserInfo UserAgentId********************/
+    UPDATE FPS_FingerPrint.BrowserInfo bi
+    INNER JOIN Temp_BrowserInfo tmp ON tmp.Id = bi.Id
+    SET bi.UserAgentId = tmp.UserAgentId;
 	
+    /*******Update BrowserInfoId********************/
 	UPDATE Temp_RawTransaction2 tmp
 		INNER JOIN Temp_BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey
     SET tmp.BrowserInfoId = bi.Id; 
-        
-	-- Insert data completed
+    
+    /*******Insert data completed********************/
     INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
     SELECT	tmpTs2.Id
 		,	tmpTs2.CustId
