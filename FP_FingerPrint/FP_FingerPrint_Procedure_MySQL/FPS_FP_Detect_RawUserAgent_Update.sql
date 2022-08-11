@@ -4,8 +4,6 @@ DELIMITER $$
 
 CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Detect_RawUserAgent_Update`(
 		ip_RawUserAgentJson	LONGTEXT
-    ,   ip_OffsetId		INT
-	,	ip_OffsetValue	BIGINT
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -24,12 +22,11 @@ BEGIN
 			- CALL FPS_FP_Detect_RawUserAgent_Update(100,4);
 			
 	*/
-    DECLARE lv_offsetValue BIGINT;
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
 		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
-		SELECT 'FPS_FP_Detect_RawUserAgent_Update', ip_RawUserAgentJson,CONCAT('ip_OffsetId:',ip_OffsetId,'; ip_OffsetValue:',ip_OffsetValue), CURRENT_TIMESTAMP();
+		SELECT 'FPS_FP_Detect_RawUserAgent_Update', ip_RawUserAgentJson, NULL, CURRENT_TIMESTAMP();
 	END IF;
     /*******LOG TEST********************/
     
@@ -102,10 +99,6 @@ BEGIN
 		ua.Model = tmp.Model,
 		ua.BotName = tmp.BotName,
 		ua.BotCategory = tmp.BotCategory;
-    
-    UPDATE FPS_FingerPrint.Offset AS off
-		SET off.OffsetValue = ip_OffsetValue
-    WHERE off.Id = ip_OffsetId;
           
 END$$
 DELIMITER ;
