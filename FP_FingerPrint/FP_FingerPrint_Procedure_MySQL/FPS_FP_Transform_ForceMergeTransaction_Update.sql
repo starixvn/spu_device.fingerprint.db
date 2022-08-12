@@ -102,7 +102,7 @@ BEGIN
         LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
     
 	INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL
-		, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old,	IP_Old,	UserAgent_Old, URL_Old,	Flagged_Old, TransKey)
+		, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	BrowserInfoId, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old,	IP_Old,	UserAgent_Old, URL_Old,	Flagged_Old, TransKey)
 	SELECT	transD.LoginName	
 		, 	sub.Name
 		, 	transD.TransTime
@@ -120,7 +120,7 @@ BEGIN
 		, 	NULL AS InvalidDevice
 		, 	0 AS TransStatus
 		, 	NULL AS FPSTransID
-		, 	1 AS Flagged   /*******Waiting for the DCS team to accept the solution********************/
+		, 	transD.BrowserInfoId
 		, 	transD.DeviceId
 		, 	sub.Id
 		, 	transD.CustId

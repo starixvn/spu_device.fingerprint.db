@@ -122,7 +122,7 @@ BEGIN
 		,	InvalidDevice 		VARCHAR(1000) 
 		,	TransStatus 		BIT(16) 
 		,	FPSTransID 			BIGINT UNSIGNED
-		,	Flagged 			SMALLINT
+		,	BrowserInfoId		BIGINT UNSIGNED
 		,	IsProcessed 		TINYINT 
 		,	TransID 			BIGINT UNSIGNED
 		,	FPDeviceID 			BIGINT UNSIGNED
@@ -138,45 +138,45 @@ BEGIN
         ,	TransKey			VARCHAR(200)
     );
     
-    INSERT INTO Temp_Transactions2(Id, Id_Old, LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgentId, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, Flagged, IsProcessed, TransID, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old,TransKey)
+    INSERT INTO Temp_Transactions2(Id, Id_Old, LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgentId, UserAgent, IP, BrowserInfoId, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, FPSTransID, IsProcessed, TransID, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old,TransKey)
 	SELECT	transD.Id
 		,	transO.TransID
-		,	transD.LoginName 			
-		,	transO.SubscriberName 		
-		,	transD.TransTime 			
-		,	transO.CreatedDate 		
-		,	transO.DeviceCode 			
-		,	transO.FingerprintCode 	
-		,	transO.FingerprintMoreInfo 
-		,	transD.UserAgentId 			
-		,	transD.UserAgent 			
-		,	transD.ClientIP 					
-		,	transO.IPID 				
-		,	transO.PluginID 			
-		,	transD.URL 				
-		,	transD.Action 				
-		,	transO.ActionResult 		
-		,	transO.InvalidDevice 		
-		,	transO.TransStatus 		
-		,	transO.FPSTransID 			
-		, 	1 AS Flagged   /*******Waiting for the DCS team to accept the solution********************/		
-		,	transO.IsProcessed 		
-		,	transO.TransID 			
-		,	transD.DeviceId 			
-		,	transD.SubscriberId 		
-		,	transD.CustId 				
-		,	transD.SubAccId 			
-		,	transO.LoginName 		
-		,	transO.TransTime		
-		,	transO.IP			
-		,	transO.UserAgent		
-		,	transO.URL		
+		,	transD.LoginName
+		,	transO.SubscriberName
+		,	transD.TransTime
+		,	transO.CreatedDate
+		,	transO.DeviceCode
+		,	transO.FingerprintCode
+		,	transO.FingerprintMoreInfo
+		,	transD.UserAgentId
+		,	transD.UserAgent
+		,	transD.ClientIP AS IP
+		, 	transD.BrowserInfoId
+		,	transO.IPID
+		,	transO.PluginID
+		,	transD.URL
+		,	transD.Action
+		,	transO.ActionResult
+		,	transO.InvalidDevice
+		,	transO.TransStatus
+		,	transO.FPSTransID
+		,	transO.IsProcessed
+		,	transO.TransID
+		,	transD.DeviceId
+		,	transD.SubscriberId
+		,	transD.CustId
+		,	transD.SubAccId
+		,	transO.LoginName
+		,	transO.TransTime
+		,	transO.IP
+		,	transO.UserAgent
+		,	transO.URL
 		,	transO.Flagged
         ,	transD.TransKey
 	FROM Temp_TransactionsDevice AS transD
 		INNER JOIN FPSTesting.FP_RawTransaction_Old AS transO ON transD.TransKey = transO.TransKey;
     
-    INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
+    INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	BrowserInfoId, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	tmp.LoginName	
 	   , 	tmp.SubscriberName
 	   , 	tmp.TransTime
@@ -193,8 +193,8 @@ BEGIN
 	   , 	tmp.ActionResult
 	   , 	tmp.InvalidDevice
 	   , 	tmp.TransStatus
-	   , 	tmp.FPSTransID   
-	   , 	tmp.Flagged   
+	   , 	tmp.FPSTransID
+	   , 	tmp.BrowserInfoId
 	   , 	tmp.FPDeviceID
 	   , 	tmp.SubscriberId
 	   , 	tmp.CustId
