@@ -14,9 +14,12 @@ DROP COLUMN `Platform`;
 ALTER TABLE `FPS_FingerPrint`.`BrowserInfoCompleted` 
 DROP COLUMN `IsMobileDevice`,
 DROP COLUMN `Vendor`,
-DROP COLUMN `Platform`;
+DROP COLUMN `Platform`,
+DROP COLUMN `Reason`,
+CHANGE COLUMN `Flagged` `Flagged` SMALLINT NULL DEFAULT NULL;
+
 
 ALTER TABLE `FPS_FingerPrint`.`BrowserInfoAttribute` 
 DROP COLUMN `BrowserInfoJs`,
-ADD COLUMN `JsBrowserName` VARCHAR(100) NULL AFTER `SecChUaMobile`,
-ADD COLUMN `JsOSName` VARCHAR(100) NULL AFTER `JsBrowserName`;
+ADD COLUMN `JsBrowserName` VARCHAR(100) NULL,
+ADD COLUMN `JsOSName` VARCHAR(100) NULL;

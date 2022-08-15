@@ -54,9 +54,7 @@ BEGIN
 
     INSERT INTO Temp_BrowserInfo(Id, Flagged)
 	SELECT 	tmp.Id
-		,	(CASE WHEN bi.Flagged = 'human' THEN 1
-				WHEN bi.Flagged = 'bot' THEN 9 
-			ELSE 6 END) AS Flagged
+		,	bi.Flagged
     FROM Temp_Id AS tmp
     INNER JOIN FPS_FingerPrint.BrowserInfoCompleted AS bi ON bi.Id = tmp.Id;
     

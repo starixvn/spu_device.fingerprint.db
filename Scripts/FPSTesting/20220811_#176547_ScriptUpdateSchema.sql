@@ -8,3 +8,6 @@ USE FPSTesting;
 
 ALTER TABLE `FPSTesting`.`FP_RawTransaction` 
 ADD COLUMN `BrowserInfoId` BIGINT NULL;
+
+ALTER TABLE `FPSTesting`.`FP_RawTransaction` 
+ADD INDEX `IX_RawTransaction_BrowserInfoId` (`BrowserInfoId` ASC);
