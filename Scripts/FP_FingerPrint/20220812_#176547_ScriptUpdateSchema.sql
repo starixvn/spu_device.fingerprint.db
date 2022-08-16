@@ -11,6 +11,19 @@ DROP COLUMN `IsMobileDevice`,
 DROP COLUMN `Vendor`,
 DROP COLUMN `Platform`;
 
+
+UPDATE `FPS_FingerPrint`.`BrowserInfoCompleted` 
+SET Flagged = '1'
+where Flagged = 'human';
+
+UPDATE `FPS_FingerPrint`.`BrowserInfoCompleted` 
+SET Flagged = '9'
+where Flagged = 'bot';
+
+UPDATE `FPS_FingerPrint`.`BrowserInfoCompleted` 
+SET Flagged = '6'
+where Flagged = 'undefined';
+
 ALTER TABLE `FPS_FingerPrint`.`BrowserInfoCompleted` 
 DROP COLUMN `IsMobileDevice`,
 DROP COLUMN `Vendor`,
