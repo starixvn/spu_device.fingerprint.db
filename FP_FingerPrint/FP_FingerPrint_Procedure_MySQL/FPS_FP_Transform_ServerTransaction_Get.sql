@@ -55,6 +55,7 @@ BEGIN
     FROM FPS_FingerPrint.ServerTransaction AS trans
     WHERE trans.Id >= lv_offsetValue
         AND trans.Retry < ip_Retry
+    ORDER BY trans.Id
     LIMIT ip_BatchSize;
     
 END$$

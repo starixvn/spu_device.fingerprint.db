@@ -35,6 +35,7 @@ BEGIN
 		,	trans.TransKey 
     FROM FPS_FingerPrint.TransactionDevice AS trans 
 	WHERE trans.Retry > ip_Retry
+    ORDER BY trans.Id
     LIMIT ip_Size;
    
 END$$
