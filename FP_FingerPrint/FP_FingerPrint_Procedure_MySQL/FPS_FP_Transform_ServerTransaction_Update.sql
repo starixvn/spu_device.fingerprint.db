@@ -161,8 +161,9 @@ BEGIN
     
     /*******Update BrowserInfo UserAgentId********************/
     UPDATE FPS_FingerPrint.BrowserInfo bi
-    INNER JOIN Temp_BrowserInfo tmp ON tmp.Id = bi.Id
-    SET bi.UserAgentId = tmp.UserAgentId;
+		INNER JOIN Temp_BrowserInfo tmp ON tmp.Id = bi.Id
+    SET bi.UserAgentId = tmp.UserAgentId
+    WHERE bi.UserAgentId IS NULL;
 	
     /*******Update BrowserInfoId********************/
 	UPDATE Temp_RawTransaction2 tmp

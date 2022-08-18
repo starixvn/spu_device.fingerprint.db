@@ -153,21 +153,20 @@ BEGIN
 	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
     SELECT 	bi.Id
 		,	bi.SessionKey
-		,	bi.UserAgentId
+		,	tmp.UserAgentId
     FROM Temp_RawTransaction2 tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey;
-        
-	INSERT IGNORE INTO Temp_BrowserInfo(Id, SessionKey, UserAgentId)
-    SELECT 	bi.Id
-		,	bi.SessionKey
-		,	bi.UserAgentId
-    FROM Temp_RawTransaction2 tmp
-		INNER JOIN FPS_FingerPrint.BrowserInfoCompleted AS bi ON bi.SessionKey = tmp.SessionKey;
-      
+	
+    /*******Update BrowserInfo.UserAgentId********************/
+    UPDATE FPS_FingerPrint.BrowserInfo bi
+		INNER JOIN Temp_BrowserInfo tmp ON tmp.Id = bi.Id
+    SET bi.UserAgentId = tmp.UserAgentId
+    WHERE bi.UserAgentId IS NULL;
+	
+    /*******Update Temp_RawTransaction2.BrowserInfoId********************/
 	UPDATE Temp_RawTransaction2 tmp
 		INNER JOIN Temp_BrowserInfo AS bi ON bi.SessionKey = tmp.SessionKey
-    SET tmp.BrowserInfoId = bi.Id,
-		tmp.UserAgentId = bi.UserAgentId;
+    SET tmp.BrowserInfoId = bi.Id;
         
 	-- Insert data completed
     INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
