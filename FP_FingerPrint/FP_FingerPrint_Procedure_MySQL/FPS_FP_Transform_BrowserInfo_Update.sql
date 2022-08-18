@@ -19,7 +19,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_BrowserInfo_Update('[{"Id": 3, "Reason": null, "Flagged": "human"}]');
+			- CALL FPS_FP_Transform_BrowserInfo_Update('[{"Id": 3, "Flagged": 1}]');
 			
 	*/
     
@@ -35,26 +35,23 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInfo;
     
 	CREATE TEMPORARY TABLE Temp_BrowserInfo(
-			Id 				BIGINT UNSIGNED PRIMARY KEY        
-		,	Flagged 		VARCHAR(50) NULL
-		,	Reason 			VARCHAR(50) NULL
+			Id 				BIGINT UNSIGNED PRIMARY KEY
+		,	Flagged 		SMALLINT 		NULL
     );   
     
     
-    INSERT IGNORE INTO Temp_BrowserInfo(Id, Flagged, Reason)
+    INSERT IGNORE INTO Temp_BrowserInfo(Id, Flagged)
     SELECT 	tmp.Id
 		,	tmp.Flagged
-		,	tmp.Reason
 	FROM	JSON_TABLE(
 			ip_BrowserInfo,
 			 "$[*]" COLUMNS(
 							Id			BIGINT UNSIGNED		PATH "$.Id"   
-						,	Flagged		VARCHAR(50)			PATH "$.Flagged"
-						,	Reason		VARCHAR(50)			PATH "$.Reason"
+						,	Flagged		SMALLINT			PATH "$.Flagged"
 				)
 		   ) AS tmp; 
         
-	INSERT INTO FPS_FingerPrint.BrowserInfoCompleted(Id, SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, Platform, Vendor, IsMobileDevice, Flagged, Reason, CreatedDate)
+	INSERT INTO FPS_FingerPrint.BrowserInfoCompleted(Id, SessionKey, UserAgentId, BrowserInfoAttributeId, HeadlessScore, BrowserName, OSName, Flagged, CreatedDate)
     SELECT 	bi.Id
 		, 	bi.SessionKey
         , 	bi.UserAgentId
@@ -62,11 +59,7 @@ BEGIN
         , 	bi.HeadlessScore
         , 	bi.BrowserName
         , 	bi.OSName
-        , 	bi.Platform
-        , 	bi.Vendor
-        , 	bi.IsMobileDevice
         , 	tmp.Flagged
-        , 	tmp.Reason
         , 	bi.CreatedDate
     FROM FPS_FingerPrint.BrowserInfo AS bi
 		INNER JOIN Temp_BrowserInfo AS tmp ON tmp.Id = bi.Id;
