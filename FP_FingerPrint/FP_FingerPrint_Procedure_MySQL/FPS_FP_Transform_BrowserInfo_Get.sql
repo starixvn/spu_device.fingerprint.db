@@ -42,6 +42,7 @@ BEGIN
     FROM FPS_FingerPrint.BrowserInfo AS bi
 		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = bi.UserAgentId
     WHERE ua.Brand IS NOT NULL
+    ORDER BY bi.Id
     LIMIT ip_BatchSize;
     
 END$$

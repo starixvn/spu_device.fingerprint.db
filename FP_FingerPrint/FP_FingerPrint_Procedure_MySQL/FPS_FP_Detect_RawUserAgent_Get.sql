@@ -36,6 +36,7 @@ BEGIN
 			ua.UserAgent
     FROM FPS_FingerPrint.RawUserAgent AS ua 
     WHERE ua.Brand IS NULL
+    ORDER BY ua.Id
     LIMIT ip_BatchSize;
           
 END$$
