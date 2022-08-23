@@ -38,8 +38,7 @@ BEGIN
     
     CREATE TEMPORARY TABLE Temp_Transactions(
 			Id 				BIGINT	NOT NULL PRIMARY KEY	
-		, 	TransKey 		VARCHAR(200)
-		, 	INDEX IX_Temp_Transactions_TransKey(TransKey)            
+		, 	TransKey 		VARCHAR(200)          
     );
     
     INSERT INTO Temp_Transactions(Id, TransKey)
@@ -54,7 +53,7 @@ BEGIN
 		   ) AS rt; 
         
     CREATE TEMPORARY TABLE Temp_TransactionsDevice(
-			Id 					BIGINT UNSIGNED
+			Id 					BIGINT UNSIGNED	NOT NULL PRIMARY KEY
 		,	ServerTransId 		BIGINT UNSIGNED
 		,	CustId 				BIGINT UNSIGNED
 		,	SubAccId 			BIGINT UNSIGNED
@@ -74,10 +73,11 @@ BEGIN
 		,	TransKey 			VARCHAR(200) 
 		,	Retry 				TINYINT
 		,	AddonId 			BIGINT UNSIGNED
+        
         , 	INDEX IX_Temp_TransactionsDevice_TransKey(TransKey)
     );
     
-    INSERT INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId)
+    INSERT IGNORE INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId)
 		SELECT  td.Id
 			, 	td.ServerTransId
 			, 	td.CustId
@@ -103,7 +103,7 @@ BEGIN
         LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
     
     CREATE TEMPORARY TABLE Temp_TransactionsFlagged(
-			Id 					BIGINT UNSIGNED
+			Id 					BIGINT UNSIGNED	NOT NULL PRIMARY KEY
 		,	ServerTransId 		BIGINT UNSIGNED
 		,	CustId 				BIGINT UNSIGNED
 		,	SubAccId 			BIGINT UNSIGNED
@@ -129,7 +129,7 @@ BEGIN
     );
     
     /*******UPDATE FLAGGED********************/
-    INSERT INTO Temp_TransactionsFlagged(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId)
+    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId)
     SELECT  tmp.Id
 		, 	tmp.ServerTransId
 		, 	tmp.CustId
@@ -154,7 +154,7 @@ BEGIN
     FROM Temp_TransactionsDevice AS tmp
 		LEFT JOIN FPS_FingerPrint.BrowserInfoCompleted AS bic ON bic.Id = tmp.BrowserInfoId;
         
-	INSERT INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL
+	INSERT IGNORE INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL
 		, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	transF.LoginName	
 		, 	sub.Name
@@ -188,7 +188,7 @@ BEGIN
 	FROM Temp_TransactionsFlagged AS transF   
 		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = transF.SubscriberId;
     
-	INSERT INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId)
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId,	CustId,	SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId)
 	SELECT	transF.Id	
 		,	transF.ServerTransId
 		,	transF.CustId
@@ -208,7 +208,8 @@ BEGIN
 		,	transF.TransKey   
 		,	transF.Retry
 		,	transF.AddonId
-	FROM  Temp_TransactionsFlagged AS transF;
+	FROM  Temp_TransactionsFlagged AS transF
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.TransactionCompleted transC WHERE transC.Id = transF.Id AND transC.CreatedDate = transF.CreatedDate);
     
 	DELETE transD 
     FROM FPS_FingerPrint.TransactionDevice AS transD
