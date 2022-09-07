@@ -1,0 +1,79 @@
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2"></info>*/
+/*
+	Created: 20220825@Jonathan.Doan [Redmine ID: #176820]
+	Task: Srcipt update Schema
+	DB: FPS_FingerPrint
+*/
+USE FPS_FingerPrint;
+
+CREATE TABLE `Account` (
+  `Id` BIGINT UNSIGNED NOT NULL,
+  `LoginName` VARCHAR(100) DEFAULT NULL,
+  `SubscriberId` INT DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `IX_Account_SubscriberId_LoginName` (`SubscriberId`,`LoginName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE `AccountFingerprint` (
+  `Id` BIGINT UNSIGNED NOT NULL,
+  `AccountId` BIGINT UNSIGNED DEFAULT NULL,
+  `LastFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `IX_AccountFingerprint_AccountId` (`AccountId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+CREATE TABLE `EvolutionFingerprint` (
+  `Id` BIGINT UNSIGNED NOT NULL,
+  `AccountFingerprintId` BIGINT UNSIGNED DEFAULT NULL,
+  `ServerTransId` BIGINT UNSIGNED DEFAULT NULL,
+  `CurrentFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `IX_EvolutionFingerprint_AccountFingerprintId` (`AccountFingerprintId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+ALTER TABLE `FPS_FingerPrint`.`FingerPrintAttribute` 
+ADD COLUMN `DoNotTrack` VARCHAR(15) NULL,
+ADD COLUMN `GLRenderer` VARCHAR(200) NULL,
+ADD COLUMN `Audio` FLOAT NULL,
+ADD COLUMN `CanvasPrint` LONGTEXT NULL,
+ADD COLUMN `ColorDepth` SMALLINT NULL,
+ADD COLUMN `ColorGamut` VARCHAR(10) NULL,
+ADD COLUMN `Contrast` SMALLINT NULL,
+ADD COLUMN `CookiesEnabled` TINYINT NULL,
+ADD COLUMN `CpuClass` VARCHAR(45) NULL,
+ADD COLUMN `DeviceMemory` TINYINT NULL,
+ADD COLUMN `DomBlockers` VARCHAR(45) NULL,
+ADD COLUMN `FontPreferencePrint` VARCHAR(500) NULL,
+ADD COLUMN `Fonts` VARCHAR(500) NULL,
+ADD COLUMN `ForcedColors` TINYINT NULL,
+ADD COLUMN `HardwareConcurrency` TINYINT NULL,
+ADD COLUMN `HDR` TINYINT NULL,
+ADD COLUMN `IndexedDB` TINYINT NULL,
+ADD COLUMN `InvertedColors` TINYINT NULL,
+ADD COLUMN `LanguagesPrint` VARCHAR(500) NULL,
+ADD COLUMN `LocalStorage` TINYINT NULL,
+ADD COLUMN `Math` VARCHAR(1000) NULL,
+ADD COLUMN `Monochrome` TINYINT NULL,
+ADD COLUMN `OpenDatabase` TINYINT NULL,
+ADD COLUMN `OsCpu` VARCHAR(45) NULL,
+ADD COLUMN `Platform` VARCHAR(45) NULL,
+ADD COLUMN `Plugins` LONGTEXT NULL,
+ADD COLUMN `ReducedMotion` TINYINT NULL,
+ADD COLUMN `ScreenPrint` VARCHAR(200) NULL,
+ADD COLUMN `SessionStorage` TINYINT NULL,
+ADD COLUMN `Timezone` VARCHAR(45) NULL,
+ADD COLUMN `TouchSupport` VARCHAR(200) NULL,
+ADD COLUMN `Vendor` VARCHAR(45) NULL,
+ADD COLUMN `VendorFlavors` VARCHAR(45) NULL,
+ADD COLUMN `WebglPrint` VARCHAR(200) NULL;
+
+
