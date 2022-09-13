@@ -41,14 +41,26 @@ BEGIN
 		,	FingerPrintCode				VARCHAR(200) 		NULL
 		,	DoNotTrack					VARCHAR(15)	 		NULL
 		,	GLRenderer					VARCHAR(200)	 	NULL
+		,	HeaderAccept				VARCHAR(200)	 	NULL
+		,	HeaderAcceptEncoding		VARCHAR(100)	 	NULL
+		,	Headers						VARCHAR(500)	 	NULL
+		,	OSName						VARCHAR(100)	 	NULL
+		,	BrowserName					VARCHAR(100)	 	NULL
+		,	BrowserVersion				VARCHAR(50)	 		NULL
         , 	INDEX IX_Temp_FingerPrintAttributes_FingerPrintCode(FingerPrintCode)
     );
     
-    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, DoNotTrack, GLRenderer)
+    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, DoNotTrack, GLRenderer, HeaderAccept, HeaderAcceptEncoding, Headers, OSName, BrowserName, BrowserVersion)
 	SELECT	tmp.Attribute
 		,	tmp.FingerPrintCode
 		,	tmp.DoNotTrack
 		,	tmp.GLRenderer
+		,	tmp.HeaderAccept
+		,	tmp.HeaderAcceptEncoding
+		,	tmp.Headers
+		,	tmp.OSName
+		,	tmp.BrowserName
+		,	tmp.BrowserVersion
 	FROM	JSON_TABLE(
 			ip_FingerprintAttributes,
 			 "$[*]" COLUMNS(
@@ -56,15 +68,25 @@ BEGIN
 					,	FingerPrintCode				VARCHAR(64)		PATH "$.FingerPrintCode"
 					,	DoNotTrack					VARCHAR(15)		PATH "$.DoNotTrack"
 					,	GLRenderer					VARCHAR(200)	PATH "$.GLRenderer"
+					,	HeaderAccept				VARCHAR(200)	PATH "$.HeaderAccept"
+					,	HeaderAcceptEncoding		VARCHAR(100)	PATH "$.HeaderAcceptEncoding"
+					,	Headers						VARCHAR(500)	PATH "$.Headers"
+					,	OSName						VARCHAR(100)	PATH "$.OSName"
+					,	BrowserName					VARCHAR(100)	PATH "$.BrowserName"
+					,	BrowserVersion				VARCHAR(50)		PATH "$.BrowserVersion"
 				)
 		   ) AS tmp;
     
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, DoNotTrack, GLRenderer, Audio, CanvasPrint, ColorDepth, ColorGamut, Contrast, CookiesEnabled, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint
-						, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, LanguagesPrint, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion
-                        , ScreenPrint, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
+    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, OSName, BrowserName, BrowserVersion, DoNotTrack, GLRenderer, HeaderAccept, HeaderAcceptEncoding, Headers, Audio, CanvasPrint, ColorDepth, ColorGamut, Contrast, CookiesEnabled, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, LanguagesPrint, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, ScreenPrint, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
     SELECT	tmp.FingerPrintCode
+		,	tmp.OSName
+		,	tmp.BrowserName
+		,	tmp.BrowserVersion
 		,	tmp.DoNotTrack
 		,	tmp.GLRenderer
+		,	tmp.HeaderAccept
+		,	tmp.HeaderAcceptEncoding
+		,	tmp.Headers
 		,	tmp.Attribute->>'$.audio'
 		,	tmp.Attribute->>'$.canvasPrint'
 		,	tmp.Attribute->>'$.colorDepth'

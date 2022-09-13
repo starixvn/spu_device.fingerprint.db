@@ -6,10 +6,12 @@
 */
 USE FPS_FingerPrint;
 
+INSERT INTO `FPS_FingerPrint`.`Offset` (`Id`, `OffsetName`, `OffsetValue`, `CreatedDate`) VALUES ('12', 'UpdateEvolution', '0', NOW());
+
 CREATE TABLE `Account` (
-  `Id` BIGINT UNSIGNED NOT NULL,
-  `LoginName` VARCHAR(100) DEFAULT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `SubscriberId` INT DEFAULT NULL,
+  `LoginName` VARCHAR(100) DEFAULT NULL,
   `CreatedDate` DATETIME DEFAULT NULL,
   `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Id`),
@@ -18,7 +20,7 @@ CREATE TABLE `Account` (
 
 
 CREATE TABLE `AccountFingerprint` (
-  `Id` BIGINT UNSIGNED NOT NULL,
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `AccountId` BIGINT UNSIGNED DEFAULT NULL,
   `LastFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
   `CreatedDate` DATETIME DEFAULT NULL,
@@ -27,49 +29,73 @@ CREATE TABLE `AccountFingerprint` (
   KEY `IX_AccountFingerprint_AccountId` (`AccountId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-
-CREATE TABLE `EvolutionFingerprint` (
-  `Id` BIGINT UNSIGNED NOT NULL,
-  `AccountFingerprintId` BIGINT UNSIGNED DEFAULT NULL,
-  `ServerTransId` BIGINT UNSIGNED DEFAULT NULL,
-  `CurrentFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
-  `CreatedDate` DATETIME DEFAULT NULL,
-  `ModifiedDate` DATETIME DEFAULT NULL,
-  PRIMARY KEY (`Id`),
-  KEY `IX_EvolutionFingerprint_AccountFingerprintId` (`AccountFingerprintId`)
+CREATE TABLE `FingerPrintEvolution` (
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ServerTransId` bigint unsigned DEFAULT NULL,
+  `CustId` bigint unsigned DEFAULT NULL,
+  `SubAccId` bigint unsigned DEFAULT NULL,
+  `LoginName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `SubscriberId` int DEFAULT NULL,
+  `RawFingerPrintId` bigint unsigned DEFAULT NULL,
+  `CookieId` bigint unsigned DEFAULT NULL,
+  `TransTime` datetime(4) DEFAULT NULL,
+  `ClientIP` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `BrowserInfoId` bigint unsigned DEFAULT NULL,
+  `UserAgentId` bigint unsigned DEFAULT NULL,
+  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `CreatedDate` datetime DEFAULT NULL,
+  `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `AddonId` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `RecoverDailySum` (
+  `TransDate` DATE NOT NULL,
+  `SubscriberId` INT UNSIGNED NOT NULL,
+  `TotalRecoverTrans` BIGINT UNSIGNED DEFAULT NULL,
+  `TotalEvolutionTrans` BIGINT UNSIGNED DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`TransDate`,`SubscriberId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE `FPS_FingerPrint`.`FingerPrintAttribute` 
+ADD COLUMN `OSName` VARCHAR(100) NULL,
+ADD COLUMN `BrowserName` VARCHAR(100) NULL,
+ADD COLUMN `BrowserVersion` VARCHAR(50) NULL,
 ADD COLUMN `DoNotTrack` VARCHAR(15) NULL,
 ADD COLUMN `GLRenderer` VARCHAR(200) NULL,
-ADD COLUMN `Audio` FLOAT NULL,
+ADD COLUMN `HeaderAccept` VARCHAR(100) NULL,
+ADD COLUMN `HeaderAcceptEncoding` VARCHAR(200) NULL,
+ADD COLUMN `Headers` VARCHAR(500) NULL,
+ADD COLUMN `Audio` VARCHAR(25) NULL,
 ADD COLUMN `CanvasPrint` LONGTEXT NULL,
 ADD COLUMN `ColorDepth` SMALLINT NULL,
 ADD COLUMN `ColorGamut` VARCHAR(10) NULL,
 ADD COLUMN `Contrast` SMALLINT NULL,
-ADD COLUMN `CookiesEnabled` TINYINT NULL,
+ADD COLUMN `CookiesEnabled` BOOLEAN NULL,
 ADD COLUMN `CpuClass` VARCHAR(45) NULL,
 ADD COLUMN `DeviceMemory` TINYINT NULL,
 ADD COLUMN `DomBlockers` VARCHAR(45) NULL,
 ADD COLUMN `FontPreferencePrint` VARCHAR(500) NULL,
 ADD COLUMN `Fonts` VARCHAR(500) NULL,
-ADD COLUMN `ForcedColors` TINYINT NULL,
+ADD COLUMN `ForcedColors` BOOLEAN NULL,
 ADD COLUMN `HardwareConcurrency` TINYINT NULL,
-ADD COLUMN `HDR` TINYINT NULL,
-ADD COLUMN `IndexedDB` TINYINT NULL,
-ADD COLUMN `InvertedColors` TINYINT NULL,
+ADD COLUMN `HDR` BOOLEAN NULL,
+ADD COLUMN `IndexedDB` BOOLEAN NULL,
+ADD COLUMN `InvertedColors` BOOLEAN NULL,
 ADD COLUMN `LanguagesPrint` VARCHAR(500) NULL,
-ADD COLUMN `LocalStorage` TINYINT NULL,
+ADD COLUMN `LocalStorage` BOOLEAN NULL,
 ADD COLUMN `Math` VARCHAR(1000) NULL,
 ADD COLUMN `Monochrome` TINYINT NULL,
-ADD COLUMN `OpenDatabase` TINYINT NULL,
+ADD COLUMN `OpenDatabase` BOOLEAN NULL,
 ADD COLUMN `OsCpu` VARCHAR(45) NULL,
 ADD COLUMN `Platform` VARCHAR(45) NULL,
 ADD COLUMN `Plugins` LONGTEXT NULL,
-ADD COLUMN `ReducedMotion` TINYINT NULL,
+ADD COLUMN `ReducedMotion` BOOLEAN NULL,
 ADD COLUMN `ScreenPrint` VARCHAR(200) NULL,
-ADD COLUMN `SessionStorage` TINYINT NULL,
+ADD COLUMN `SessionStorage` BOOLEAN NULL,
 ADD COLUMN `Timezone` VARCHAR(45) NULL,
 ADD COLUMN `TouchSupport` VARCHAR(200) NULL,
 ADD COLUMN `Vendor` VARCHAR(45) NULL,

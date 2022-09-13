@@ -105,6 +105,21 @@ BEGIN
 				)
 		   ) AS tmp;            
     
+	/*******Account********************/
+    INSERT INTO FPS_FingerPrint.Account (SubscriberId, LoginName, CreatedDate)
+    SELECT 	tmp.SubscriberId
+		,	tmp.LoginName
+		,	lv_CurrentDate AS CreatedDate
+    FROM Temp_Transactions AS tmp
+    ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+    
+    INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, CreatedDate)
+    SELECT 	acc.Id AS AccountId
+		,	lv_CurrentDate AS CreatedDate
+    FROM Temp_Transactions AS tmp
+    INNER JOIN FPS_FingerPrint.Account AS acc ON acc.SubscriberId = tmp.SubscriberId AND acc.LoginName = tmp.LoginName
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = acc.Id);
+        
 	/*******RawUserAgent********************/
     INSERT IGNORE INTO FPS_FingerPrint.RawUserAgent (UserAgentCode, UserAgent, CreatedDate, ModifiedDate)
 	SELECT	DISTINCT 
