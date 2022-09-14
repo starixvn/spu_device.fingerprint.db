@@ -152,5 +152,11 @@ BEGIN
 		,	tmp.Attribute->>'$.webglPrint'
 	FROM Temp_FingerPrintAttributes AS tmp;
     
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInstance(OSName, BrowserName, Platform)
+    SELECT 	tmp.OSName
+		,	tmp.BrowserName
+        ,	tmp.Attribute->>'$.platform'
+    FROM Temp_FingerPrintAttributes AS tmp;
+    
 END$$
 DELIMITER ;

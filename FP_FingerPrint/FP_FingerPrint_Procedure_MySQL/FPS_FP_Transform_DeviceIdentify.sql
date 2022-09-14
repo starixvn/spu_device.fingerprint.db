@@ -54,6 +54,9 @@ BEGIN
         ,	DeviceId			BIGINT UNSIGNED
         ,	RecoverType			TINYINT DEFAULT 0	#0 New, 1 By RawFingerPrintId, 2 By Cookie
         ,	GroupId				BIGINT UNSIGNED
+        ,	SubscriberId		BIGINT UNSIGNED
+        ,	LoginName			VARCHAR(100)
+        ,	UserAgentId			BIGINT UNSIGNED
 
 		,	INDEX IX_Temp_InputTrans_RawFingerPrintId(RawFingerPrintId)
         ,	INDEX IX_Temp_InputTrans_CookieId(CookieId)
@@ -99,11 +102,14 @@ BEGIN
 
 	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);
 
-    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, GroupId)
+    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, CookieId, SubscriberId, LoginName, UserAgentId)
 	SELECT	tmpJs.Id
 		,	tmpJs.TransTime
 		,	tmpJs.RawFingerPrintId
         ,	tmpJs.CookieId
+        ,	tmpJs.SubscriberId
+        ,	tmpJs.LoginName
+        ,	tmpJs.UserAgentId
         ,	tmpJs.GroupId
     FROM JSON_TABLE(
 			ip_TransJson,
@@ -112,6 +118,9 @@ BEGIN
 							,	TransTime			DATETIME(4)		PATH "$.TransTime"
 							,	RawFingerPrintId	VARCHAR(64)		PATH "$.RawFingerPrintId"
                             ,	CookieId			BIGINT UNSIGNED	PATH "$.CookieId"
+                            ,	SubscriberId		BIGINT UNSIGNED	PATH "$.SubscriberId"
+                            ,	LoginName			VARCHAR(100) 	PATH "$.LoginName"
+                            ,	UserAgentId			BIGINT UNSIGNED	PATH "$.UserAgentId"
                             ,	GroupId				BIGINT UNSIGNED	PATH "$.GroupId"
 						)
 		) AS tmpJs;
@@ -319,6 +328,22 @@ BEGIN
 		WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = cte.CookieId);
 
 	END IF;
+    
+    /*****AccountFingerprint******************/
+    UPDATE Temp_InputTrans AS tmp
+		INNER JOIN FPS_FingerPrint.Account AS acc ON acc.SubscriberId = tmp.SubscriberId AND acc.LoginName = tmp.LoginName
+	SET tmp.AccountId = acc.Id;
+    
+    UPDATE Temp_InputTrans AS tmp
+		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = tmp.UserAgentId
+        INNER JOIN FPS_FingerPrint.BrowserInstance AS bi ON bi.BrowserName = ua.ClientName AND bi.OSName = ua.OSName
+	SET tmp.BrowserInstanceId = bi.Id;
+
+	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, BrowserInstanceId, FingerPrintId)
+    SELECT	AccountId
+		,	BrowserInstanceId
+        ,	RawFingerPrintId
+    FROM Temp_InputTrans;
 
 	/*****UPDATE Trans******************/
 	UPDATE Temp_InputTrans AS tmpIt

@@ -18,15 +18,27 @@ CREATE TABLE `Account` (
   KEY `IX_Account_SubscriberId_LoginName` (`SubscriberId`,`LoginName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE `BrowserInstance` (
+  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `OSName` VARCHAR(100) DEFAULT NULL,
+  `Platform` VARCHAR(15) DEFAULT NULL,
+  `BrowserName` VARCHAR(100) DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `ModifiedDate` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `UX_BrowserInstance_OSName_Platform_BrowserName` (`OSName`,`Platform`,`BrowserName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `AccountFingerprint` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `AccountId` BIGINT UNSIGNED DEFAULT NULL,
-  `LastFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `BrowserInstanceId` BIGINT UNSIGNED DEFAULT NULL,
+  `FingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `IsEvolution` BOOLEAN DEFAULT NULL,
   `CreatedDate` DATETIME DEFAULT NULL,
   `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  KEY `IX_AccountFingerprint_AccountId` (`AccountId`)
+  UNIQUE KEY `UX_AccountFingerprint_AccountId_BrowserInstanceId_FingerPrintId` (`AccountId`,`BrowserInstanceId`,`FingerPrintId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `FingerPrintEvolution` (
