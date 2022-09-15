@@ -198,7 +198,7 @@ BEGIN
     SET tmp.BrowserInfoId = bi.Id; 
     
     /*******CHECK RECOVER********************/        
-	INSERT INTO Temp_Recover(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, AddonId, CreatedDate)
+	INSERT INTO Temp_Recover(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, BrowserInfoId, AddonId, CreatedDate)
 	SELECT 	tmpTs.Id
 	   , 	tmpTs.SessionKey
 	   , 	tmpTs.CustId
@@ -214,6 +214,7 @@ BEGIN
 	   ,	tmpTs.Action
 	   ,	tmpTs.RawFingerPrintId
 	   ,	tmpTs.CookieId
+	   ,	tmpTs.BrowserInfoId
 	   ,	tmpTs.AddonId
 	   ,	tmpTs.CreatedDate
 	FROM Temp_RawTransaction2 AS tmpTs 

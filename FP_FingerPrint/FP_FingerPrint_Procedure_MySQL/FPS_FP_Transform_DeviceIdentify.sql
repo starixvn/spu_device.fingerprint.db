@@ -57,6 +57,8 @@ BEGIN
         ,	SubscriberId		BIGINT UNSIGNED
         ,	LoginName			VARCHAR(100)
         ,	UserAgentId			BIGINT UNSIGNED
+        ,	AccountId			BIGINT UNSIGNED
+        ,	BrowserInstanceId	BIGINT UNSIGNED
 
 		,	INDEX IX_Temp_InputTrans_RawFingerPrintId(RawFingerPrintId)
         ,	INDEX IX_Temp_InputTrans_CookieId(CookieId)
@@ -102,7 +104,7 @@ BEGIN
 
 	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);
 
-    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, CookieId, SubscriberId, LoginName, UserAgentId)
+    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, SubscriberId, LoginName, UserAgentId, GroupId)
 	SELECT	tmpJs.Id
 		,	tmpJs.TransTime
 		,	tmpJs.RawFingerPrintId
@@ -328,6 +330,11 @@ BEGIN
 		WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = cte.CookieId);
 
 	END IF;
+
+	UPDATE Temp_InputTrans AS tmpIt
+		INNER JOIN Temp_TransDevice AS tmpTd ON tmpIt.Id = tmpTd.Id
+	SET tmpIt.DeviceId = tmpTd.DeviceId
+	WHERE tmpIt.DeviceId IS NULL;
     
     /*****AccountFingerprint******************/
     UPDATE Temp_InputTrans AS tmp
@@ -339,18 +346,16 @@ BEGIN
         INNER JOIN FPS_FingerPrint.BrowserInstance AS bi ON bi.BrowserName = ua.ClientName AND bi.OSName = ua.OSName
 	SET tmp.BrowserInstanceId = bi.Id;
 
-	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, BrowserInstanceId, FingerPrintId)
+	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, BrowserInstanceId, FingerPrintId, DeviceId, CreatedDate)
     SELECT	AccountId
 		,	BrowserInstanceId
         ,	RawFingerPrintId
-    FROM Temp_InputTrans;
+        ,	DeviceId
+        ,	lv_CreatedDate
+    FROM Temp_InputTrans
+    ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate;
 
-	/*****UPDATE Trans******************/
-	UPDATE Temp_InputTrans AS tmpIt
-		INNER JOIN Temp_TransDevice AS tmpTd ON tmpIt.Id = tmpTd.Id
-	SET tmpIt.DeviceId = tmpTd.DeviceId
-	WHERE tmpIt.DeviceId IS NULL;
-
+	/*****TransactionDevice******************/
 	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId)
     SELECT  	ts.ServerTransId
             ,	ts.TransTime

@@ -44,11 +44,16 @@ BEGIN
 		,	fpa.HeaderAccept
 		,	fpa.HeaderAcceptEncoding
 		,	fpa.Headers
+		,	GROUP_CONCAT(af.FingerPrintId) AS FPIds
 	FROM FPS_FingerPrint.FingerPrintEvolution AS fe
-		LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = fe.UserAgentId
-		LEFT JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = fe.RawFingerPrintId
-		LEFT JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
-	ORDER BY fpa.Id
+		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = fe.UserAgentId
+		INNER JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = fe.RawFingerPrintId
+		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
+		LEFT JOIN FPS_FingerPrint.Account AS acc ON acc.SubscriberId = fe.SubscriberId AND acc.LoginName = fe.LoginName
+		LEFT JOIN FPS_FingerPrint.BrowserInstance AS bi ON bi.OSName = ua.OSName AND bi.Platform = fpa.Platform AND bi.BrowserName = ua.ClientName
+		LEFT JOIN FPS_FingerPrint.AccountFingerprint AS af ON af.AccountId = acc.Id AND af.BrowserInstanceId = bi.Id
+	GROUP BY fe.Id, fe.RawFingerPrintId, fe.CookieId, fe.TransTime, ua.UserAgent, fpa.OSName, fpa.BrowserName, fpa.BrowserVersion, fpa.Platform, fpa.LocalStorage, fpa.DoNotTrack, fpa.CookiesEnabled, fpa.CanvasPrint, fpa.Fonts, fpa.Vendor, fpa.GLRenderer, fpa.Plugins, fpa.LanguagesPrint, fpa.HeaderAccept, fpa.HeaderAcceptEncoding, fpa.Headers
+	ORDER BY fe.Id
 	LIMIT ip_BatchSize;
 
 END$$
