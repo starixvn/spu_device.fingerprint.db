@@ -42,16 +42,18 @@ BEGIN
 		,	fpa.Platform
 		,	fpa.LocalStorage
 		,	fpa.DoNotTrack
-		,	fpa.CookiesEnabled
-		,	fpa.CanvasPrint
+		,	fpa.Cookies
+		,	fpa.Canvas
 		,	fpa.Fonts
 		,	fpa.Vendor
 		,	fpa.GLRenderer
 		,	fpa.Plugins
-		,	fpa.LanguagesPrint
-		,	fpa.HeaderAccept
-		,	fpa.HeaderAcceptEncoding
+		,	fpa.Languages
+		,	fpa.Accept
+		,	fpa.Encoding
 		,	fpa.Headers
+		,	fpa.Resolution
+		,	fpa.Timezone
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.Id
 		-- INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = fp.UserAgentId

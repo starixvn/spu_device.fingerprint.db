@@ -41,8 +41,8 @@ BEGIN
 		,	FingerPrintCode				VARCHAR(200) 		NULL
 		,	DoNotTrack					VARCHAR(15)	 		NULL
 		,	GLRenderer					VARCHAR(200)	 	NULL
-		,	HeaderAccept				VARCHAR(200)	 	NULL
-		,	HeaderAcceptEncoding		VARCHAR(100)	 	NULL
+		,	Accept						VARCHAR(100)	 	NULL
+		,	Encoding					VARCHAR(200)	 	NULL
 		,	Headers						VARCHAR(500)	 	NULL
 		,	OSName						VARCHAR(100)	 	NULL
 		,	BrowserName					VARCHAR(100)	 	NULL
@@ -50,13 +50,13 @@ BEGIN
         , 	INDEX IX_Temp_FingerPrintAttributes_FingerPrintCode(FingerPrintCode)
     );
     
-    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, DoNotTrack, GLRenderer, HeaderAccept, HeaderAcceptEncoding, Headers, OSName, BrowserName, BrowserVersion)
+    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, DoNotTrack, GLRenderer, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion)
 	SELECT	tmp.Attribute
 		,	tmp.FingerPrintCode
 		,	tmp.DoNotTrack
 		,	tmp.GLRenderer
-		,	tmp.HeaderAccept
-		,	tmp.HeaderAcceptEncoding
+		,	tmp.Accept
+		,	tmp.Encoding
 		,	tmp.Headers
 		,	tmp.OSName
 		,	tmp.BrowserName
@@ -68,8 +68,8 @@ BEGIN
 					,	FingerPrintCode				VARCHAR(64)		PATH "$.FingerPrintCode"
 					,	DoNotTrack					VARCHAR(15)		PATH "$.DoNotTrack"
 					,	GLRenderer					VARCHAR(200)	PATH "$.GLRenderer"
-					,	HeaderAccept				VARCHAR(200)	PATH "$.HeaderAccept"
-					,	HeaderAcceptEncoding		VARCHAR(100)	PATH "$.HeaderAcceptEncoding"
+					,	Accept						VARCHAR(100)	PATH "$.Accept"
+					,	Encoding					VARCHAR(200)	PATH "$.Encoding"
 					,	Headers						VARCHAR(500)	PATH "$.Headers"
 					,	OSName						VARCHAR(100)	PATH "$.OSName"
 					,	BrowserName					VARCHAR(100)	PATH "$.BrowserName"
@@ -77,25 +77,25 @@ BEGIN
 				)
 		   ) AS tmp;
     
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, OSName, BrowserName, BrowserVersion, DoNotTrack, GLRenderer, HeaderAccept, HeaderAcceptEncoding, Headers, Audio, CanvasPrint, ColorDepth, ColorGamut, Contrast, CookiesEnabled, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, LanguagesPrint, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, ScreenPrint, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
+    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, OSName, BrowserName, BrowserVersion, DoNotTrack, GLRenderer, Accept, Encoding, Headers, Audio, Canvas, ColorDepth, ColorGamut, Contrast, Cookies, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, Languages, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, Resolution, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
     SELECT	tmp.FingerPrintCode
 		,	tmp.OSName
 		,	tmp.BrowserName
 		,	tmp.BrowserVersion
 		,	tmp.DoNotTrack
 		,	tmp.GLRenderer
-		,	tmp.HeaderAccept
-		,	tmp.HeaderAcceptEncoding
+		,	tmp.Accept
+		,	tmp.Encoding
 		,	tmp.Headers
 		,	tmp.Attribute->>'$.audio'
-		,	tmp.Attribute->>'$.canvasPrint'
+		,	tmp.Attribute->>'$.canvasPrint' AS Canvas
 		,	tmp.Attribute->>'$.colorDepth'
 		,	tmp.Attribute->>'$.colorGamut'
 		,	tmp.Attribute->>'$.contrast'
 		,	CASE 	tmp.Attribute->>'$.cookiesEnabled'
 					WHEN 'true' THEN 1
                     WHEN 'false' THEN 0
-                    ELSE NULL END AS cookiesEnabled
+                    ELSE NULL END AS Cookies
 		,	tmp.Attribute->>'$.cpuClass'
 		,	tmp.Attribute->>'$.deviceMemory'
 		,	tmp.Attribute->>'$.domBlockers'
@@ -120,7 +120,7 @@ BEGIN
 					WHEN 'true' THEN 1
                     WHEN 'false' THEN 0
                     ELSE NULL END AS invertedColors
-		,	tmp.Attribute->>'$.languagesPrint'
+		,	tmp.Attribute->>'$.languagesPrint' AS Languages
 		,	CASE 	tmp.Attribute->>'$.localStorage'
 					WHEN 'true' THEN 1
                     WHEN 'false' THEN 0
@@ -140,7 +140,7 @@ BEGIN
 					WHEN 'true' THEN 1
                     WHEN 'false' THEN 0
                     ELSE -1 END AS reducedMotion
-		,	tmp.Attribute->>'$.screenPrint'
+		,	tmp.Attribute->>'$.screenPrint' AS Resolution
 		,	CASE 	tmp.Attribute->>'$.sessionStorage'
 					WHEN 'true' THEN 1
                     WHEN 'false' THEN 0

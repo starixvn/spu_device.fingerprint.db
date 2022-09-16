@@ -88,6 +88,7 @@ BEGIN
 		,	RawFingerPrintId	BIGINT UNSIGNED
         ,	CookieId			BIGINT UNSIGNED
         ,	DeviceId			BIGINT UNSIGNED
+        ,	RecoverType			TINYINT DEFAULT 0
      );
 
      DROP TEMPORARY TABLE IF EXISTS Temp_ExistingRawFingerPrintId;
@@ -155,18 +156,20 @@ BEGIN
     /*====RECOVER DEVICE: PROCESS FOR Group*/
     IF (ip_GroupType != 0) THEN
 		
-		INSERT IGNORE INTO Temp_GroupDevice(GroupId, DeviceId, Id, TransTime, RawFingerPrintId, CookieId)
+		INSERT IGNORE INTO Temp_GroupDevice(GroupId, DeviceId, Id, TransTime, RawFingerPrintId, CookieId, RecoverType)
         SELECT	tmpIt.GroupId
 			,	tmpIt.DeviceId
             ,	tmpIt.Id
             ,	tmpIt.TransTime
             ,	tmpIt.RawFingerPrintId
             ,	tmpIt.CookieId
+            ,	tmpIt.RecoverType
 		FROM Temp_InputTrans AS tmpIt;
 
 		UPDATE Temp_InputTrans AS tmpTs
 			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpTs.GroupId = tmpGd.GroupId
-		SET tmpTs.DeviceId = tmpGd.DeviceId
+		SET tmpTs.DeviceId = tmpGd.DeviceId,
+			tmpTs.RecoverType = tmpGd.RecoverType
         WHERE tmpTs.DeviceId IS NULL;
 
     END IF;
@@ -346,17 +349,17 @@ BEGIN
         INNER JOIN FPS_FingerPrint.BrowserInstance AS bi ON bi.BrowserName = ua.ClientName AND bi.OSName = ua.OSName
 	SET tmp.BrowserInstanceId = bi.Id;
 
-	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, BrowserInstanceId, FingerPrintId, DeviceId, CreatedDate)
+	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, BrowserInstanceId, FingerPrintId, CreatedDate)
     SELECT	AccountId
 		,	BrowserInstanceId
         ,	RawFingerPrintId
-        ,	DeviceId
         ,	lv_CreatedDate
     FROM Temp_InputTrans
-    ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate;
+    ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate
+						,	FingerPrintId = RawFingerPrintId;
 
 	/*****TransactionDevice******************/
-	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
     SELECT  	ts.ServerTransId
             ,	ts.TransTime
 			, 	ts.CustId
@@ -374,6 +377,7 @@ BEGIN
 			, 	lv_CreatedDate
 			, 	ts.TransKey
 			, 	ts.AddonId
+			, 	tmpIt.RecoverType
 	FROM Temp_InputTrans AS tmpIt
 		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpIt.Id = ts.Id;
 

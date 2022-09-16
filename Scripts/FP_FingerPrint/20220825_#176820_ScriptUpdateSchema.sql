@@ -8,6 +8,12 @@ USE FPS_FingerPrint;
 
 INSERT INTO `FPS_FingerPrint`.`Offset` (`Id`, `OffsetName`, `OffsetValue`, `CreatedDate`) VALUES ('12', 'UpdateEvolution', '0', NOW());
 
+ALTER TABLE `FPS_FingerPrint`.`TransactionDevice` 
+ADD COLUMN `RecoverType` TINYINT NULL;
+
+ALTER TABLE `FPS_FingerPrint`.`TransactionCompleted` 
+ADD COLUMN `RecoverType` TINYINT NULL;
+
 CREATE TABLE `Account` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `SubscriberId` INT DEFAULT NULL,
@@ -15,7 +21,7 @@ CREATE TABLE `Account` (
   `CreatedDate` DATETIME DEFAULT NULL,
   `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  KEY `IX_Account_SubscriberId_LoginName` (`SubscriberId`,`LoginName`)
+  UNIQUE KEY `UX_Account_SubscriberId_LoginName` (`SubscriberId`,`LoginName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `BrowserInstance` (
@@ -79,15 +85,15 @@ ADD COLUMN `BrowserName` VARCHAR(100) NULL,
 ADD COLUMN `BrowserVersion` VARCHAR(50) NULL,
 ADD COLUMN `DoNotTrack` VARCHAR(15) NULL,
 ADD COLUMN `GLRenderer` VARCHAR(200) NULL,
-ADD COLUMN `HeaderAccept` VARCHAR(100) NULL,
-ADD COLUMN `HeaderAcceptEncoding` VARCHAR(200) NULL,
+ADD COLUMN `Accept` VARCHAR(100) NULL,
+ADD COLUMN `Encoding` VARCHAR(200) NULL,
 ADD COLUMN `Headers` VARCHAR(500) NULL,
 ADD COLUMN `Audio` VARCHAR(25) NULL,
-ADD COLUMN `CanvasPrint` LONGTEXT NULL,
+ADD COLUMN `Canvas` LONGTEXT NULL,
 ADD COLUMN `ColorDepth` SMALLINT NULL,
 ADD COLUMN `ColorGamut` VARCHAR(10) NULL,
 ADD COLUMN `Contrast` SMALLINT NULL,
-ADD COLUMN `CookiesEnabled` BOOLEAN NULL,
+ADD COLUMN `Cookies` BOOLEAN NULL,
 ADD COLUMN `CpuClass` VARCHAR(45) NULL,
 ADD COLUMN `DeviceMemory` TINYINT NULL,
 ADD COLUMN `DomBlockers` VARCHAR(45) NULL,
@@ -98,7 +104,7 @@ ADD COLUMN `HardwareConcurrency` TINYINT NULL,
 ADD COLUMN `HDR` BOOLEAN NULL,
 ADD COLUMN `IndexedDB` BOOLEAN NULL,
 ADD COLUMN `InvertedColors` BOOLEAN NULL,
-ADD COLUMN `LanguagesPrint` VARCHAR(500) NULL,
+ADD COLUMN `Languages` VARCHAR(500) NULL,
 ADD COLUMN `LocalStorage` BOOLEAN NULL,
 ADD COLUMN `Math` VARCHAR(1000) NULL,
 ADD COLUMN `Monochrome` TINYINT NULL,
@@ -107,7 +113,7 @@ ADD COLUMN `OsCpu` VARCHAR(45) NULL,
 ADD COLUMN `Platform` VARCHAR(45) NULL,
 ADD COLUMN `Plugins` LONGTEXT NULL,
 ADD COLUMN `ReducedMotion` BOOLEAN NULL,
-ADD COLUMN `ScreenPrint` VARCHAR(200) NULL,
+ADD COLUMN `Resolution` VARCHAR(200) NULL,
 ADD COLUMN `SessionStorage` BOOLEAN NULL,
 ADD COLUMN `Timezone` VARCHAR(45) NULL,
 ADD COLUMN `TouchSupport` VARCHAR(200) NULL,

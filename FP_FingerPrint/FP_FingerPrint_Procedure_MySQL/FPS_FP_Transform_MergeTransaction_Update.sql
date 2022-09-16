@@ -73,9 +73,10 @@ BEGIN
 		,	TransKey 			VARCHAR(200)
 		,	Retry 				TINYINT
 		,	AddonId 			BIGINT UNSIGNED
+		,	RecoverType 		TINYINT
     );
     
-    INSERT IGNORE INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId)
+    INSERT IGNORE INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
     SELECT  td.Id
 		, 	td.ServerTransId
 		, 	td.CustId
@@ -96,6 +97,7 @@ BEGIN
 		, 	td.TransKey
 		, 	td.Retry
 		, 	td.AddonId
+		, 	td.RecoverType
     FROM Temp_Transactions AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
 		LEFT JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = td.UserAgentId;
@@ -122,12 +124,13 @@ BEGIN
 		,	TransKey 			VARCHAR(200)
 		,	Retry 				TINYINT
 		,	AddonId 			BIGINT UNSIGNED
+		,	RecoverType 		TINYINT
         
         , 	INDEX IX_Temp_Transactions_TransKey(TransKey)
     );
     
     /*******UPDATE FLAGGED********************/
-    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId)
+    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
     SELECT  tmp.Id
 		, 	tmp.ServerTransId
 		, 	tmp.CustId
@@ -149,6 +152,7 @@ BEGIN
 		, 	tmp.TransKey
 		, 	tmp.Retry
 		, 	tmp.AddonId
+		, 	tmp.RecoverType
     FROM Temp_TransactionsDevice AS tmp
 		LEFT JOIN FPS_FingerPrint.BrowserInfoCompleted AS bic ON bic.Id = tmp.BrowserInfoId
 	WHERE tmp.DeviceId IS NULL
@@ -265,7 +269,7 @@ BEGIN
 	   ,	tmp.TransKey
 	FROM Temp_Transactions2 AS tmp;
       
-   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId)
+   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
    SELECT	transF.Id
 		,	transF.ServerTransId
 		,	transF.CustId
@@ -285,6 +289,7 @@ BEGIN
 		,	transF.TransKey
         ,	transF.Retry
         ,	transF.AddonId
+        ,	transF.RecoverType
 	FROM  Temp_TransactionsFlagged AS transF 
 		INNER JOIN Temp_Transactions2 AS tmp ON transF.Id = tmp.Id
     WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.TransactionCompleted transC WHERE transC.Id = transF.Id AND transC.CreatedDate = transF.CreatedDate);
