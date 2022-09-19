@@ -54,11 +54,10 @@ BEGIN
         ,	DeviceId			BIGINT UNSIGNED
         ,	RecoverType			TINYINT DEFAULT 0	#0 New, 1 By RawFingerPrintId, 2 By Cookie
         ,	GroupId				BIGINT UNSIGNED
+        ,	AccountId			BIGINT UNSIGNED
         ,	SubscriberId		BIGINT UNSIGNED
         ,	LoginName			VARCHAR(100)
         ,	UserAgentId			BIGINT UNSIGNED
-        ,	AccountId			BIGINT UNSIGNED
-        ,	BrowserInstanceId	BIGINT UNSIGNED
 
 		,	INDEX IX_Temp_InputTrans_RawFingerPrintId(RawFingerPrintId)
         ,	INDEX IX_Temp_InputTrans_CookieId(CookieId)
@@ -105,11 +104,12 @@ BEGIN
 
 	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);
 
-    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, SubscriberId, LoginName, UserAgentId, GroupId)
+    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, AccountId, SubscriberId, LoginName, UserAgentId, GroupId)
 	SELECT	tmpJs.Id
 		,	tmpJs.TransTime
 		,	tmpJs.RawFingerPrintId
         ,	tmpJs.CookieId
+        ,	tmpJs.AccountId
         ,	tmpJs.SubscriberId
         ,	tmpJs.LoginName
         ,	tmpJs.UserAgentId
@@ -120,6 +120,7 @@ BEGIN
 								Id					BIGINT UNSIGNED	PATH "$.Id"
 							,	TransTime			DATETIME(4)		PATH "$.TransTime"
 							,	RawFingerPrintId	VARCHAR(64)		PATH "$.RawFingerPrintId"
+                            ,	AccountId			BIGINT UNSIGNED	PATH "$.AccountId"
                             ,	CookieId			BIGINT UNSIGNED	PATH "$.CookieId"
                             ,	SubscriberId		BIGINT UNSIGNED	PATH "$.SubscriberId"
                             ,	LoginName			VARCHAR(100) 	PATH "$.LoginName"
@@ -340,30 +341,20 @@ BEGIN
 	WHERE tmpIt.DeviceId IS NULL;
     
     /*****AccountFingerprint******************/
-    UPDATE Temp_InputTrans AS tmp
-		INNER JOIN FPS_FingerPrint.Account AS acc ON acc.SubscriberId = tmp.SubscriberId AND acc.LoginName = tmp.LoginName
-	SET tmp.AccountId = acc.Id;
-    
-    UPDATE Temp_InputTrans AS tmp
-		INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = tmp.UserAgentId
-        INNER JOIN FPS_FingerPrint.BrowserInstance AS bi ON bi.BrowserName = ua.ClientName AND bi.OSName = ua.OSName
-	SET tmp.BrowserInstanceId = bi.Id;
-
-	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, BrowserInstanceId, FingerPrintId, CreatedDate)
+	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
     SELECT	AccountId
-		,	BrowserInstanceId
         ,	RawFingerPrintId
         ,	lv_CreatedDate
     FROM Temp_InputTrans
-    ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate
-						,	FingerPrintId = RawFingerPrintId;
+		ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate;
 
 	/*****TransactionDevice******************/
-	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
     SELECT  	ts.ServerTransId
             ,	ts.TransTime
 			, 	ts.CustId
 			, 	ts.SubAccId
+			, 	ts.AccountId
 			, 	ts.LoginName
 			, 	ts.SubscriberId
 			, 	ts.RawFingerPrintId

@@ -6,13 +6,26 @@
 */
 USE FPS_FingerPrint;
 
-INSERT INTO `FPS_FingerPrint`.`Offset` (`Id`, `OffsetName`, `OffsetValue`, `CreatedDate`) VALUES ('12', 'UpdateEvolution', '0', NOW());
-
 ALTER TABLE `FPS_FingerPrint`.`TransactionDevice` 
 ADD COLUMN `RecoverType` TINYINT NULL;
 
 ALTER TABLE `FPS_FingerPrint`.`TransactionCompleted` 
 ADD COLUMN `RecoverType` TINYINT NULL;
+
+ALTER TABLE `FPS_FingerPrint`.`ServerTransaction` 
+ADD COLUMN `AccountId` BIGINT UNSIGNED NULL AFTER `SubAccId`;
+
+ALTER TABLE `FPS_FingerPrint`.`ServerTransactionCompleted` 
+ADD COLUMN `AccountId` BIGINT UNSIGNED NULL AFTER `SubAccId`;
+
+ALTER TABLE `FPS_FingerPrint`.`Transaction` 
+ADD COLUMN `AccountId` BIGINT UNSIGNED NULL AFTER `SubAccId`;
+
+ALTER TABLE `FPS_FingerPrint`.`TransactionDevice` 
+ADD COLUMN `AccountId` BIGINT UNSIGNED NULL AFTER `SubAccId`;
+
+ALTER TABLE `FPS_FingerPrint`.`TransactionCompleted` 
+ADD COLUMN `AccountId` BIGINT UNSIGNED NULL AFTER `SubAccId`;
 
 CREATE TABLE `Account` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -24,48 +37,36 @@ CREATE TABLE `Account` (
   UNIQUE KEY `UX_Account_SubscriberId_LoginName` (`SubscriberId`,`LoginName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `BrowserInstance` (
-  `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `OSName` VARCHAR(100) DEFAULT NULL,
-  `Platform` VARCHAR(15) DEFAULT NULL,
-  `BrowserName` VARCHAR(100) DEFAULT NULL,
-  `CreatedDate` DATETIME DEFAULT NULL,
-  `ModifiedDate` DATETIME DEFAULT NULL,
-  PRIMARY KEY (`Id`),
-  UNIQUE KEY `UX_BrowserInstance_OSName_Platform_BrowserName` (`OSName`,`Platform`,`BrowserName`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 CREATE TABLE `AccountFingerprint` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `AccountId` BIGINT UNSIGNED DEFAULT NULL,
-  `BrowserInstanceId` BIGINT UNSIGNED DEFAULT NULL,
-  `FingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
-  `DeviceId` BIGINT UNSIGNED DEFAULT NULL,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
   `IsEvolution` BOOLEAN DEFAULT NULL,
   `CreatedDate` DATETIME DEFAULT NULL,
   `ModifiedDate` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `UX_AccountFingerprint_AccountId_BrowserInstanceId_FingerPrintId` (`AccountId`,`BrowserInstanceId`,`FingerPrintId`)
+  UNIQUE KEY `UX_AccountFingerprint_AccountId_RawFingerPrintId` (`AccountId`,`RawFingerPrintId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `FingerPrintEvolution` (
+CREATE TABLE `TransactionEvolution` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ServerTransId` bigint unsigned DEFAULT NULL,
-  `CustId` bigint unsigned DEFAULT NULL,
-  `SubAccId` bigint unsigned DEFAULT NULL,
-  `LoginName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `ServerTransId` BIGINT UNSIGNED DEFAULT NULL,
+  `CustId` BIGINT UNSIGNED DEFAULT NULL,
+  `SubAccId` BIGINT UNSIGNED DEFAULT NULL,
+  `AccountId` BIGINT UNSIGNED DEFAULT NULL,
+  `LoginName` VARCHAR(100) DEFAULT NULL,
   `SubscriberId` int DEFAULT NULL,
-  `RawFingerPrintId` bigint unsigned DEFAULT NULL,
-  `CookieId` bigint unsigned DEFAULT NULL,
-  `TransTime` datetime(4) DEFAULT NULL,
-  `ClientIP` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `BrowserInfoId` bigint unsigned DEFAULT NULL,
-  `UserAgentId` bigint unsigned DEFAULT NULL,
-  `Url` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `CreatedDate` datetime DEFAULT NULL,
-  `TransKey` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `AddonId` bigint unsigned DEFAULT NULL,
+  `RawFingerPrintId` BIGINT UNSIGNED DEFAULT NULL,
+  `CookieId` BIGINT UNSIGNED DEFAULT NULL,
+  `TransTime` DATETIME(4) DEFAULT NULL,
+  `ClientIP` VARCHAR(45) DEFAULT NULL,
+  `BrowserInfoId` BIGINT UNSIGNED DEFAULT NULL,
+  `UserAgentId` BIGINT UNSIGNED DEFAULT NULL,
+  `Url` VARCHAR(100) DEFAULT NULL,
+  `Action` VARCHAR(100) DEFAULT NULL,
+  `CreatedDate` DATETIME DEFAULT NULL,
+  `TransKey` VARCHAR(200) DEFAULT NULL,
+  `AddonId` BIGINT UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -80,20 +81,25 @@ CREATE TABLE `RecoverDailySum` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 ALTER TABLE `FPS_FingerPrint`.`FingerPrintAttribute` 
+ADD COLUMN `UserAgent` LONGTEXT NULL,
+ADD COLUMN `BrowserInstanceCode` VARCHAR(64) NULL COMMENT 'hash: OSName, BrowserName, Plugins',
 ADD COLUMN `OSName` VARCHAR(100) NULL,
+ADD COLUMN `Platform` VARCHAR(45) NULL,
 ADD COLUMN `BrowserName` VARCHAR(100) NULL,
 ADD COLUMN `BrowserVersion` VARCHAR(50) NULL,
+ADD COLUMN `ForbiddenChangesCode` VARCHAR(64) NULL COMMENT 'hash: LocalStorage, DoNotTrack, Cookies, Canvas',
+ADD COLUMN `LocalStorage` BOOLEAN NULL,
 ADD COLUMN `DoNotTrack` VARCHAR(15) NULL,
+ADD COLUMN `Cookies` BOOLEAN NULL,
+ADD COLUMN `Canvas` LONGTEXT NULL,
 ADD COLUMN `GLRenderer` VARCHAR(200) NULL,
 ADD COLUMN `Accept` VARCHAR(100) NULL,
 ADD COLUMN `Encoding` VARCHAR(200) NULL,
 ADD COLUMN `Headers` VARCHAR(500) NULL,
 ADD COLUMN `Audio` VARCHAR(25) NULL,
-ADD COLUMN `Canvas` LONGTEXT NULL,
 ADD COLUMN `ColorDepth` SMALLINT NULL,
 ADD COLUMN `ColorGamut` VARCHAR(10) NULL,
 ADD COLUMN `Contrast` SMALLINT NULL,
-ADD COLUMN `Cookies` BOOLEAN NULL,
 ADD COLUMN `CpuClass` VARCHAR(45) NULL,
 ADD COLUMN `DeviceMemory` TINYINT NULL,
 ADD COLUMN `DomBlockers` VARCHAR(45) NULL,
@@ -105,12 +111,10 @@ ADD COLUMN `HDR` BOOLEAN NULL,
 ADD COLUMN `IndexedDB` BOOLEAN NULL,
 ADD COLUMN `InvertedColors` BOOLEAN NULL,
 ADD COLUMN `Languages` VARCHAR(500) NULL,
-ADD COLUMN `LocalStorage` BOOLEAN NULL,
 ADD COLUMN `Math` VARCHAR(1000) NULL,
 ADD COLUMN `Monochrome` TINYINT NULL,
 ADD COLUMN `OpenDatabase` BOOLEAN NULL,
 ADD COLUMN `OsCpu` VARCHAR(45) NULL,
-ADD COLUMN `Platform` VARCHAR(45) NULL,
 ADD COLUMN `Plugins` LONGTEXT NULL,
 ADD COLUMN `ReducedMotion` BOOLEAN NULL,
 ADD COLUMN `Resolution` VARCHAR(200) NULL,
@@ -121,4 +125,6 @@ ADD COLUMN `Vendor` VARCHAR(45) NULL,
 ADD COLUMN `VendorFlavors` VARCHAR(45) NULL,
 ADD COLUMN `WebglPrint` VARCHAR(200) NULL;
 
+ALTER TABLE `FPS_FingerPrint`.`FingerPrintAttribute` 
+ADD INDEX `IX_FingerPrintAttribute_BrowserInstanceCode` (`BrowserInstanceCode`);
 

@@ -43,6 +43,7 @@ BEGIN
 		,	RawFingerPrintId	BIGINT UNSIGNED
         ,	CookieId			BIGINT UNSIGNED
         ,	TransTime			DATETIME(4)
+        ,	AccountId			BIGINT UNSIGNED
         ,	SubscriberId		BIGINT UNSIGNED
         ,	LoginName			VARCHAR(100)
         ,	UserAgentId			BIGINT UNSIGNED
@@ -72,11 +73,12 @@ BEGIN
         ,	GroupId	BIGINT UNSIGNED           
     );
     
-    INSERT INTO Temp_Transaction(Id, RawFingerPrintId, CookieId, TransTime, SubscriberId, LoginName, UserAgentId)
+    INSERT INTO Temp_Transaction(Id, RawFingerPrintId, CookieId, TransTime, AccountId, SubscriberId, LoginName, UserAgentId)
     SELECT	Id
 		,	RawFingerPrintId
         ,	CookieId
         ,	TransTime
+        ,	AccountId
         ,	SubscriberId
         ,	LoginName
         ,	UserAgentId
@@ -166,6 +168,7 @@ BEGIN
 		,	tmpTs.TransTime
 		,	tmpTs.RawFingerPrintId
         ,	tmpTs.CookieId
+        ,	tmpTs.AccountId
         ,	tmpTs.SubscriberId
         ,	tmpTs.LoginName
         ,	tmpTs.UserAgentId
@@ -184,6 +187,7 @@ BEGIN
 		,	tmpTs.TransTime
 		,	tmpTs.RawFingerPrintId
         ,	tmpTs.CookieId
+        ,	tmpTs.AccountId
         ,	tmpTs.SubscriberId
         ,	tmpTs.LoginName
         ,	tmpTs.UserAgentId

@@ -53,6 +53,7 @@ BEGIN
 		,	SessionKey 			VARCHAR(200) NULL
 		,	CustId 				BIGINT DEFAULT NULL
 		,	SubAccId 			BIGINT DEFAULT NULL
+		,	AccountId 			BIGINT UNSIGNED DEFAULT NULL
 		,	LoginName 			VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 		INT DEFAULT NULL
 		,	TransTime 			DATETIME(4) DEFAULT NULL
@@ -74,6 +75,7 @@ BEGIN
 		,	SessionKey 			VARCHAR(200) NOT NULL
 		,	CustId 				BIGINT DEFAULT NULL
 		,	SubAccId 			BIGINT DEFAULT NULL
+		,	AccountId 			BIGINT UNSIGNED DEFAULT NULL
 		,	LoginName 			VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 		INT DEFAULT NULL
 		,	TransTime 			DATETIME(4) DEFAULT NULL
@@ -105,6 +107,7 @@ BEGIN
 		,	SessionKey 			VARCHAR(200) NOT NULL
 		,	CustId 				BIGINT DEFAULT NULL
 		,	SubAccId 			BIGINT DEFAULT NULL
+		,	AccountId 			BIGINT UNSIGNED DEFAULT NULL
 		,	LoginName 			VARCHAR(100) DEFAULT NULL
 		,	SubscriberId 		INT DEFAULT NULL
 		,	TransTime 			DATETIME(4) DEFAULT NULL
@@ -123,11 +126,12 @@ BEGIN
         ,	INDEX IX_Temp_Recover_RawFingerPrintId (RawFingerPrintId)
     );
     
-   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, CreatedDate)
+   INSERT INTO Temp_RawTransaction(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, CreatedDate)
 	SELECT	rt.Id
 		,	rt.SessionKey
 		,	rt.CustId
 		,	rt.SubAccId
+		,	rt.AccountId
 		,	rt.LoginName
 		,	rt.SubscriberId
 		,	rt.TransTime
@@ -145,6 +149,7 @@ BEGIN
 							,	SessionKey				VARCHAR(200) 	PATH "$.SessionKey"
 							,	CustId					BIGINT 			PATH "$.CustId"
 							,	SubAccId				BIGINT			PATH "$.SubAccId"
+							,	AccountId				BIGINT UNSIGNED	PATH "$.AccountId"
 							,	LoginName				VARCHAR(100)	PATH "$.LoginName"
 							,	SubscriberId			INT 			PATH "$.SubscriberId"
 							,	TransTime				DATETIME(4)	 	PATH "$.TransTime"
@@ -162,6 +167,7 @@ BEGIN
 	   , 	tmpTs.SessionKey
 	   , 	tmpTs.CustId
 	   , 	tmpTs.SubAccId
+	   , 	tmpTs.AccountId
 	   , 	tmpTs.LoginName
 	   , 	tmpTs.SubscriberId
 	   , 	tmpTs.TransTime
@@ -198,11 +204,12 @@ BEGIN
     SET tmp.BrowserInfoId = bi.Id; 
     
     /*******CHECK RECOVER********************/        
-	INSERT INTO Temp_Recover(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, BrowserInfoId, AddonId, CreatedDate)
+	INSERT INTO Temp_Recover(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, BrowserInfoId, AddonId, CreatedDate)
 	SELECT 	tmpTs.Id
 	   , 	tmpTs.SessionKey
 	   , 	tmpTs.CustId
 	   , 	tmpTs.SubAccId
+	   , 	tmpTs.AccountId
 	   , 	tmpTs.LoginName
 	   , 	tmpTs.SubscriberId
 	   , 	tmpTs.TransTime
@@ -219,17 +226,19 @@ BEGIN
 	   ,	tmpTs.CreatedDate
 	FROM Temp_RawTransaction2 AS tmpTs 
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = tmpTs.RawFingerPrintId)
-		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = tmpTs.CookieId);
+		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = tmpTs.CookieId)
+		AND tmpTs.RawFingerPrintId IS NOT NULL;
     
-    /*******INSERT INTO FingerPrintEvolution********************/
+    /*******INSERT INTO TransactionEvolution********************/
     IF EXISTS (
 		SELECT 1
 		FROM Temp_Recover
     ) THEN
-		INSERT INTO FPS_FingerPrint.FingerPrintEvolution(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
+		INSERT INTO FPS_FingerPrint.TransactionEvolution(ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
         SELECT 	tmp.Id
 			,	tmp.CustId
 			,	tmp.SubAccId
+			,	tmp.AccountId
 			,	tmp.LoginName
 			,	tmp.SubscriberId
 			,	tmp.RawFingerPrintId
@@ -263,11 +272,12 @@ BEGIN
 		FROM Temp_RawTransaction2 AS tmp
         INNER JOIN Temp_Recover AS tmpR ON tmpR.Id = tmp.Id;
         
-		INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
+		INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
 		SELECT	rt.Id
 			,	rt.SessionKey
 			,	rt.CustId
 			,	rt.SubAccId
+			,	rt.AccountId
 			,	rt.LoginName
 			,	rt.SubscriberId
 			,	rt.TransTime
@@ -307,10 +317,11 @@ BEGIN
     END IF;
     
 	/*******Insert data completed********************/
-	INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
+	INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
 	SELECT	tmpTs2.Id
 		,	tmpTs2.CustId
 		,	tmpTs2.SubAccId
+		,	tmpTs2.AccountId
 		,	tmpTs2.LoginName
 		,	tmpTs2.SubscriberId
 		,	tmpTs2.RawFingerPrintId
@@ -341,11 +352,12 @@ BEGIN
 	ON DUPLICATE KEY UPDATE TotalRecoverTrans = TotalRecoverTrans + lv_countTrans,
 							ModifiedDate = lv_CurrentDate;
 
-	INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
+	INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
 	SELECT	rt.Id
 		,	rt.SessionKey
 		,	rt.CustId
 		,	rt.SubAccId
+		,	rt.AccountId
 		,	rt.LoginName
 		,	rt.SubscriberId
 		,	rt.TransTime

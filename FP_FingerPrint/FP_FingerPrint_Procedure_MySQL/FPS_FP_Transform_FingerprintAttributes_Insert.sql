@@ -47,10 +47,11 @@ BEGIN
 		,	OSName						VARCHAR(100)	 	NULL
 		,	BrowserName					VARCHAR(100)	 	NULL
 		,	BrowserVersion				VARCHAR(50)	 		NULL
+		,	UserAgent					LONGTEXT	 		NULL
         , 	INDEX IX_Temp_FingerPrintAttributes_FingerPrintCode(FingerPrintCode)
     );
     
-    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, DoNotTrack, GLRenderer, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion)
+    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, DoNotTrack, GLRenderer, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion, UserAgent)
 	SELECT	tmp.Attribute
 		,	tmp.FingerPrintCode
 		,	tmp.DoNotTrack
@@ -61,6 +62,7 @@ BEGIN
 		,	tmp.OSName
 		,	tmp.BrowserName
 		,	tmp.BrowserVersion
+		,	tmp.UserAgent
 	FROM	JSON_TABLE(
 			ip_FingerprintAttributes,
 			 "$[*]" COLUMNS(
@@ -74,11 +76,14 @@ BEGIN
 					,	OSName						VARCHAR(100)	PATH "$.OSName"
 					,	BrowserName					VARCHAR(100)	PATH "$.BrowserName"
 					,	BrowserVersion				VARCHAR(50)		PATH "$.BrowserVersion"
+					,	UserAgent					LONGTEXT		PATH "$.UserAgent"
 				)
 		   ) AS tmp;
     
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, OSName, BrowserName, BrowserVersion, DoNotTrack, GLRenderer, Accept, Encoding, Headers, Audio, Canvas, ColorDepth, ColorGamut, Contrast, Cookies, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, Languages, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, Resolution, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
+    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, BrowserInstanceCode, UserAgent, OSName, BrowserName, BrowserVersion, DoNotTrack, GLRenderer, Accept, Encoding, Headers, Audio, Canvas, ColorDepth, ColorGamut, Contrast, Cookies, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, Languages, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, Resolution, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
     SELECT	tmp.FingerPrintCode
+		,	MD5(CONCAT(tmp.OSName, tmp.BrowserName, tmp.Attribute->>'$.platform')) AS BrowserInstanceCode
+		,	tmp.UserAgent
 		,	tmp.OSName
 		,	tmp.BrowserName
 		,	tmp.BrowserVersion
@@ -151,12 +156,6 @@ BEGIN
 		,	tmp.Attribute->>'$.vendorFlavors'
 		,	tmp.Attribute->>'$.webglPrint'
 	FROM Temp_FingerPrintAttributes AS tmp;
-    
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInstance(OSName, BrowserName, Platform)
-    SELECT 	tmp.OSName
-		,	tmp.BrowserName
-        ,	tmp.Attribute->>'$.platform'
-    FROM Temp_FingerPrintAttributes AS tmp;
     
 END$$
 DELIMITER ;

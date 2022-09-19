@@ -1,9 +1,10 @@
 /*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsService" isFunction="0" isNested="0"></info>*/
-DROP PROCEDURE IF EXISTS `FPS_FP_Recover_FingerPrintAttributesEvolution_Get`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Recover_TransactionEvolutionAttributes_Get`;
 DELIMITER $$
 
-CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Recover_FingerPrintAttributesEvolution_Get`(
-		ip_FingerPrintIds 	LONGTEXT
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Recover_TransactionEvolutionAttributes_Get`(
+		ip_FingerPrintIds 		LONGTEXT
+	,	ip_BrowserInstanceCode	VARCHAR(64)
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -19,7 +20,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Recover_FingerPrintAttributesEvolution_Get('1,2');
+			- CALL FPS_FP_Recover_TransactionEvolutionAttributes_Get('2,3', '0728347210233b933365877664283ce5');
 			
 	*/
     
@@ -35,7 +36,8 @@ BEGIN
 	EXECUTE stmt1;
     
     SELECT 	tmp.Id
-		-- ,	ua.UserAgent
+		,	fpa.UserAgent
+		,	fpa.BrowserInstanceCode
 		,	fpa.OSName
 		,	fpa.BrowserName
 		,	fpa.BrowserVersion
@@ -56,8 +58,8 @@ BEGIN
 		,	fpa.Timezone
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.Id
-		-- INNER JOIN FPS_FingerPrint.RawUserAgent AS ua ON ua.Id = fp.UserAgentId
 		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
+	WHERE fpa.BrowserInstanceCode = ip_BrowserInstanceCode
 	ORDER BY tmp.Id;
 
 END$$

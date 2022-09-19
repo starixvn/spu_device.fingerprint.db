@@ -42,10 +42,10 @@ BEGIN
         , 	trans.SessionKey
         , 	trans.CustId
         , 	trans.SubAccId
+        , 	trans.AccountId
         , 	trans.LoginName
-        , 	trans.SubAccId
         , 	trans.SubscriberId
-        , 	trans.TransTime
+        , 	trans.Transtime
         , 	trans.ClientIP
         , 	trans.UserAgentId
         , 	trans.Url
