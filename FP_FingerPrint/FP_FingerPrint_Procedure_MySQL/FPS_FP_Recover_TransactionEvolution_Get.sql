@@ -28,6 +28,7 @@ BEGIN
 		,	fe.CookieId
 		,	fe.TransTime
 		,	fpa.UserAgent
+		,	fpa.BrowserInstanceCode
 		,	fpa.OSName
 		,	fpa.BrowserName
 		,	fpa.BrowserVersion
@@ -52,6 +53,7 @@ BEGIN
 		LEFT JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = fe.RawFingerPrintId
 		LEFT JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
 		LEFT JOIN FPS_FingerPrint.AccountFingerprint AS af ON af.AccountId = fe.AccountId
+	WHERE af.IsEvolution IS NULL
 	GROUP BY fe.Id, fe.RawFingerPrintId, fe.CookieId, fe.TransTime, fpa.UserAgent, fpa.OSName, fpa.BrowserName, fpa.BrowserVersion, fpa.Platform, fpa.LocalStorage, fpa.DoNotTrack, fpa.Cookies, fpa.Canvas, fpa.Fonts, fpa.Vendor, fpa.GLRenderer, fpa.Plugins, fpa.Languages, fpa.Accept, fpa.Encoding, fpa.Headers, fpa.Resolution, fpa.Timezone
 	ORDER BY fe.Id
 	LIMIT ip_BatchSize;

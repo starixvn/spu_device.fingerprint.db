@@ -39,8 +39,6 @@ BEGIN
 	CREATE TEMPORARY TABLE Temp_FingerPrintAttributes(
 			Attribute					LONGTEXT	 		NULL
 		,	FingerPrintCode				VARCHAR(200) 		NULL
-		,	DoNotTrack					VARCHAR(15)	 		NULL
-		,	GLRenderer					VARCHAR(200)	 	NULL
 		,	Accept						VARCHAR(100)	 	NULL
 		,	Encoding					VARCHAR(200)	 	NULL
 		,	Headers						VARCHAR(500)	 	NULL
@@ -51,11 +49,9 @@ BEGIN
         , 	INDEX IX_Temp_FingerPrintAttributes_FingerPrintCode(FingerPrintCode)
     );
     
-    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, DoNotTrack, GLRenderer, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion, UserAgent)
+    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion, UserAgent)
 	SELECT	tmp.Attribute
 		,	tmp.FingerPrintCode
-		,	tmp.DoNotTrack
-		,	tmp.GLRenderer
 		,	tmp.Accept
 		,	tmp.Encoding
 		,	tmp.Headers
@@ -68,8 +64,6 @@ BEGIN
 			 "$[*]" COLUMNS(
 						Attribute					LONGTEXT		PATH "$.Attribute"
 					,	FingerPrintCode				VARCHAR(64)		PATH "$.FingerPrintCode"
-					,	DoNotTrack					VARCHAR(15)		PATH "$.DoNotTrack"
-					,	GLRenderer					VARCHAR(200)	PATH "$.GLRenderer"
 					,	Accept						VARCHAR(100)	PATH "$.Accept"
 					,	Encoding					VARCHAR(200)	PATH "$.Encoding"
 					,	Headers						VARCHAR(500)	PATH "$.Headers"
@@ -87,8 +81,8 @@ BEGIN
 		,	tmp.OSName
 		,	tmp.BrowserName
 		,	tmp.BrowserVersion
-		,	tmp.DoNotTrack
-		,	tmp.GLRenderer
+		,	tmp.Attribute->>'$.doNotTrack' AS DoNotTrack
+		,	tmp.Attribute->>'$.webglRenderer' AS GLRenderer
 		,	tmp.Accept
 		,	tmp.Encoding
 		,	tmp.Headers

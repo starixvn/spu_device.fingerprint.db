@@ -60,7 +60,7 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.Id
 		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
 	WHERE fpa.BrowserInstanceCode = ip_BrowserInstanceCode
-	ORDER BY tmp.Id;
+	ORDER BY tmp.Id DESC;
 
 END$$
 DELIMITER ;
