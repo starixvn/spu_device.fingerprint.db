@@ -227,6 +227,7 @@ BEGIN
 	FROM Temp_RawTransaction2 AS tmpTs 
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = tmpTs.RawFingerPrintId)
 		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = tmpTs.CookieId)
+		AND EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmpTs.AccountId AND af.IsEvolution IS NULL)
 		AND tmpTs.RawFingerPrintId IS NOT NULL;
     
     /*******INSERT INTO TransactionEvolution********************/
