@@ -42,30 +42,31 @@ BEGIN
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
 
-	INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
-	SELECT	fpe.ServerTransId
-		,	fpe.CustId
-		,	fpe.SubAccId
-		,	fpe.AccountId
-		,	fpe.LoginName
-		,	fpe.SubscriberId
-		,	fpe.RawFingerPrintId
-		,	fpe.CookieId
-		,	fpe.TransTime
-		,	fpe.ClientIP
-		,	fpe.UserAgentId
-		,	fpe.Url
-		,	fpe.Action
-		,	fpe.CreatedDate
-		,	fpe.TransKey
-		,	fpe.BrowserInfoId
-		,	fpe.AddonId
+	INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
+	SELECT	te.ServerTransId
+		,	te.ClientTransId
+		,	te.CustId
+		,	te.SubAccId
+		,	te.AccountId
+		,	te.LoginName
+		,	te.SubscriberId
+		,	te.RawFingerPrintId
+		,	te.CookieId
+		,	te.TransTime
+		,	te.ClientIP
+		,	te.UserAgentId
+		,	te.Url
+		,	te.Action
+		,	te.CreatedDate
+		,	te.TransKey
+		,	te.BrowserInfoId
+		,	te.AddonId
 	FROM Temp_InputTrans AS tmp
-		INNER JOIN FPS_FingerPrint.TransactionEvolution AS fpe ON tmp.Id = fpe.Id;
+		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 	
-	DELETE fpe
+	DELETE te
 	FROM Temp_InputTrans AS tmp
-		INNER JOIN FPS_FingerPrint.TransactionEvolution AS fpe ON tmp.Id = fpe.Id;
+		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 
 END$$
 DELIMITER ;

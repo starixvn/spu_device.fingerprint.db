@@ -54,6 +54,7 @@ BEGIN
     CREATE TEMPORARY TABLE Temp_TransactionsDevice(
 			Id 					BIGINT UNSIGNED	NOT NULL PRIMARY KEY
 		,	ServerTransId 		BIGINT UNSIGNED
+		,	ClientTransId 		BIGINT UNSIGNED
 		,	CustId 				BIGINT UNSIGNED
 		,	SubAccId 			BIGINT UNSIGNED
 		,	AccountId 			BIGINT UNSIGNED
@@ -77,9 +78,10 @@ BEGIN
 		,	RecoverType 		TINYINT
     );
     
-    INSERT IGNORE INTO Temp_TransactionsDevice(Id, ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsDevice(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
     SELECT  td.Id
 		, 	td.ServerTransId
+		, 	td.ClientTransId
 		, 	td.CustId
 		, 	td.SubAccId
 		, 	td.AccountId
@@ -107,6 +109,7 @@ BEGIN
     CREATE TEMPORARY TABLE Temp_TransactionsFlagged(
 			Id 					BIGINT UNSIGNED	NOT NULL PRIMARY KEY
 		,	ServerTransId 		BIGINT UNSIGNED
+		,	ClientTransId 		BIGINT UNSIGNED
 		,	CustId 				BIGINT UNSIGNED
 		,	SubAccId 			BIGINT UNSIGNED
 		,	AccountId 			BIGINT UNSIGNED
@@ -133,9 +136,10 @@ BEGIN
     );
     
     /*******UPDATE FLAGGED********************/
-    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
     SELECT  tmp.Id
 		, 	tmp.ServerTransId
+		, 	tmp.ClientTransId
 		, 	tmp.CustId
 		, 	tmp.SubAccId
 		, 	tmp.AccountId
@@ -275,9 +279,10 @@ BEGIN
 	   ,	tmp.TransKey
 	FROM Temp_Transactions2 AS tmp;
       
-   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
+   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
    SELECT	transF.Id
 		,	transF.ServerTransId
+		,	transF.ClientTransId
 		,	transF.CustId
 		,	transF.SubAccId
 		,	transF.AccountId

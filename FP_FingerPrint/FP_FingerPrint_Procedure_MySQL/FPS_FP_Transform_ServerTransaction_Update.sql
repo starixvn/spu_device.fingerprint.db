@@ -118,6 +118,7 @@ BEGIN
 		,	CreatedDate 		DATETIME DEFAULT NULL
 		,	TransKey 			VARCHAR(200) DEFAULT NULL
 		,	Retry 				TINYINT DEFAULT '0'
+		,	ClientTransId		BIGINT UNSIGNED
 		,	RawFingerPrintId 	BIGINT UNSIGNED DEFAULT NULL
 		,	CookieId 			BIGINT UNSIGNED DEFAULT NULL
 		,	BrowserInfoId 		BIGINT UNSIGNED DEFAULT NULL
@@ -204,7 +205,7 @@ BEGIN
     SET tmp.BrowserInfoId = bi.Id; 
     
     /*******CHECK RECOVER********************/        
-	INSERT INTO Temp_Recover(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, RawFingerPrintId, CookieId, BrowserInfoId, AddonId, CreatedDate)
+	INSERT INTO Temp_Recover(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, ClientTransId, RawFingerPrintId, CookieId, BrowserInfoId, AddonId, CreatedDate)
 	SELECT 	tmpTs.Id
 	   , 	tmpTs.SessionKey
 	   , 	tmpTs.CustId
@@ -219,6 +220,7 @@ BEGIN
 	   , 	tmpTs.TransKey
 	   ,	tmpTs.Retry
 	   ,	tmpTs.Action
+	   ,	tmpTs.ClientTransId
 	   ,	tmpTs.RawFingerPrintId
 	   ,	tmpTs.CookieId
 	   ,	tmpTs.BrowserInfoId
@@ -235,8 +237,9 @@ BEGIN
 		SELECT 1
 		FROM Temp_Recover
     ) THEN
-		INSERT INTO FPS_FingerPrint.TransactionEvolution(ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
+		INSERT INTO FPS_FingerPrint.TransactionEvolution(ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
         SELECT 	tmp.Id
+			,	tmp.ClientTransId
 			,	tmp.CustId
 			,	tmp.SubAccId
 			,	tmp.AccountId
@@ -318,8 +321,9 @@ BEGIN
     END IF;
     
 	/*******Insert data completed********************/
-	INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
+	INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
 	SELECT	tmpTs2.Id
+		,	tmpTs2.ClientTransId
 		,	tmpTs2.CustId
 		,	tmpTs2.SubAccId
 		,	tmpTs2.AccountId

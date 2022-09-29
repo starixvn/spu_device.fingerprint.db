@@ -349,8 +349,9 @@ BEGIN
 		ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate;
 
 	/*****TransactionDevice******************/
-	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
     SELECT  	ts.ServerTransId
+            ,	ts.ClientTransId
             ,	ts.TransTime
 			, 	ts.CustId
 			, 	ts.SubAccId
