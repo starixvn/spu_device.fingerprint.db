@@ -295,10 +295,10 @@ BEGIN
 			,	rt.Action
 		FROM Temp_Recover AS tmp 
 			INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmp.Id
-		WHERE tmp.RawFingerPrintId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.ServerTransactionCompleted sc WHERE sc.Id = tmp.Id);
+		WHERE tmp.ClientTransId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.ServerTransactionCompleted sc WHERE sc.Id = tmp.Id);
         
 		INSERT IGNORE INTO FPS_FingerPrint.ClientTransactionCompleted(Id, RawFingerPrintId, CookieId, SubscriberId, SessionKey, Url, TransTime, AddonId, CreatedDate)
-		SELECT	fp.Id
+		SELECT	tmp.ClientTransId
 			,	fp.RawFingerPrintId
 			,	fp.CookieId
 			,	fp.SubscriberId
@@ -308,15 +308,15 @@ BEGIN
 			,	fp.AddonId
 			,	fp.CreatedDate
 		FROM Temp_Recover AS tmp
-			INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON tmp.SessionKey = fp.SessionKey
-		WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.ClientTransactionCompleted cc WHERE cc.Id = tmp.Id);
+			INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON tmp.ClientTransId = fp.Id
+		WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.ClientTransactionCompleted cc WHERE cc.Id = tmp.ClientTransId);
 			
-		DELETE fp FROM FPS_FingerPrint.ClientTransaction AS fp
-			INNER JOIN Temp_Recover AS tmp ON tmp.SessionKey = fp.SessionKey;
+		DELETE fp FROM Temp_Recover AS tmp
+			INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON tmp.ClientTransId = fp.Id;
 		
-		DELETE rt FROM FPS_FingerPrint.ServerTransaction AS rt 
-			INNER JOIN Temp_Recover AS tmp ON rt.Id = tmp.Id
-		WHERE tmp.RawFingerPrintId IS NOT NULL;
+		DELETE rt FROM Temp_Recover AS tmp
+			INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmp.Id
+		WHERE tmp.ClientTransId IS NOT NULL;
 		
     END IF;
     
