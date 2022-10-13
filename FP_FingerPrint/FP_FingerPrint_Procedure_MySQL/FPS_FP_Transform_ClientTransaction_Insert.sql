@@ -115,7 +115,8 @@ BEGIN
 	SELECT	tmp.CookieCode		
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_FingerPrint AS tmp;
+	FROM Temp_FingerPrint AS tmp
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.Cookie c WHERE c.CookieCode = tmp.CookieCode);
     
     INSERT INTO Temp_Cookie(CookieId, CookieCode)
     SELECT DISTINCT c.Id AS CookieId, tmp.CookieCode
