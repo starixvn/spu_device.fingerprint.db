@@ -163,7 +163,7 @@ BEGIN
 				)
 		   ) AS  rt;    
     
-   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, ClientTransId, RawFingerPrintId, CookieId, AddonId, CreatedDate)
+   INSERT INTO Temp_RawTransaction2(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, TransKey, Retry, Action, ClientTransId, RawFingerPrintId, CookieId, AddonId, CreatedDate)
    SELECT 	tmpTs.Id
 	   , 	tmpTs.SessionKey
 	   , 	tmpTs.CustId
@@ -312,10 +312,14 @@ BEGIN
 		WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.ClientTransactionCompleted cc WHERE cc.Id = tmp.ClientTransId);
 			
 		DELETE fp FROM Temp_Recover AS tmp
-			INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON tmp.ClientTransId = fp.Id;
+			INNER JOIN FPS_FingerPrint.ClientTransaction AS fp ON fp.Id = tmp.ClientTransId;
 		
 		DELETE rt FROM Temp_Recover AS tmp
 			INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmp.Id
+		WHERE tmp.ClientTransId IS NOT NULL;
+		
+		DELETE stn FROM Temp_Recover AS tmp
+			INNER JOIN FPS_FingerPrint.ServerTransactionN AS stn ON stn.ServerTransId = tmp.Id
 		WHERE tmp.ClientTransId IS NOT NULL;
 		
     END IF;
@@ -398,6 +402,10 @@ BEGIN
     DELETE rt FROM Temp_RawTransaction2 AS tmpT2 
 		INNER JOIN FPS_FingerPrint.ServerTransaction AS rt ON rt.Id = tmpT2.Id
     WHERE tmpT2.ClientTransId IS NOT NULL;
+		
+	DELETE stn FROM Temp_RawTransaction2 AS tmpT2
+		INNER JOIN FPS_FingerPrint.ServerTransactionN AS stn ON stn.ServerTransId = tmpT2.Id
+	WHERE tmpT2.ClientTransId IS NOT NULL;
 	
 	DELETE tmpT2 FROM Temp_RawTransaction2 AS tmpT2
     WHERE tmpT2.ClientTransId IS NOT NULL;
