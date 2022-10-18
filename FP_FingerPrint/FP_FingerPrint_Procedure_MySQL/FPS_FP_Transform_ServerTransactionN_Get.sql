@@ -22,7 +22,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_RawTransactionN_Get(100, 1234);			
+			- CALL FPS_FP_Transform_ServerTransactionN_Get(100, 2, 8);			
 	*/
     DECLARE lv_offsetValue BIGINT;
     
