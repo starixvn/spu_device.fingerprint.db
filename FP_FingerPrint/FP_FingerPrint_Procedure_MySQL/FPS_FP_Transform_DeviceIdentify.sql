@@ -54,6 +54,10 @@ BEGIN
         ,	DeviceId			BIGINT UNSIGNED
         ,	RecoverType			TINYINT DEFAULT 0	#0 New, 1 By RawFingerPrintId, 2 By Cookie
         ,	GroupId				BIGINT UNSIGNED
+        ,	AccountId			BIGINT UNSIGNED
+        ,	SubscriberId		BIGINT UNSIGNED
+        ,	LoginName			VARCHAR(100)
+        ,	UserAgentId			BIGINT UNSIGNED
 
 		,	INDEX IX_Temp_InputTrans_RawFingerPrintId(RawFingerPrintId)
         ,	INDEX IX_Temp_InputTrans_CookieId(CookieId)
@@ -83,6 +87,7 @@ BEGIN
 		,	RawFingerPrintId	BIGINT UNSIGNED
         ,	CookieId			BIGINT UNSIGNED
         ,	DeviceId			BIGINT UNSIGNED
+        ,	RecoverType			TINYINT DEFAULT 0
      );
 
      DROP TEMPORARY TABLE IF EXISTS Temp_ExistingRawFingerPrintId;
@@ -99,11 +104,15 @@ BEGIN
 
 	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);
 
-    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, GroupId)
+    INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, AccountId, SubscriberId, LoginName, UserAgentId, GroupId)
 	SELECT	tmpJs.Id
 		,	tmpJs.TransTime
 		,	tmpJs.RawFingerPrintId
         ,	tmpJs.CookieId
+        ,	tmpJs.AccountId
+        ,	tmpJs.SubscriberId
+        ,	tmpJs.LoginName
+        ,	tmpJs.UserAgentId
         ,	tmpJs.GroupId
     FROM JSON_TABLE(
 			ip_TransJson,
@@ -111,7 +120,11 @@ BEGIN
 								Id					BIGINT UNSIGNED	PATH "$.Id"
 							,	TransTime			DATETIME(4)		PATH "$.TransTime"
 							,	RawFingerPrintId	VARCHAR(64)		PATH "$.RawFingerPrintId"
+                            ,	AccountId			BIGINT UNSIGNED	PATH "$.AccountId"
                             ,	CookieId			BIGINT UNSIGNED	PATH "$.CookieId"
+                            ,	SubscriberId		BIGINT UNSIGNED	PATH "$.SubscriberId"
+                            ,	LoginName			VARCHAR(100) 	PATH "$.LoginName"
+                            ,	UserAgentId			BIGINT UNSIGNED	PATH "$.UserAgentId"
                             ,	GroupId				BIGINT UNSIGNED	PATH "$.GroupId"
 						)
 		) AS tmpJs;
@@ -144,18 +157,20 @@ BEGIN
     /*====RECOVER DEVICE: PROCESS FOR Group*/
     IF (ip_GroupType != 0) THEN
 		
-		INSERT IGNORE INTO Temp_GroupDevice(GroupId, DeviceId, Id, TransTime, RawFingerPrintId, CookieId)
+		INSERT IGNORE INTO Temp_GroupDevice(GroupId, DeviceId, Id, TransTime, RawFingerPrintId, CookieId, RecoverType)
         SELECT	tmpIt.GroupId
 			,	tmpIt.DeviceId
             ,	tmpIt.Id
             ,	tmpIt.TransTime
             ,	tmpIt.RawFingerPrintId
             ,	tmpIt.CookieId
+            ,	tmpIt.RecoverType
 		FROM Temp_InputTrans AS tmpIt;
 
 		UPDATE Temp_InputTrans AS tmpTs
 			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpTs.GroupId = tmpGd.GroupId
-		SET tmpTs.DeviceId = tmpGd.DeviceId
+		SET tmpTs.DeviceId = tmpGd.DeviceId,
+			tmpTs.RecoverType = tmpGd.RecoverType
         WHERE tmpTs.DeviceId IS NULL;
 
     END IF;
@@ -320,17 +335,27 @@ BEGIN
 
 	END IF;
 
-	/*****UPDATE Trans******************/
 	UPDATE Temp_InputTrans AS tmpIt
 		INNER JOIN Temp_TransDevice AS tmpTd ON tmpIt.Id = tmpTd.Id
 	SET tmpIt.DeviceId = tmpTd.DeviceId
 	WHERE tmpIt.DeviceId IS NULL;
+    
+    /*****AccountFingerprint******************/
+	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
+    SELECT	AccountId
+        ,	RawFingerPrintId
+        ,	lv_CreatedDate
+    FROM Temp_InputTrans
+		ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate;
 
-	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, TransTime, CustId , SubAccId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId)
+	/*****TransactionDevice******************/
+	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
     SELECT  	ts.ServerTransId
+            ,	ts.ClientTransId
             ,	ts.TransTime
 			, 	ts.CustId
 			, 	ts.SubAccId
+			, 	ts.AccountId
 			, 	ts.LoginName
 			, 	ts.SubscriberId
 			, 	ts.RawFingerPrintId
@@ -344,6 +369,7 @@ BEGIN
 			, 	lv_CreatedDate
 			, 	ts.TransKey
 			, 	ts.AddonId
+			, 	tmpIt.RecoverType
 	FROM Temp_InputTrans AS tmpIt
 		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpIt.Id = ts.Id;
 

@@ -39,11 +39,12 @@ BEGIN
     
 	CREATE TEMPORARY TABLE Temp_Transactions(
 			Id 							BIGINT UNSIGNED 		NOT NULL AUTO_INCREMENT
-		,	LoginName					VARCHAR(100) 			NOT NULL	
+		,	AccountId					BIGINT UNSIGNED			NULL
+		,	LoginName					VARCHAR(100) 			NOT NULL
 		,	SubscriberId				INT						NOT NULL
 		,	SessionKey					VARCHAR(100)	 		NOT NULL
 		,	TransTime					DATETIME(4)	 			NULL
-		,	ClientIp					VARCHAR(45)				NULL	
+		,	ClientIp					VARCHAR(45)				NULL
 		,	UserAgentId					BIGINT UNSIGNED			NULL
 		,	UserAgent					LONGTEXT				NULL
 		,	UserAgentCode				VARCHAR(100)			NULL
@@ -105,6 +106,18 @@ BEGIN
 				)
 		   ) AS tmp;            
     
+	/*******Account********************/
+    INSERT INTO FPS_FingerPrint.Account (SubscriberId, LoginName, CreatedDate)
+    SELECT 	tmp.SubscriberId
+		,	tmp.LoginName
+		,	lv_CurrentDate AS CreatedDate
+    FROM Temp_Transactions AS tmp
+    ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+    
+    UPDATE Temp_Transactions AS tmp
+		INNER JOIN FPS_FingerPrint.Account AS acc ON acc.SubscriberId = tmp.SubscriberId AND acc.LoginName = tmp.LoginName
+	SET tmp.AccountId = acc.Id;
+        
 	/*******RawUserAgent********************/
     INSERT IGNORE INTO FPS_FingerPrint.RawUserAgent (UserAgentCode, UserAgent, CreatedDate, ModifiedDate)
 	SELECT	DISTINCT 
@@ -127,33 +140,35 @@ BEGIN
 
     /*******ServerTransaction********************/
     INSERT INTO FPS_FingerPrint.ServerTransaction(
-						LoginName
-					,	SubscriberId
-                    ,	SessionKey
-					,	TransTime
-					,	ClientIp
-					,	UserAgentId
-                    ,	Url
-                    ,	Action
-					,	ModifiedDate
-					,	CreatedDate
-                    ,	TransKey
-                    ,	CustId
-                    ,	SubAccId
+					AccountId
+				,	LoginName
+				,	SubscriberId
+				,	SessionKey
+				,	TransTime
+				,	ClientIp
+				,	UserAgentId
+				,	Url
+				,	Action
+				,	ModifiedDate
+				,	CreatedDate
+				,	TransKey
+				,	CustId
+				,	SubAccId
 	)
-	SELECT			tmp.LoginName
-					,	tmp.SubscriberId
-					,	tmp.SessionKey
-					,	tmp.TransTime
-					,	tmp.ClientIp
-					,	tmp.UserAgentId
-                    ,	tmp.Url
-                    ,	tmp.Action
-					, 	lv_CurrentDate
-					, 	lv_CurrentDate
-                    ,	tmp.TransKey
-                    ,	tmp.CustId
-                    ,	tmp.SubAccId
+	SELECT			tmp.AccountId
+				,	tmp.LoginName
+				,	tmp.SubscriberId
+				,	tmp.SessionKey
+				,	tmp.TransTime
+				,	tmp.ClientIp
+				,	tmp.UserAgentId
+				,	tmp.Url
+				,	tmp.Action
+				, 	lv_CurrentDate
+				, 	lv_CurrentDate
+				,	tmp.TransKey
+				,	tmp.CustId
+				,	tmp.SubAccId
 	FROM Temp_Transactions AS tmp;
     
 END$$

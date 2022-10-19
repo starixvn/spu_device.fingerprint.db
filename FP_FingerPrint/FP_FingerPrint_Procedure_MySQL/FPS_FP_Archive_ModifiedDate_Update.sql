@@ -79,6 +79,7 @@ BEGIN
 	FROM FPS_FingerPrint.TransactionCompleted
 	WHERE Id > lv_offsetValue
 		AND DeviceId IS NOT NULL
+		AND CookieId IS NOT NULL
 	LIMIT ip_BatchSize;
 
     INSERT INTO Temp_Device(DeviceId, TransTime)

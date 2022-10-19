@@ -40,21 +40,23 @@ BEGIN
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
     
-    INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, CustId , SubAccId, LoginName, SubscriberId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId)
+    INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, CustId , SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId)
     SELECT  ts.ServerTransId
-			, 	ts.CustId
-			, 	ts.SubAccId
-			, 	ts.LoginName
-			, 	ts.SubscriberId			
-			, 	ts.TransTime
-			, 	ts.ClientIP
-			, 	ts.BrowserInfoId
-			, 	ts.UserAgentId
-			, 	ts.Url
-			, 	ts.Action
-			, 	CURRENT_TIMESTAMP(4)
-			, 	ts.TransKey
-			, 	ts.AddonId
+		, 	ts.ClientTransId
+		, 	ts.CustId
+		, 	ts.SubAccId
+		, 	ts.AccountId
+		, 	ts.LoginName
+		, 	ts.SubscriberId			
+		, 	ts.TransTime
+		, 	ts.ClientIP
+		, 	ts.BrowserInfoId
+		, 	ts.UserAgentId
+		, 	ts.Url
+		, 	ts.Action
+		, 	CURRENT_TIMESTAMP(4)
+		, 	ts.TransKey
+		, 	ts.AddonId
 	FROM Temp_InputTrans AS tmpTs
 		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpTs.Id = ts.Id;
     

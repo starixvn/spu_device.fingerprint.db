@@ -1,0 +1,181 @@
+/*<info serverAlias="FPSDC-FPS_FingerPrint" databaseType="2" executers="fpsServiceAdmin" isFunction="0" isNested="0"></info>*/
+DROP PROCEDURE IF EXISTS `FPS_FP_Recover_TransactionEvolution_RecoverDevice`;
+DELIMITER $$
+
+CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Recover_TransactionEvolution_RecoverDevice`(
+		ip_TransJson LONGTEXT
+)
+    SQL SECURITY INVOKER
+BEGIN
+	/*
+		Created:	20220913@Jonathan.Doan
+		Task :		
+		DB:			FPS_FingerPrint
+		Original:
+
+		Revisions:
+			- 20220913@Jonathan.Doan: Created [Redmine ID: #176820]
+            
+		Param's Explanation (filtered by):	
+
+		Example:
+			- CALL FPS_FP_Recover_TransactionEvolution_RecoverDevice('[{"Id": 1}]');
+			
+	*/
+    
+    DECLARE lv_CurrentDate DATETIME DEFAULT NOW();
+    
+    /*******LOG TEST********************/
+    IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
+		INSERT INTO CTS_Log.FPSLog(SpName, JsonString, OtherText, InsertTime)
+		SELECT 'FPS_FP_Recover_TransactionEvolution_RecoverDevice', ip_TransJson, NULL, CURRENT_TIMESTAMP();
+	END IF;
+    /*******LOG TEST********************/
+    DROP TEMPORARY TABLE IF EXISTS Temp_Recover;
+    DROP TEMPORARY TABLE IF EXISTS Temp_TransactionDevice;
+    
+    CREATE TEMPORARY TABLE Temp_Recover(
+				Id 						BIGINT UNSIGNED NOT NULL PRIMARY KEY
+			, 	RecoverFingerPrintId	BIGINT UNSIGNED
+			, 	DeviceId				BIGINT UNSIGNED
+    );
+    
+    CREATE TEMPORARY TABLE Temp_TransactionDevice(
+			 	ServerTransId			BIGINT UNSIGNED NOT NULL PRIMARY KEY
+			, 	ClientTransId			BIGINT UNSIGNED
+			, 	CustId					BIGINT UNSIGNED
+			, 	SubAccId				BIGINT UNSIGNED
+			, 	AccountId				BIGINT UNSIGNED
+			, 	LoginName				VARCHAR(100)
+			, 	SubscriberId			INT
+			, 	RawFingerPrintId		BIGINT UNSIGNED
+			, 	CookieId				BIGINT UNSIGNED
+			, 	DeviceId				BIGINT UNSIGNED
+			, 	RecoverFingerPrintId	BIGINT UNSIGNED
+			, 	TransTime				DATETIME(4)
+			, 	ClientIP				VARCHAR(45)
+			, 	BrowserInfoId			BIGINT UNSIGNED
+			, 	UserAgentId				BIGINT UNSIGNED
+			, 	Url						VARCHAR(100)
+			, 	Action					VARCHAR(100)
+			, 	CreatedDate				DATETIME
+			, 	TransKey				VARCHAR(200)
+			, 	AddonId					BIGINT UNSIGNED
+			, 	RecoverType				TINYINT DEFAULT 0
+			, 	BrowserInstanceId		BIGINT UNSIGNED
+    );
+    
+	INSERT IGNORE INTO Temp_Recover(Id, RecoverFingerPrintId)
+	SELECT	tmp.Id
+		,	tmp.RecoverFingerPrintId
+	FROM	JSON_TABLE(
+			ip_TransJson,
+			 "$[*]" COLUMNS(
+						Id						BIGINT UNSIGNED			PATH "$.Id",
+						RecoverFingerPrintId	BIGINT UNSIGNED			PATH "$.RecoverFingerPrintId"
+				)
+		   ) AS tmp;
+		   
+	UPDATE Temp_Recover AS tmp
+		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmp.RecoverFingerPrintId = df.RawFingerPrintId
+	SET tmp.DeviceId = df.DeviceId;
+		   
+	INSERT IGNORE INTO Temp_TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType, RecoverFingerPrintId)
+	SELECT  te.ServerTransId
+		,	te.ClientTransId
+		,	te.TransTime
+		, 	te.CustId
+		, 	te.SubAccId
+		, 	te.AccountId
+		, 	te.LoginName
+		, 	te.SubscriberId
+		, 	te.RawFingerPrintId
+		, 	te.CookieId
+		, 	tmp.DeviceId
+		, 	te.ClientIP
+		, 	te.BrowserInfoId
+		, 	te.UserAgentId
+		, 	te.Url
+		, 	te.Action
+		, 	lv_CurrentDate
+		, 	te.TransKey
+		, 	te.AddonId
+		, 	4 AS RecoverType
+		, 	tmp.RecoverFingerPrintId
+	FROM Temp_Recover AS tmp
+		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
+		   
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
+	SELECT  tmp.ServerTransId
+		,	tmp.ClientTransId
+		,	tmp.TransTime
+		, 	tmp.CustId
+		, 	tmp.SubAccId
+		, 	tmp.AccountId
+		, 	tmp.LoginName
+		, 	tmp.SubscriberId
+		, 	tmp.RawFingerPrintId
+		, 	tmp.CookieId
+		, 	tmp.DeviceId
+		, 	tmp.ClientIP
+		, 	tmp.BrowserInfoId
+		, 	tmp.UserAgentId
+		, 	tmp.Url
+		, 	tmp.Action
+		, 	lv_CurrentDate
+		, 	tmp.TransKey
+		, 	tmp.AddonId
+		, 	tmp.RecoverType
+	FROM Temp_TransactionDevice AS tmp;
+
+	INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(RawFingerPrintId, DeviceId, CreatedDate, ModifiedDate)
+	WITH cte (RawFingerPrintId, DeviceId, TransTime) AS
+	(
+		SELECT 	tmp.RawFingerPrintId
+			,	tmp.DeviceId
+			,	MAX(tmp.TransTime) AS TransTime
+		FROM Temp_TransactionDevice AS tmp
+		GROUP BY tmp.RawFingerPrintId, tmp.DeviceId
+	)
+	SELECT 	cte.RawFingerPrintId
+		,	cte.DeviceId
+		,	lv_CurrentDate
+		,	cte.TransTime
+	FROM cte
+	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = cte.RawFingerPrintId);
+	
+	INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieId, DeviceId, CreatedDate, ModifiedDate)
+	WITH cte (CookieId, DeviceId, TransTime) AS
+	(
+		SELECT 	tmp.CookieId
+			,	tmp.DeviceId
+			,	MAX(tmp.TransTime) AS TransTime
+		FROM Temp_TransactionDevice AS tmp
+		GROUP BY tmp.CookieId, tmp.DeviceId
+	)
+	SELECT 	cte.CookieId
+		,	cte.DeviceId
+		,	lv_CurrentDate
+		,	cte.TransTime
+	FROM cte
+	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = cte.CookieId);
+	
+	/*****AccountFingerprint******************/
+	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
+	SELECT	AccountId
+		,	RawFingerPrintId
+		,	lv_CurrentDate
+	FROM Temp_TransactionDevice
+	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+    
+	UPDATE FPS_FingerPrint.AccountFingerprint AS af
+		INNER JOIN Temp_TransactionDevice AS tmp ON tmp.AccountId = af.AccountId AND tmp.RecoverFingerPrintId = af.RawFingerPrintId 
+	SET af.IsEvolution = 1,
+		af.ModifiedDate = lv_CurrentDate;
+
+	DELETE te
+	FROM Temp_Recover AS tmp
+		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
+
+END$$
+DELIMITER ;

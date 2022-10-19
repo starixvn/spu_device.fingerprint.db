@@ -40,9 +40,9 @@ BEGIN
 	   
     SELECT  trans.Id
         , 	trans.SessionKey
-        , 	trans.SessionKey
         , 	trans.CustId
         , 	trans.SubAccId
+        , 	trans.AccountId
         , 	trans.LoginName
         , 	trans.SubscriberId
         , 	trans.Transtime

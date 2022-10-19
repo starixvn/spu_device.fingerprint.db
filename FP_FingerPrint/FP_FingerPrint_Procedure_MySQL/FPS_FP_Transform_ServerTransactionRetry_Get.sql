@@ -21,7 +21,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_RawTransactionN_Get(100, 1234);			
+			- CALL FPS_FP_Transform_ServerTransactionRetry_Get(100, 2, 8);			
 	*/
     DECLARE lv_offsetValue BIGINT;
     
@@ -41,11 +41,12 @@ BEGIN
         , 	trans.SessionKey
         , 	trans.CustId
         , 	trans.SubAccId
+        , 	trans.AccountId
         , 	trans.LoginName
-        , 	trans.SubAccId
         , 	trans.SubscriberId
-        , 	trans.TransTime
+        , 	trans.Transtime
         , 	trans.ClientIP
+        , 	trans.UserAgentId
         , 	trans.Url
         , 	trans.TransKey
         , 	trans.Action

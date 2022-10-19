@@ -43,6 +43,10 @@ BEGIN
 		,	RawFingerPrintId	BIGINT UNSIGNED
         ,	CookieId			BIGINT UNSIGNED
         ,	TransTime			DATETIME(4)
+        ,	AccountId			BIGINT UNSIGNED
+        ,	SubscriberId		BIGINT UNSIGNED
+        ,	LoginName			VARCHAR(100)
+        ,	UserAgentId			BIGINT UNSIGNED
         ,	GroupId				BIGINT UNSIGNED DEFAULT 0
         
         , 	INDEX IX_Temp_Transaction_RawFingerPrintId(RawFingerPrintId)
@@ -69,11 +73,15 @@ BEGIN
         ,	GroupId	BIGINT UNSIGNED           
     );
     
-    INSERT INTO Temp_Transaction(Id, RawFingerPrintId, CookieId,TransTime)
+    INSERT INTO Temp_Transaction(Id, RawFingerPrintId, CookieId, TransTime, AccountId, SubscriberId, LoginName, UserAgentId)
     SELECT	Id
 		,	RawFingerPrintId
         ,	CookieId
         ,	TransTime
+        ,	AccountId
+        ,	SubscriberId
+        ,	LoginName
+        ,	UserAgentId
     FROM FPS_FingerPrint.Transaction AS ts
     ORDER BY Id
     LIMIT lv_Size;
@@ -160,6 +168,10 @@ BEGIN
 		,	tmpTs.TransTime
 		,	tmpTs.RawFingerPrintId
         ,	tmpTs.CookieId
+        ,	tmpTs.AccountId
+        ,	tmpTs.SubscriberId
+        ,	tmpTs.LoginName
+        ,	tmpTs.UserAgentId
 		,	tmpTs.GroupId
         ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @BatchNo := @BatchNo + 1 ELSE @BatchNo END) AS BatchNumber
         ,	(CASE WHEN @rowNo >= @packSize AND GroupId !=  @preGroupId THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
@@ -175,6 +187,10 @@ BEGIN
 		,	tmpTs.TransTime
 		,	tmpTs.RawFingerPrintId
         ,	tmpTs.CookieId
+        ,	tmpTs.AccountId
+        ,	tmpTs.SubscriberId
+        ,	tmpTs.LoginName
+        ,	tmpTs.UserAgentId
 		,	tmpTs.GroupId
         ,	(CASE WHEN @rowNo >= @packSize THEN @BatchNo := @BatchNo +1 ELSE @BatchNo END) AS BatchNumber
         ,	(CASE WHEN @rowNo >= @packSize THEN @rowNo:= 1 ELSE @rowNo:= @rowNo + 1 END) AS RowNo
