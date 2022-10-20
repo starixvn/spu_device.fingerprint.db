@@ -33,7 +33,6 @@ BEGIN
 	*/
    
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
-    DECLARE lv_countTrans INT DEFAULT 0;
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
@@ -257,20 +256,6 @@ BEGIN
 			,	tmp.BrowserInfoId
 			,	tmp.AddonId
         FROM Temp_Recover AS tmp;
-        
-        SELECT COUNT(1)
-        INTO lv_countTrans
-        FROM Temp_Recover;
-        
-        INSERT INTO FPS_FingerPrint.RecoverDailySum(TransDate, SubscriberId, TotalRecoverTrans, TotalEvolutionTrans, CreatedDate)
-        SELECT 	DATE_FORMAT(tmp.TransTime,'%Y-%m-%d') AS TransDate
-			,	tmp.SubscriberId
-			,	0 AS TotalRecoverTrans
-			,	lv_countTrans AS TotalEvolutionTrans
-			,	lv_currentDate AS CreatedDate
-        FROM Temp_Recover AS tmp
-		ON DUPLICATE KEY UPDATE TotalEvolutionTrans = TotalEvolutionTrans + lv_countTrans,
-								ModifiedDate = lv_CurrentDate;
 
 		DELETE tmp
 		FROM Temp_RawTransaction2 AS tmp
@@ -346,20 +331,6 @@ BEGIN
 		,	tmpTs2.AddonId
 	FROM Temp_RawTransaction2 AS tmpTs2
     WHERE tmpTs2.ClientTransId IS NOT NULL;
-    
-	SELECT COUNT(1)
-	INTO lv_countTrans
-	FROM Temp_RawTransaction2;
-
-	INSERT INTO FPS_FingerPrint.RecoverDailySum(TransDate, SubscriberId, TotalRecoverTrans, TotalEvolutionTrans, CreatedDate)
-	SELECT 	DATE_FORMAT(tmp.TransTime,'%Y-%m-%d') AS TransDate
-		,	tmp.SubscriberId
-		,	lv_countTrans AS TotalRecoverTrans
-		,	0 AS TotalEvolutionTrans
-		,	lv_currentDate AS CreatedDate
-	FROM Temp_RawTransaction2 AS tmp
-	ON DUPLICATE KEY UPDATE TotalRecoverTrans = TotalRecoverTrans + lv_countTrans,
-							ModifiedDate = lv_CurrentDate;
 
 	INSERT IGNORE INTO FPS_FingerPrint.ServerTransactionCompleted(Id, SessionKey, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgentId, Url, ModifiedDate, CreatedDate, TransKey, Retry, Action)
 	SELECT	rt.Id
