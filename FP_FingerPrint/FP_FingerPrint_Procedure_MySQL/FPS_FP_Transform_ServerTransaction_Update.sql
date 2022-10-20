@@ -33,6 +33,7 @@ BEGIN
 	*/
    
     DECLARE lv_currentDate DATETIME DEFAULT NOW();
+    DECLARE lv_countTrans INT DEFAULT 0;
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
@@ -256,7 +257,7 @@ BEGIN
 			,	tmp.BrowserInfoId
 			,	tmp.AddonId
         FROM Temp_Recover AS tmp;
-
+        
 		DELETE tmp
 		FROM Temp_RawTransaction2 AS tmp
         INNER JOIN Temp_Recover AS tmpR ON tmpR.Id = tmp.Id;
