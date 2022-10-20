@@ -15,6 +15,7 @@ BEGIN
 
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]			
+            - 20221020@Terry.Nguyen: Log more information [Redmine ID: #178913]
             
 		Param's Explanation (filtered by):	
 
@@ -41,15 +42,16 @@ BEGIN
         ,	Url							VARCHAR(100)		NULL
 		,	TransTime					DATETIME(4)	 		NULL			
 		,	UserAgent					VARCHAR(300)	 	NULL
-        , 	INDEX IX_Temp_FingerPrint_SessionKey(SessionKey)
+        ,	Information					TEXT			 	NULL        
     );
     
-    INSERT INTO Temp_FingerPrint(SessionKey, SubscriberId, Url, TransTime, UserAgent)
+    INSERT INTO Temp_FingerPrint(SessionKey, SubscriberId, Url, TransTime, UserAgent, Information)
 	SELECT	tmp.SessionKey
 		,	tmp.SubscriberId        
         ,	tmp.Url
         ,	tmp.TransTime
         ,	tmp.UserAgent
+        ,	tmp.Information
 	FROM	JSON_TABLE(
 			ip_FingerPrint,
 			 "$[*]" COLUMNS(
@@ -58,18 +60,20 @@ BEGIN
                             ,	Url						VARCHAR(100) 	PATH "$.Url"
                             ,	TransTime				DATETIME(4)		PATH "$.TransTime"
                             ,	UserAgent				VARCHAR(300)	PATH "$.UserAgent"
+                            ,	Information				VARCHAR(300)	PATH "$.Information"
 				)
 		   ) AS tmp;     
    
     
     /*******ClientTransaction********************/
-    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction_Logs(SubscriberId, SessionKey, Url, TransTime, UserAgent, CreatedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.ClientTransaction_Logs(SubscriberId, SessionKey, Url, TransTime, UserAgent, CreatedDate, Information)
 	SELECT	tmp.SubscriberId		
 		,	tmp.SessionKey
 		,	tmp.Url
 		,	tmp.TransTime
 		,	tmp.UserAgent
 		,	lv_CurrentDate AS CreatedDate
+        ,	tmp.Information
 	FROM Temp_FingerPrint AS tmp;
     
 END$$
