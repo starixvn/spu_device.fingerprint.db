@@ -126,6 +126,15 @@ BEGIN
 	ON DUPLICATE KEY UPDATE Total = Total + lv_CountTrans,
 							ModifiedDate = lv_CurrentDate;
     
+    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, ServerTransId, ClientTransId, AccountId, IsEvolution, CreatedDate)
+    SELECT	Id
+		,	ServerTransId
+		,	ClientTransId
+		,	AccountId
+		,	0 AS IsEvolution
+		,	lv_CurrentDate AS CreatedDate
+    FROM Temp_InputTrans;
+    
 	DELETE te
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;

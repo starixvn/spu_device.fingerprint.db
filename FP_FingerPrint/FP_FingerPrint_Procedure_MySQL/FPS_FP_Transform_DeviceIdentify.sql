@@ -17,6 +17,7 @@ BEGIN
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
             - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
+            - 20221025@Jonathan.Doan: Monitor RecoverDailySum [Redmine ID: #179362]
             
 		Param's Explanation (filtered by):	
 			ip_GroupType: 0- Not a group, 1- Trans Group(the same RawFingerPrintId or Cookie);
@@ -38,6 +39,7 @@ BEGIN
     
     DECLARE lv_GroupDeviceId	BIGINT UNSIGNED;
     DECLARE lv_CreatedDate		DATETIME(4);
+    DECLARE lv_countTrans 		INT DEFAULT 0;
     
 	/*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
@@ -376,6 +378,20 @@ BEGIN
     DELETE ts
     FROM FPS_FingerPrint.Transaction AS ts
 		INNER JOIN Temp_InputTrans AS tmpIt ON tmpIt.Id = ts.Id;
+        
+	-- SELECT COUNT(1)
+-- 	INTO lv_countTrans
+-- 	FROM Temp_InputTrans;
+--     
+-- 	INSERT INTO FPS_FingerPrint.RecoverDailySum(RecoverType, SubscriberId, TransDate, Total, CreatedDate)
+--     SELECT 	RecoverType
+-- 		,	SubscriberId
+-- 		,	TransDate
+-- 		,	lv_countTrans AS Total
+-- 		,	lv_CreatedDate AS CreatedDate
+--     FROM Temp_InputTrans
+--     ON DUPLICATE KEY UPDATE Total = Total + lv_countTrans,
+-- 							ModifiedDate = lv_CurrentDate;
 
 END$$
 DELIMITER ;

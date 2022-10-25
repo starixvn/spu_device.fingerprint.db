@@ -41,7 +41,8 @@ BEGIN
     );
     
     CREATE TEMPORARY TABLE Temp_TransactionDevice(
-			 	ServerTransId			BIGINT UNSIGNED NOT NULL PRIMARY KEY
+			 	Id 						BIGINT UNSIGNED NOT NULL PRIMARY KEY
+			, 	ServerTransId			BIGINT UNSIGNED
 			, 	ClientTransId			BIGINT UNSIGNED
 			, 	CustId					BIGINT UNSIGNED
 			, 	SubAccId				BIGINT UNSIGNED
@@ -80,8 +81,9 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmp.RecoverFingerPrintId = df.RawFingerPrintId
 	SET tmp.DeviceId = df.DeviceId;
 		   
-	INSERT IGNORE INTO Temp_TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType, RecoverFingerPrintId)
-	SELECT  te.ServerTransId
+	INSERT IGNORE INTO Temp_TransactionDevice(Id, ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType, RecoverFingerPrintId)
+	SELECT  te.Id
+		,	te.ServerTransId
 		,	te.ClientTransId
 		,	te.TransTime
 		, 	te.CustId
@@ -104,6 +106,20 @@ BEGIN
 		, 	tmp.RecoverFingerPrintId
 	FROM Temp_Recover AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
+	
+	-- SELECT COUNT(1)
+-- 	INTO lv_countTrans
+-- 	FROM Temp_Recover;
+--     
+-- 	INSERT INTO FPS_FingerPrint.RecoverDailySum(RecoverType, SubscriberId, TransDate, Total, CreatedDate)
+--     SELECT 	4 AS RecoverType
+-- 		,	SubscriberId
+-- 		,	TransDate
+-- 		,	lv_countTrans AS Total
+-- 		,	lv_CreatedDate AS CreatedDate
+--     FROM Temp_InputTrans
+--     ON DUPLICATE KEY UPDATE Total = Total + lv_countTrans,
+-- 							ModifiedDate = lv_CurrentDate;
 		   
 	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
 	SELECT  tmp.ServerTransId
@@ -168,10 +184,19 @@ BEGIN
 	FROM Temp_TransactionDevice
 	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
     
-	UPDATE FPS_FingerPrint.AccountFingerprint AS af
-		INNER JOIN Temp_TransactionDevice AS tmp ON tmp.AccountId = af.AccountId AND tmp.RecoverFingerPrintId = af.RawFingerPrintId 
+	UPDATE Temp_TransactionDevice AS tmp
+		INNER JOIN FPS_FingerPrint.AccountFingerprint AS af ON tmp.AccountId = af.AccountId AND tmp.RecoverFingerPrintId = af.RawFingerPrintId 
 	SET af.IsEvolution = 1,
 		af.ModifiedDate = lv_CurrentDate;
+    
+    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, ServerTransId, ClientTransId, AccountId, IsEvolution, CreatedDate)
+    SELECT	Id
+		,	ServerTransId
+		,	ClientTransId
+		,	AccountId
+		,	1 AS IsEvolution
+		,	lv_CurrentDate AS CreatedDate
+    FROM Temp_TransactionDevice;
 
 	DELETE te
 	FROM Temp_Recover AS tmp
