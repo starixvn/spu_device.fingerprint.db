@@ -79,6 +79,18 @@ BEGIN
 		,	INDEX IX_Temp_TransDevice_RawFingerPrintId(RawFingerPrintId)
         ,	INDEX IX_Temp_TransDevice_CookieId(CookieId)
         ,	INDEX IX_Temp_TransDevice_GroupId(GroupId)
+    );
+
+    DROP TEMPORARY TABLE IF EXISTS Temp_TransNoDevice;
+    CREATE TEMPORARY TABLE Temp_TransNoDevice(
+			Id					BIGINT UNSIGNED PRIMARY KEY
+		,	RawFingerPrintId	BIGINT UNSIGNED
+        ,	CookieId			BIGINT UNSIGNED
+        ,	DeviceId			BIGINT UNSIGNED
+        ,	RecoverType			TINYINT DEFAULT 0	#0 New, 1 By RawFingerPrintId, 2 By Cookie
+        ,	GroupId				BIGINT UNSIGNED
+
+        ,	INDEX IX_Temp_TransNoDevice_RecoverType(RecoverType)
     );  
 
 	DROP TEMPORARY TABLE IF EXISTS Temp_GroupDevice;
@@ -300,10 +312,72 @@ BEGIN
             ,	tmpIt.RecoverType
             ,	tmpIt.GroupId
 		FROM Temp_InputTrans AS tmpIt
-			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpGd.GroupId = tmpIt.GroupId
+			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpGd.GroupId = tmpIt.GroupId AND tmpGd.Id = tmpIt.Id
 			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstRawFingerPrintId = tmpGd.RawFingerPrintId;
+        
+		INSERT INTO Temp_TransDevice(Id, TransTime, RawFingerPrintId, CookieId, DeviceId, RecoverType, GroupId)
+        SELECT	tmpIt.Id
+			,	tmpIt.TransTime
+            ,	tmpIt.RawFingerPrintId
+            ,	tmpIt.CookieId
+            ,	dv.Id
+            ,	CASE 
+					WHEN tmpIt.RawFingerPrintId = tmpGd.RawFingerPrintId AND tmpIt.CookieId = tmpGd.CookieId THEN 3
+					WHEN tmpIt.RawFingerPrintId = tmpGd.RawFingerPrintId THEN 1
+					WHEN tmpIt.CookieId = tmpGd.CookieId THEN 2
+					ELSE -1
+				END AS RecoverType
+            ,	tmpIt.GroupId
+		FROM Temp_InputTrans AS tmpIt
+			INNER JOIN Temp_GroupDevice AS tmpGd ON tmpGd.GroupId = tmpIt.GroupId AND tmpGd.Id <> tmpIt.Id
+			INNER JOIN FPS_FingerPrint.Device AS dv ON dv.FirstRawFingerPrintId = tmpGd.RawFingerPrintId;
+		
+		INSERT INTO Temp_TransNoDevice(Id, RawFingerPrintId, CookieId, DeviceId, RecoverType, GroupId)
+        SELECT 	Id
+			,	RawFingerPrintId
+			,	CookieId
+			,	DeviceId
+			,	RecoverType
+			,	GroupId
+        FROM Temp_TransDevice
+        WHERE RecoverType = -1;
+		
+		/*====RecoverType = 3 */
+		UPDATE Temp_TransNoDevice AS tmpNo
+			INNER JOIN Temp_TransDevice AS tmp ON tmp.GroupId = tmpNo.GroupId AND tmp.RecoverType <> -1 AND tmpNo.RawFingerPrintId = tmp.RawFingerPrintId AND tmpNo.CookieId = tmp.CookieId
+		SET tmpNo.RecoverType = 3
+		WHERE tmpNo.RecoverType = -1;
+        
+        UPDATE Temp_TransDevice AS tmp
+			INNER JOIN Temp_TransNoDevice AS tmpNo ON tmpNo.Id = tmp.Id
+		SET tmp.RecoverType = tmpNo.RecoverType
+        WHERE tmp.RecoverType = -1;
+        
+		/*====RecoverType = 1 */
+		UPDATE Temp_TransNoDevice AS tmpNo
+			INNER JOIN Temp_TransDevice AS tmp ON tmp.GroupId = tmpNo.GroupId AND tmp.RecoverType <> -1 AND tmpNo.RawFingerPrintId = tmp.RawFingerPrintId
+		SET tmpNo.RecoverType = 1
+		WHERE tmpNo.RecoverType = -1;
+        
+        UPDATE Temp_TransDevice AS tmp
+			INNER JOIN Temp_TransNoDevice AS tmpNo ON tmpNo.Id = tmp.Id
+		SET tmp.RecoverType = tmpNo.RecoverType
+        WHERE tmp.RecoverType = -1;
+        
+        
+		/*====RecoverType = 2 */
+		UPDATE Temp_TransNoDevice AS tmpNo
+			INNER JOIN Temp_TransDevice AS tmp ON tmp.GroupId = tmpNo.GroupId AND tmp.RecoverType <> -1 AND tmpNo.CookieId = tmp.CookieId
+		SET tmpNo.RecoverType = 2
+		WHERE tmpNo.RecoverType = -1;
+        
+        UPDATE Temp_TransDevice AS tmp
+			INNER JOIN Temp_TransNoDevice AS tmpNo ON tmpNo.Id = tmp.Id
+		SET tmp.RecoverType = tmpNo.RecoverType
+        WHERE tmp.RecoverType = -1;
+        
   
-	  INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(RawFingerPrintId, DeviceId, CreatedDate, ModifiedDate)
+		INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(RawFingerPrintId, DeviceId, CreatedDate, ModifiedDate)
 		WITH cte (RawFingerPrintId, DeviceId, TransTime) AS
 		(
 			SELECT 	tmpTd.RawFingerPrintId
@@ -339,7 +413,8 @@ BEGIN
 
 	UPDATE Temp_InputTrans AS tmpIt
 		INNER JOIN Temp_TransDevice AS tmpTd ON tmpIt.Id = tmpTd.Id
-	SET tmpIt.DeviceId = tmpTd.DeviceId
+	SET tmpIt.DeviceId = tmpTd.DeviceId,
+		tmpIt.RecoverType = tmpTd.RecoverType
 	WHERE tmpIt.DeviceId IS NULL;
     
     /*****AccountFingerprint******************/
