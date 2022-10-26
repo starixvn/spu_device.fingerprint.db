@@ -10,14 +10,19 @@ DROP TABLE `FPS_FingerPrint`.`RecoverDailySum`;
 
 CREATE TABLE `RecoverDailySum` (
   `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `RecoverType` smallint unsigned NOT NULL COMMENT '0: New device\\n1: Recover By FP\\n2: Recover By Cookies\\n3: Recover By FP & Cookies\\n4: Recover By Evolution',
   `SubscriberId` int unsigned NOT NULL,
   `TransDate` date NOT NULL,
-  `Total` bigint unsigned DEFAULT NULL,
+  `Total` BIGINT UNSIGNED DEFAULT NULL,
+  `NullDevice` BIGINT UNSIGNED DEFAULT NULL,
+  `NewDevice` BIGINT UNSIGNED DEFAULT NULL,
+  `RecoverByFP` BIGINT UNSIGNED DEFAULT NULL,
+  `RecoverByCookies` BIGINT UNSIGNED DEFAULT NULL,
+  `RecoverByFPnCookies` BIGINT UNSIGNED DEFAULT NULL,
+  `RecoverByEvolution` BIGINT UNSIGNED DEFAULT NULL,
   `CreatedDate` datetime DEFAULT NULL,
   `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `UX_RecoverDailySum_RecoverType_SubscriberId_TransDate` (`RecoverType`,`SubscriberId`,`TransDate`)
+  UNIQUE KEY `UX_RecoverDailySum_SubscriberId_TransDate` (`SubscriberId`,`TransDate`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `TransactionEvolutionCompleted` (
@@ -39,3 +44,5 @@ CREATE INDEX IX_AccountFingerprint_IsEvolution ON FPS_FingerPrint.AccountFingerp
 
 ALTER TABLE `FPS_FingerPrint`.`AccountFingerprint` 
 ADD INDEX `IX_AccountFingerprint_IsEvolution` (`IsEvolution`);
+
+INSERT INTO `FPS_FingerPrint`.`Offset` (`Id`, `OffsetName`, `OffsetValue`, `CreatedDate`) VALUES ('13', 'SummaryRecoverType', '0', '2022-10-26 00:00:00');
