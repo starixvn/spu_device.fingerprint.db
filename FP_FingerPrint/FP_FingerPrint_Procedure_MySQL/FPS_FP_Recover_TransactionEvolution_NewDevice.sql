@@ -24,7 +24,6 @@ BEGIN
 	*/
     
     DECLARE lv_CurrentDate DATETIME DEFAULT NOW();
-    DECLARE lv_CountTrans INT DEFAULT 0;
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
@@ -41,7 +40,8 @@ BEGIN
     );
     
     CREATE TEMPORARY TABLE Temp_Transaction(
-			 	ServerTransId			BIGINT UNSIGNED NOT NULL PRIMARY KEY
+				Id 			BIGINT	NOT NULL PRIMARY KEY
+			, 	ServerTransId			BIGINT UNSIGNED
 			, 	ClientTransId			BIGINT UNSIGNED
 			, 	CustId					BIGINT UNSIGNED
 			, 	SubAccId				BIGINT UNSIGNED
@@ -69,8 +69,9 @@ BEGIN
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
 
-	INSERT INTO Temp_Transaction(ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
-	SELECT	te.ServerTransId
+	INSERT INTO Temp_Transaction(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
+	SELECT	tmp.Id
+		,	te.ServerTransId
 		,	te.ClientTransId
 		,	te.CustId
 		,	te.SubAccId
@@ -112,20 +113,6 @@ BEGIN
 		,	tmp.AddonId
 	FROM Temp_Transaction AS tmp;
     
-    SELECT COUNT(1)
-	INTO lv_CountTrans
-	FROM Temp_Transaction;
-    
-    INSERT INTO FPS_FingerPrint.RecoverDailySum(RecoverType, SubscriberId, TransDate, Total, CreatedDate)
-	SELECT 	0 AS RecoverType
-		,	tmp.SubscriberId
-		,	DATE_FORMAT(tmp.TransTime,'%Y-%m-%d') AS TransDate
-		,	lv_CountTrans AS Total
-		,	lv_CurrentDate AS CreatedDate
-	FROM Temp_Recover AS tmp
-	ON DUPLICATE KEY UPDATE Total = Total + lv_CountTrans,
-							ModifiedDate = lv_CurrentDate;
-    
     INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, ServerTransId, ClientTransId, AccountId, IsEvolution, CreatedDate)
     SELECT	Id
 		,	ServerTransId
@@ -133,7 +120,7 @@ BEGIN
 		,	AccountId
 		,	0 AS IsEvolution
 		,	lv_CurrentDate AS CreatedDate
-    FROM Temp_InputTrans;
+    FROM Temp_Transaction;
     
 	DELETE te
 	FROM Temp_InputTrans AS tmp

@@ -52,16 +52,16 @@ BEGIN
     ); 
     
     CREATE TEMPORARY TABLE Temp_SumTransaction(
-			Id			 		BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
-		,	SubscriberId 		INT DEFAULT NULL
-		,	TransDate 			DATE DEFAULT NULL
-		,	Total				INT UNSIGNED DEFAULT NULL
-		,	NullDevice			INT UNSIGNED DEFAULT NULL
-		,	NewDevice			INT UNSIGNED DEFAULT NULL
-		,	RecoverByFP			INT UNSIGNED DEFAULT NULL
-		,	RecoverByCookies	INT UNSIGNED DEFAULT NULL
-		,	RecoverByFPnCookies	INT UNSIGNED DEFAULT NULL
-		,	RecoverByEvolution	INT UNSIGNED DEFAULT NULL
+			Id			 			BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY
+		,	SubscriberId 			INT DEFAULT NULL
+		,	TransDate 				DATE DEFAULT NULL
+		,	TmpTotal				INT UNSIGNED DEFAULT 0
+		,	TmpNullDevice			INT UNSIGNED DEFAULT 0
+		,	TmpNewDevice			INT UNSIGNED DEFAULT 0
+		,	TmpRecoverByFP			INT UNSIGNED DEFAULT 0
+		,	TmpRecoverByCookies		INT UNSIGNED DEFAULT 0
+		,	TmpRecoverByFPnCookies	INT UNSIGNED DEFAULT 0
+		,	TmpRecoverByEvolution	INT UNSIGNED DEFAULT 0
     ); 
     
     INSERT INTO Temp_Transaction(Id, SubscriberId, TransDate, RecoverType)
@@ -72,11 +72,11 @@ BEGIN
 	FROM FPS_FingerPrint.TransactionCompleted
     WHERE Id > lv_TransId
     LIMIT ip_batchSize;
-    
+        
     IF EXISTS(SELECT 1 FROM Temp_Transaction) THEN
-		INSERT INTO Temp_SumTransaction(SubscriberId, TransDate, Total, NullDevice, NewDevice, RecoverByFP, RecoverByCookies, RecoverByFPnCookies, RecoverByEvolution)
+		INSERT INTO Temp_SumTransaction(SubscriberId, TransDate, TmpTotal, TmpNullDevice, TmpNewDevice, TmpRecoverByFP, TmpRecoverByCookies, TmpRecoverByFPnCookies, TmpRecoverByEvolution)
 		SELECT 	SubscriberId
-			,	DATE(TransTime) AS TransDate
+			,	TransDate
 			,	COUNT(Id) AS Total
 			,	SUM(IF(RecoverType IS NULL, 1, 0)) AS NullDevice
 			,	SUM(IF(RecoverType = 0, 1, 0)) AS NewDevice
@@ -86,27 +86,27 @@ BEGIN
 			,	SUM(IF(RecoverType = 4, 1, 0)) AS RecoverByEvolution
 		FROM Temp_Transaction
 		GROUP BY SubscriberId, TransDate;
-        
+         
         INSERT INTO FPS_FingerPrint.RecoverDailySum(SubscriberId, TransDate, Total, NullDevice, NewDevice, RecoverByFP, RecoverByCookies, RecoverByFPnCookies, RecoverByEvolution, CreatedDate)
         SELECT 	tmp.SubscriberId
 			,	tmp.TransDate
-            ,	tmp.Total
-            ,	tmp.NullDevice
-            ,	tmp.NewDevice
-            ,	tmp.RecoverByFP
-            ,	tmp.RecoverByCookies
-            ,	tmp.RecoverByFPnCookies
-            ,	tmp.RecoverByEvolution
+            ,	tmp.TmpTotal
+            ,	tmp.TmpNullDevice
+            ,	tmp.TmpNewDevice
+            ,	tmp.TmpRecoverByFP
+            ,	tmp.TmpRecoverByCookies
+            ,	tmp.TmpRecoverByFPnCookies
+            ,	tmp.TmpRecoverByEvolution
             ,	lv_CreatedDate AS CreatedDate
         FROM Temp_SumTransaction AS tmp
 			ON DUPLICATE KEY UPDATE ModifiedDate 			= lv_CreatedDate
-								,	Total 					= Total + tmp.Total
-								,	NullDevice 				= NullDevice + tmp.NullDevice
-								,	NewDevice 				= NewDevice + tmp.NewDevice
-								,	RecoverByFP 			= RecoverByFP + tmp.RecoverByFP
-								,	RecoverByCookies 		= RecoverByCookies + tmp.RecoverByCookies
-								,	RecoverByFPnCookies 	= RecoverByFPnCookies + tmp.RecoverByFPnCookies
-								,	RecoverByEvolution 		= RecoverByEvolution + tmp.RecoverByEvolution;
+								,	Total 					= Total + tmp.TmpTotal
+								,	NullDevice 				= NullDevice + tmp.TmpNullDevice
+								,	NewDevice 				= NewDevice + tmp.TmpNewDevice
+								,	RecoverByFP 			= RecoverByFP + tmp.TmpRecoverByFP
+								,	RecoverByCookies 		= RecoverByCookies + tmp.TmpRecoverByCookies
+								,	RecoverByFPnCookies 	= RecoverByFPnCookies + tmp.TmpRecoverByFPnCookies
+								,	RecoverByEvolution 		= RecoverByEvolution + tmp.TmpRecoverByEvolution;
         
 		SELECT MAX(tmp.Id) INTO lv_MaxTransId 
 			FROM Temp_Transaction AS tmp;

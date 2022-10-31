@@ -454,19 +454,5 @@ BEGIN
     FROM FPS_FingerPrint.Transaction AS ts
 		INNER JOIN Temp_InputTrans AS tmpIt ON tmpIt.Id = ts.Id;
         
-	-- SELECT COUNT(1)
--- 	INTO lv_countTrans
--- 	FROM Temp_InputTrans;
---     
--- 	INSERT INTO FPS_FingerPrint.RecoverDailySum(RecoverType, SubscriberId, TransDate, Total, CreatedDate)
---     SELECT 	RecoverType
--- 		,	SubscriberId
--- 		,	TransDate
--- 		,	lv_countTrans AS Total
--- 		,	lv_CreatedDate AS CreatedDate
---     FROM Temp_InputTrans
---     ON DUPLICATE KEY UPDATE Total = Total + lv_countTrans,
--- 							ModifiedDate = lv_CurrentDate;
-
 END$$
 DELIMITER ;

@@ -38,7 +38,7 @@ BEGIN
 			, 	SUM(st.TotalTrans) AS TotalTrans
 			, 	SUM(st.TotalValidTrans) AS TotalValidTrans
 		FROM FPS_FingerPrint.ServerTransactionDailySum AS st 
-		WHERE st.TransDate BETWEEN ip_FromDate AND DATE_ADD(ip_ToDate, INTERVAL 1 DAY)
+		WHERE st.TransDate BETWEEN ip_FromDate AND ip_ToDate
 		GROUP BY st.SubscriberId
 	)
     SELECT 	sub.Name AS SubscriberName	
@@ -54,7 +54,7 @@ BEGIN
 			, 	SUM(ct.TotalTrans) AS TotalTrans
 			, 	SUM(ct.TotalValidTrans) AS TotalValidTrans
 		FROM FPS_FingerPrint.ClientTransactionDailySum AS ct 
-		WHERE ct.TransDate BETWEEN ip_FromDate AND DATE_ADD(ip_ToDate, INTERVAL 1 DAY)
+		WHERE ct.TransDate BETWEEN ip_FromDate AND ip_ToDate
 		GROUP BY ct.SubscriberId
 	)
     SELECT 	sub.Name AS SubscriberName
@@ -69,7 +69,7 @@ BEGIN
 		SELECT 	st.SubscriberId
 			, 	SUM(st.TotalTrans) AS TotalTrans
 		FROM FPS_FingerPrint.TransactionDailySum AS st
-		WHERE st.TransDate BETWEEN ip_FromDate AND DATE_ADD(ip_ToDate, INTERVAL 1 DAY)
+		WHERE st.TransDate BETWEEN ip_FromDate AND ip_ToDate
 		GROUP BY st.SubscriberId
 	)
     SELECT 	sub.Name AS SubscriberName

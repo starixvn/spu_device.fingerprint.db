@@ -106,20 +106,6 @@ BEGIN
 		, 	tmp.RecoverFingerPrintId
 	FROM Temp_Recover AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
-	
-	-- SELECT COUNT(1)
--- 	INTO lv_countTrans
--- 	FROM Temp_Recover;
---     
--- 	INSERT INTO FPS_FingerPrint.RecoverDailySum(RecoverType, SubscriberId, TransDate, Total, CreatedDate)
---     SELECT 	4 AS RecoverType
--- 		,	SubscriberId
--- 		,	TransDate
--- 		,	lv_countTrans AS Total
--- 		,	lv_CreatedDate AS CreatedDate
---     FROM Temp_InputTrans
---     ON DUPLICATE KEY UPDATE Total = Total + lv_countTrans,
--- 							ModifiedDate = lv_CurrentDate;
 		   
 	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
 	SELECT  tmp.ServerTransId
