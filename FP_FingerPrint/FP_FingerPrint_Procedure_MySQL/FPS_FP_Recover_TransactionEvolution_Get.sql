@@ -62,12 +62,15 @@ BEGIN
 		,	tmp.CookieId
 		,	tmp.TransTime
 		,	tmpG.FPIds
-		,	fpa.UserAgent
-		,	fpa.BrowserInstanceCode
-		,	fpa.OSName
-		,	fpa.BrowserName
-		,	fpa.BrowserVersion
-		,	fpa.Platform
+		,	bis.UserAgent
+		,	bis.BrowserFamilyCode
+		,	bis.OSName
+		,	bis.BrowserName
+		,	bis.BrowserVersion
+		,	bis.Platform
+		,	bis.Accept
+		,	bis.Encoding
+		,	bis.Headers
 		,	fpa.LocalStorage
 		,	fpa.DoNotTrack
 		,	fpa.Cookies
@@ -77,15 +80,14 @@ BEGIN
 		,	fpa.GLRenderer
 		,	fpa.Plugins
 		,	fpa.Languages
-		,	fpa.Accept
-		,	fpa.Encoding
-		,	fpa.Headers
 		,	fpa.Resolution
 		,	fpa.Timezone
 	FROM Temp_TransactionEvolution AS tmp
 		INNER JOIN Temp_GroupFP AS tmpG ON tmpG.Id = tmp.Id
 		LEFT JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.RawFingerPrintId
-		LEFT JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode;
+		LEFT JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
+		LEFT JOIN FPS_FingerPrint.BrowserInstanceAttribute AS bisa ON bisa.FingerPrintAttributeId = fpa.Id
+		LEFT JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.Id = bisa.BrowserInstanceId;
 
 END$$
 DELIMITER ;

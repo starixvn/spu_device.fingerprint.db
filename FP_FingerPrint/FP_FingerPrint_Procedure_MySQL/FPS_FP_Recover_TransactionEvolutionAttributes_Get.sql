@@ -4,7 +4,7 @@ DELIMITER $$
 
 CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Recover_TransactionEvolutionAttributes_Get`(
 		ip_FingerPrintIds 		LONGTEXT
-	,	ip_BrowserInstanceCode	VARCHAR(64)
+	,	ip_BrowserFamilyCode	VARCHAR(64)
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -36,12 +36,15 @@ BEGIN
 	EXECUTE stmt1;
     
     SELECT 	tmp.Id
-		,	fpa.UserAgent
-		,	fpa.BrowserInstanceCode
-		,	fpa.OSName
-		,	fpa.BrowserName
-		,	fpa.BrowserVersion
-		,	fpa.Platform
+		,	bis.UserAgent
+		,	bis.BrowserFamilyCode
+		,	bis.OSName
+		,	bis.BrowserName
+		,	bis.BrowserVersion
+		,	bis.Platform
+		,	bis.Accept
+		,	bis.Encoding
+		,	bis.Headers
 		,	fpa.LocalStorage
 		,	fpa.DoNotTrack
 		,	fpa.Cookies
@@ -51,15 +54,14 @@ BEGIN
 		,	fpa.GLRenderer
 		,	fpa.Plugins
 		,	fpa.Languages
-		,	fpa.Accept
-		,	fpa.Encoding
-		,	fpa.Headers
 		,	fpa.Resolution
 		,	fpa.Timezone
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.Id
 		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
-	WHERE fpa.BrowserInstanceCode = ip_BrowserInstanceCode
+		INNER JOIN FPS_FingerPrint.BrowserInstanceAttribute AS bisa ON bisa.FingerPrintAttributeId = fpa.Id
+		INNER JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.Id = bisa.BrowserInstanceId
+	WHERE bis.BrowserFamilyCode = ip_BrowserFamilyCode
 	ORDER BY tmp.Id DESC;
 
 END$$

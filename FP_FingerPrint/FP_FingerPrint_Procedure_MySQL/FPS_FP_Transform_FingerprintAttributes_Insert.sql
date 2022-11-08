@@ -26,6 +26,7 @@ BEGIN
 	*/
     
     DECLARE lv_CurrentDate DATETIME DEFAULT NOW();
+    DECLARE lv_FingerPrintAttributeId BIGINT UNSIGNED;
     
     /*******LOG TEST********************/
     IF (SELECT ofs.OffsetValue FROM FPS_FingerPrint.Offset AS ofs WHERE Id = 7) = 1 THEN		
@@ -38,54 +39,52 @@ BEGIN
     
 	CREATE TEMPORARY TABLE Temp_FingerPrintAttributes(
 			Attribute					LONGTEXT	 		NULL
-		,	FingerPrintCode				VARCHAR(200) 		NULL
+		,	FingerPrintCode				VARCHAR(64) 		NULL
+		,	BrowserInstanceCode			VARCHAR(64) 		NULL
 		,	Accept						VARCHAR(100)	 	NULL
 		,	Encoding					VARCHAR(200)	 	NULL
 		,	Headers						VARCHAR(500)	 	NULL
 		,	OSName						VARCHAR(100)	 	NULL
 		,	BrowserName					VARCHAR(100)	 	NULL
 		,	BrowserVersion				VARCHAR(50)	 		NULL
+		,	Platform					VARCHAR(45)	 		NULL
 		,	UserAgent					LONGTEXT	 		NULL
         , 	INDEX IX_Temp_FingerPrintAttributes_FingerPrintCode(FingerPrintCode)
     );
     
-    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion, UserAgent)
+    INSERT INTO Temp_FingerPrintAttributes(Attribute, FingerPrintCode, BrowserInstanceCode, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion, Platform, UserAgent)
 	SELECT	tmp.Attribute
 		,	tmp.FingerPrintCode
+		,	tmp.BrowserInstanceCode
 		,	tmp.Accept
 		,	tmp.Encoding
 		,	tmp.Headers
 		,	tmp.OSName
 		,	tmp.BrowserName
 		,	tmp.BrowserVersion
+		,	tmp.Platform
 		,	tmp.UserAgent
 	FROM	JSON_TABLE(
 			ip_FingerprintAttributes,
 			 "$[*]" COLUMNS(
 						Attribute					LONGTEXT		PATH "$.Attribute"
 					,	FingerPrintCode				VARCHAR(64)		PATH "$.FingerPrintCode"
+					,	BrowserInstanceCode			VARCHAR(64)		PATH "$.BrowserInstanceCode"
 					,	Accept						VARCHAR(100)	PATH "$.Accept"
 					,	Encoding					VARCHAR(200)	PATH "$.Encoding"
 					,	Headers						VARCHAR(500)	PATH "$.Headers"
 					,	OSName						VARCHAR(100)	PATH "$.OSName"
 					,	BrowserName					VARCHAR(100)	PATH "$.BrowserName"
 					,	BrowserVersion				VARCHAR(50)		PATH "$.BrowserVersion"
+					,	Platform					VARCHAR(45)		PATH "$.Platform"
 					,	UserAgent					LONGTEXT		PATH "$.UserAgent"
 				)
 		   ) AS tmp;
     
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, BrowserInstanceCode, UserAgent, OSName, BrowserName, BrowserVersion, DoNotTrack, GLRenderer, Accept, Encoding, Headers, Audio, Canvas, ColorDepth, ColorGamut, Contrast, Cookies, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, Languages, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, Resolution, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
+    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, DoNotTrack, GLRenderer, Audio, Canvas, ColorDepth, ColorGamut, Contrast, Cookies, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, Languages, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, Resolution, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
     SELECT	tmp.FingerPrintCode
-		,	MD5(CONCAT(tmp.OSName, tmp.BrowserName, tmp.Attribute->>'$.platform')) AS BrowserInstanceCode
-		,	tmp.UserAgent
-		,	tmp.OSName
-		,	tmp.BrowserName
-		,	tmp.BrowserVersion
 		,	tmp.Attribute->>'$.doNotTrack' AS DoNotTrack
 		,	tmp.Attribute->>'$.webglRenderer' AS GLRenderer
-		,	tmp.Accept
-		,	tmp.Encoding
-		,	tmp.Headers
 		,	tmp.Attribute->>'$.audio'
 		,	tmp.Attribute->>'$.canvasPrint' AS Canvas
 		,	tmp.Attribute->>'$.colorDepth'
@@ -151,5 +150,24 @@ BEGIN
 		,	tmp.Attribute->>'$.webglPrint'
 	FROM Temp_FingerPrintAttributes AS tmp;
     
+	INSERT IGNORE INTO FPS_FingerPrint.BrowserInstance(BrowserInstanceCode, BrowserFamilyCode, UserAgent, OSName, BrowserName, BrowserVersion, Platform, Accept, Encoding, Headers)
+    SELECT	tmp.BrowserInstanceCode
+		,	MD5(CONCAT(tmp.OSName, tmp.BrowserName, tmp.Platform)) AS BrowserFamilyCode
+		,	tmp.UserAgent
+		,	tmp.OSName
+		,	tmp.BrowserName
+		,	tmp.BrowserVersion
+		,	tmp.Platform
+		,	tmp.Accept
+		,	tmp.Encoding
+		,	tmp.Headers
+	FROM Temp_FingerPrintAttributes AS tmp;
+    
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInstanceAttribute(FingerPrintAttributeId, BrowserInstanceId)
+    SELECT 	fpa.Id AS FingerPrintAttributeId
+		,	bi.Id AS BrowserInstanceId
+    FROM Temp_FingerPrintAttributes AS tmp
+		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = tmp.FingerPrintCode
+		INNER JOIN FPS_FingerPrint.BrowserInstance AS bi ON bi.BrowserInstanceCode = tmp.BrowserInstanceCode;
 END$$
 DELIMITER ;
