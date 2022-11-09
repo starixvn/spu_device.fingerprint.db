@@ -14,7 +14,6 @@ CREATE TABLE `BrowserInstanceAttribute` (
   UNIQUE KEY `UX_BrowserInstanceAttribute_FPAId_BrowserInstanceId` (`FingerPrintAttributeId`, `BrowserInstanceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- drop table `BrowserInstance`;
 CREATE TABLE `BrowserInstance` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `BrowserInstanceCode` varchar(64) DEFAULT NULL COMMENT 'hash ALL',
