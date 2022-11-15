@@ -15,6 +15,7 @@ BEGIN
 
 		Revisions:
 			- 20220913@Jonathan.Doan: Created [Redmine ID: #176820]
+			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
             
 		Param's Explanation (filtered by):	
 
@@ -40,9 +41,7 @@ BEGIN
     );
     
     CREATE TEMPORARY TABLE Temp_Transaction(
-				Id 			BIGINT	NOT NULL PRIMARY KEY
-			, 	ServerTransId			BIGINT UNSIGNED
-			, 	ClientTransId			BIGINT UNSIGNED
+				Id 						BIGINT UNSIGNED NOT NULL PRIMARY KEY
 			, 	CustId					BIGINT UNSIGNED
 			, 	SubAccId				BIGINT UNSIGNED
 			, 	AccountId				BIGINT UNSIGNED
@@ -60,7 +59,6 @@ BEGIN
 			, 	Action					VARCHAR(100)
 			, 	CreatedDate				DATETIME
 			, 	TransKey				VARCHAR(200)
-			, 	AddonId					BIGINT UNSIGNED
 			, 	RecoverType				TINYINT DEFAULT 0
 			, 	BrowserInstanceId		BIGINT UNSIGNED
     );
@@ -69,10 +67,8 @@ BEGIN
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
 
-	INSERT INTO Temp_Transaction(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
+	INSERT INTO Temp_Transaction(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
 	SELECT	tmp.Id
-		,	te.ServerTransId
-		,	te.ClientTransId
 		,	te.CustId
 		,	te.SubAccId
 		,	te.AccountId
@@ -88,14 +84,11 @@ BEGIN
 		,	te.CreatedDate
 		,	te.TransKey
 		,	te.BrowserInfoId
-		,	te.AddonId
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 	
-    INSERT INTO FPS_FingerPrint.Transaction(ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId, AddonId)
-	SELECT	tmp.ServerTransId
-		,	tmp.ClientTransId
-		,	tmp.CustId
+    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+	SELECT	tmp.CustId
 		,	tmp.SubAccId
 		,	tmp.AccountId
 		,	tmp.LoginName
@@ -110,13 +103,10 @@ BEGIN
 		,	tmp.CreatedDate
 		,	tmp.TransKey
 		,	tmp.BrowserInfoId
-		,	tmp.AddonId
 	FROM Temp_Transaction AS tmp;
     
-    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, ServerTransId, ClientTransId, AccountId, IsEvolution, CreatedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, AccountId, IsEvolution, CreatedDate)
     SELECT	Id
-		,	ServerTransId
-		,	ClientTransId
 		,	AccountId
 		,	0 AS IsEvolution
 		,	lv_CurrentDate AS CreatedDate

@@ -42,3 +42,7 @@ DROP COLUMN `Headers`,
 DROP COLUMN `Encoding`,
 DROP COLUMN `Accept`,
 DROP INDEX `IX_FingerPrintAttribute_BrowserInstanceCode` ;
+
+
+INSERT INTO `FPS_FingerPrint`.`Offset`(Id, OffsetName, OffsetValue, CreatedDate)
+VALUES ROW(12, 'UpdateEvolution', 0, '2022-09-12 05:35:49'), ROW(13,'SummaryRecoverType', 0, '2022-10-26 00:00:00')

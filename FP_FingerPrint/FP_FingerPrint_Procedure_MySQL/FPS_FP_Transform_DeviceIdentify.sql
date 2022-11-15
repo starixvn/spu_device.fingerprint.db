@@ -18,6 +18,7 @@ BEGIN
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
             - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
             - 20221025@Jonathan.Doan: Monitor RecoverDailySum [Redmine ID: #179362]
+			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
             
 		Param's Explanation (filtered by):	
 			ip_GroupType: 0- Not a group, 1- Trans Group(the same RawFingerPrintId or Cookie);
@@ -426,27 +427,24 @@ BEGIN
 		ON DUPLICATE KEY UPDATE ModifiedDate=lv_CreatedDate;
 
 	/*****TransactionDevice******************/
-	INSERT INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
-    SELECT  	ts.ServerTransId
-            ,	ts.ClientTransId
-            ,	ts.TransTime
-			, 	ts.CustId
-			, 	ts.SubAccId
-			, 	ts.AccountId
-			, 	ts.LoginName
-			, 	ts.SubscriberId
-			, 	ts.RawFingerPrintId
-			, 	ts.CookieId
-			, 	tmpIt.DeviceId
-			, 	ts.ClientIP
-			, 	ts.BrowserInfoId
-			, 	ts.UserAgentId
-			, 	ts.Url
-			, 	ts.Action
-			, 	lv_CreatedDate
-			, 	ts.TransKey
-			, 	ts.AddonId
-			, 	tmpIt.RecoverType
+	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
+	SELECT  ts.TransTime
+		, 	ts.CustId
+		, 	ts.SubAccId
+		, 	ts.AccountId
+		, 	ts.LoginName
+		, 	ts.SubscriberId
+		, 	ts.RawFingerPrintId
+		, 	ts.CookieId
+		, 	tmpIt.DeviceId
+		, 	ts.ClientIP
+		, 	ts.BrowserInfoId
+		, 	ts.UserAgentId
+		, 	ts.Url
+		, 	ts.Action
+		, 	lv_CreatedDate
+		, 	ts.TransKey
+		, 	tmpIt.RecoverType
 	FROM Temp_InputTrans AS tmpIt
 		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpIt.Id = ts.Id;
 

@@ -16,6 +16,7 @@ BEGIN
 		Revisions:
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
             - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
+			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
             
 		Param's Explanation (filtered by):	
 
@@ -53,8 +54,6 @@ BEGIN
     
     CREATE TEMPORARY TABLE Temp_TransactionsDevice(
 			Id 					BIGINT UNSIGNED	NOT NULL PRIMARY KEY
-		,	ServerTransId 		BIGINT UNSIGNED
-		,	ClientTransId 		BIGINT UNSIGNED
 		,	CustId 				BIGINT UNSIGNED
 		,	SubAccId 			BIGINT UNSIGNED
 		,	AccountId 			BIGINT UNSIGNED
@@ -74,14 +73,11 @@ BEGIN
 		,	CreatedDate 		DATETIME
 		,	TransKey 			VARCHAR(200)
 		,	Retry 				TINYINT
-		,	AddonId 			BIGINT UNSIGNED
 		,	RecoverType 		TINYINT
     );
     
-    INSERT IGNORE INTO Temp_TransactionsDevice(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsDevice(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
     SELECT  td.Id
-		, 	td.ServerTransId
-		, 	td.ClientTransId
 		, 	td.CustId
 		, 	td.SubAccId
 		, 	td.AccountId
@@ -100,7 +96,6 @@ BEGIN
 		, 	td.CreatedDate
 		, 	td.TransKey
 		, 	td.Retry
-		, 	td.AddonId
 		, 	td.RecoverType
     FROM Temp_Transactions AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionDevice AS td ON td.Id = tmp.Id
@@ -108,8 +103,6 @@ BEGIN
     
     CREATE TEMPORARY TABLE Temp_TransactionsFlagged(
 			Id 					BIGINT UNSIGNED	NOT NULL PRIMARY KEY
-		,	ServerTransId 		BIGINT UNSIGNED
-		,	ClientTransId 		BIGINT UNSIGNED
 		,	CustId 				BIGINT UNSIGNED
 		,	SubAccId 			BIGINT UNSIGNED
 		,	AccountId 			BIGINT UNSIGNED
@@ -129,17 +122,14 @@ BEGIN
 		,	CreatedDate 		DATETIME
 		,	TransKey 			VARCHAR(200)
 		,	Retry 				TINYINT
-		,	AddonId 			BIGINT UNSIGNED
 		,	RecoverType 		TINYINT
         
         , 	INDEX IX_Temp_Transactions_TransKey(TransKey)
     );
     
     /*******UPDATE FLAGGED********************/
-    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
     SELECT  tmp.Id
-		, 	tmp.ServerTransId
-		, 	tmp.ClientTransId
 		, 	tmp.CustId
 		, 	tmp.SubAccId
 		, 	tmp.AccountId
@@ -159,7 +149,6 @@ BEGIN
 		, 	tmp.CreatedDate
 		, 	tmp.TransKey
 		, 	tmp.Retry
-		, 	tmp.AddonId
 		, 	tmp.RecoverType
     FROM Temp_TransactionsDevice AS tmp
 		LEFT JOIN FPS_FingerPrint.BrowserInfoCompleted AS bic ON bic.Id = tmp.BrowserInfoId
@@ -279,10 +268,8 @@ BEGIN
 	   ,	tmp.TransKey
 	FROM Temp_Transactions2 AS tmp;
       
-   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, ServerTransId, ClientTransId, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, AddonId, RecoverType)
+   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
    SELECT	transF.Id
-		,	transF.ServerTransId
-		,	transF.ClientTransId
 		,	transF.CustId
 		,	transF.SubAccId
 		,	transF.AccountId
@@ -300,7 +287,6 @@ BEGIN
 		,	transF.CreatedDate
 		,	transF.TransKey
         ,	transF.Retry
-        ,	transF.AddonId
         ,	transF.RecoverType
 	FROM  Temp_TransactionsFlagged AS transF 
 		INNER JOIN Temp_Transactions2 AS tmp ON transF.Id = tmp.Id

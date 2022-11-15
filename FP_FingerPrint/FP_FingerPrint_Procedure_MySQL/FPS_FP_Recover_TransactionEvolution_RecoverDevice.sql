@@ -15,6 +15,7 @@ BEGIN
 
 		Revisions:
 			- 20220913@Jonathan.Doan: Created [Redmine ID: #176820]
+			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
             
 		Param's Explanation (filtered by):	
 
@@ -42,8 +43,6 @@ BEGIN
     
     CREATE TEMPORARY TABLE Temp_TransactionDevice(
 			 	Id 						BIGINT UNSIGNED NOT NULL PRIMARY KEY
-			, 	ServerTransId			BIGINT UNSIGNED
-			, 	ClientTransId			BIGINT UNSIGNED
 			, 	CustId					BIGINT UNSIGNED
 			, 	SubAccId				BIGINT UNSIGNED
 			, 	AccountId				BIGINT UNSIGNED
@@ -61,7 +60,6 @@ BEGIN
 			, 	Action					VARCHAR(100)
 			, 	CreatedDate				DATETIME
 			, 	TransKey				VARCHAR(200)
-			, 	AddonId					BIGINT UNSIGNED
 			, 	RecoverType				TINYINT DEFAULT 0
 			, 	BrowserInstanceId		BIGINT UNSIGNED
     );
@@ -81,10 +79,8 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmp.RecoverFingerPrintId = df.RawFingerPrintId
 	SET tmp.DeviceId = df.DeviceId;
 		   
-	INSERT IGNORE INTO Temp_TransactionDevice(Id, ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType, RecoverFingerPrintId)
+	INSERT IGNORE INTO Temp_TransactionDevice(Id, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType, RecoverFingerPrintId)
 	SELECT  te.Id
-		,	te.ServerTransId
-		,	te.ClientTransId
 		,	te.TransTime
 		, 	te.CustId
 		, 	te.SubAccId
@@ -101,16 +97,13 @@ BEGIN
 		, 	te.Action
 		, 	lv_CurrentDate
 		, 	te.TransKey
-		, 	te.AddonId
 		, 	4 AS RecoverType
 		, 	tmp.RecoverFingerPrintId
 	FROM Temp_Recover AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 		   
-	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(ServerTransId, ClientTransId, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, AddonId, RecoverType)
-	SELECT  tmp.ServerTransId
-		,	tmp.ClientTransId
-		,	tmp.TransTime
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
+	SELECT  tmp.TransTime
 		, 	tmp.CustId
 		, 	tmp.SubAccId
 		, 	tmp.AccountId
@@ -126,7 +119,6 @@ BEGIN
 		, 	tmp.Action
 		, 	lv_CurrentDate
 		, 	tmp.TransKey
-		, 	tmp.AddonId
 		, 	tmp.RecoverType
 	FROM Temp_TransactionDevice AS tmp;
 
@@ -175,10 +167,8 @@ BEGIN
 	SET af.IsEvolution = 1,
 		af.ModifiedDate = lv_CurrentDate;
     
-    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, ServerTransId, ClientTransId, AccountId, IsEvolution, CreatedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, AccountId, IsEvolution, CreatedDate)
     SELECT	Id
-		,	ServerTransId
-		,	ClientTransId
 		,	AccountId
 		,	1 AS IsEvolution
 		,	lv_CurrentDate AS CreatedDate
