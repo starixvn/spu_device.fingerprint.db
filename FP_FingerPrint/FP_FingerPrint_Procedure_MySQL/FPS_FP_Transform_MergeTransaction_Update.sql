@@ -140,7 +140,7 @@ BEGIN
 		, 	tmp.DeviceId
 		, 	tmp.TransTime
 		, 	tmp.ClientIP
-		, 	CASE WHEN bic.Flagged IS NULL THEN 6 ELSE bic.Flagged END AS Flagged
+		, 	CASE WHEN bi.Flagged IS NULL THEN 6 ELSE bi.Flagged END AS Flagged
 		, 	tmp.BrowserInfoId
 		, 	tmp.UserAgentId
 		, 	tmp.UserAgent
@@ -151,9 +151,9 @@ BEGIN
 		, 	tmp.Retry
 		, 	tmp.RecoverType
     FROM Temp_TransactionsDevice AS tmp
-		LEFT JOIN FPS_FingerPrint.BrowserInfoCompleted AS bic ON bic.Id = tmp.BrowserInfoId
+		LEFT JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.Id = tmp.BrowserInfoId
 	WHERE tmp.DeviceId IS NULL
-		OR (tmp.DeviceId IS NOT NULL AND bic.Id IS NOT NULL);
+		OR (tmp.DeviceId IS NOT NULL AND bi.Id IS NOT NULL);
     
     CREATE TEMPORARY TABLE Temp_Transactions2(
 			Id					BIGINT UNSIGNED	NOT NULL PRIMARY KEY

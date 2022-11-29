@@ -142,7 +142,7 @@ BEGIN
 		, 	tmp.DeviceId
 		, 	tmp.TransTime
 		, 	tmp.ClientIP
-		, 	CASE WHEN bic.Flagged IS NULL THEN 6 ELSE bic.Flagged END AS Flagged
+		, 	CASE WHEN bi.Flagged IS NULL THEN 6 ELSE bi.Flagged END AS Flagged
 		, 	tmp.BrowserInfoId
 		, 	tmp.UserAgentId
 		, 	tmp.UserAgent
@@ -153,7 +153,7 @@ BEGIN
 		, 	tmp.Retry
 		, 	tmp.RecoverType
     FROM Temp_TransactionsDevice AS tmp
-		LEFT JOIN FPS_FingerPrint.BrowserInfoCompleted AS bic ON bic.Id = tmp.BrowserInfoId;
+		LEFT JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.Id = tmp.BrowserInfoId;
         
 	INSERT IGNORE INTO FPSTesting.FP_RawTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	transF.LoginName	

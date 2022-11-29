@@ -34,7 +34,7 @@ BEGIN
 	DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;
     DROP TEMPORARY TABLE IF EXISTS Temp_Cookie;
     DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
-    DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrintAttributes;
+    DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrintAttribute;
     DROP TEMPORARY TABLE IF EXISTS Temp_RawFingerPrint;
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
 	DROP TEMPORARY TABLE IF EXISTS Temp_MapIdRawUserAgent;
@@ -52,7 +52,7 @@ BEGIN
 		,	LoginName 				VARCHAR(100) 		DEFAULT NULL
 		,	SubscriberId 			INT 				DEFAULT NULL
 		,	TransTime 				DATETIME(4) 		DEFAULT NULL
-		,	ClientIp 				VARCHAR(45) 		DEFAULT NULL
+		,	ClientIP 				VARCHAR(45) 		DEFAULT NULL
 		,	UserAgentId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	UserAgent				LONGTEXT			DEFAULT NULL
 		,	UserAgentCode			VARCHAR(100)		DEFAULT NULL
@@ -81,7 +81,7 @@ BEGIN
 		,	LoginName 				VARCHAR(100) 		DEFAULT NULL
 		,	SubscriberId 			INT 				DEFAULT NULL
 		,	TransTime 				DATETIME(4) 		DEFAULT NULL
-		,	ClientIp 				VARCHAR(45) 		DEFAULT NULL
+		,	ClientIP 				VARCHAR(45) 		DEFAULT NULL
 		,	UserAgentId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	UserAgent				LONGTEXT			DEFAULT NULL
 		,	UserAgentCode			VARCHAR(100)		DEFAULT NULL
@@ -130,11 +130,12 @@ BEGIN
         ,	PRIMARY KEY (TmpTransactionsId)
     );
     
-	CREATE TEMPORARY TABLE Temp_FingerPrintAttributes(
+	CREATE TEMPORARY TABLE Temp_FingerPrintAttribute(
 			TmpTransactionsId 			INT 				NOT NULL 
 		,	Attribute					LONGTEXT	 		NULL
 		,	FingerPrintCode				VARCHAR(64) 		NULL
 		,	BrowserInstanceCode			VARCHAR(64) 		NULL
+		,	BrowserFamilyCode			VARCHAR(64) 		NULL
 		,	Accept						VARCHAR(100)	 	NULL
 		,	Encoding					VARCHAR(200)	 	NULL
 		,	Headers						VARCHAR(500)	 	NULL
@@ -145,7 +146,7 @@ BEGIN
 		,	UserAgent					LONGTEXT	 		NULL
         
         ,	PRIMARY KEY (TmpTransactionsId)
-        , 	INDEX IX_Temp_FingerPrintAttributes_FingerPrintCode(FingerPrintCode)
+        , 	INDEX IX_Temp_FingerPrintAttribute_FingerPrintCode(FingerPrintCode)
     );
     
 	CREATE TEMPORARY TABLE Temp_RawFingerPrint(
@@ -167,6 +168,7 @@ BEGIN
 		,	BrowserName					VARCHAR(100)		NULL
 		,	HeadlessScore				DECIMAL(1)			NULL
 		,	HeadlessDetail				LONGTEXT			NULL
+		,	Flagged						SMALLINT			NULL
 		,	BrowserInfoCode				VARCHAR(64)			NULL
 		,	SecChUa						VARCHAR(100)	 	NULL
 		,	SecChUaPlatform				VARCHAR(100)		NULL
@@ -176,11 +178,11 @@ BEGIN
         
         ,	PRIMARY KEY (TmpTransactionsId)
         , 	INDEX IX_Temp_BrowserInfo_BrowserInfoId(BrowserInfoId)
-        , 	INDEX IX_Temp_BrowserInfo_BrowserInfoCodee(BrowserInfoCode)
+        , 	INDEX IX_Temp_BrowserInfo_BrowserInfoCode(BrowserInfoCode)
         , 	INDEX IX_Temp_BrowserInfo_BrowserInfoAttributeCode(BrowserInfoAttributeCode)
     );
     
-	INSERT INTO Temp_Transaction(CookieCode, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIp, UserAgent, UserAgentCode, Url, Action, TransKey, FingerprintAttribute, UserAgentInfo, BrowserInfo, BrowserInfoAttribute)
+	INSERT INTO Temp_Transaction(CookieCode, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, UserAgentCode, Url, Action, TransKey, FingerprintAttribute, UserAgentInfo, BrowserInfo, BrowserInfoAttribute)
 	SELECT	rt.CookieCode
 		,	rt.CustId
 		,	rt.SubAccId
@@ -188,7 +190,7 @@ BEGIN
 		,	rt.LoginName
 		,	rt.SubscriberId
 		,	rt.TransTime
-		,	rt.ClientIp
+		,	rt.ClientIP
 		,	rt.UserAgent
 		,	rt.UserAgentCode
 		,	rt.Url
@@ -208,7 +210,7 @@ BEGIN
 					,	LoginName 				VARCHAR(100) 	PATH "$.LoginName"
 					,	SubscriberId 			INT			 	PATH "$.SubscriberId"
 					,	TransTime 				DATETIME(4)	 	PATH "$.TransTime"
-					,	ClientIp 				VARCHAR(45)	 	PATH "$.ClientIp"
+					,	ClientIP 				VARCHAR(45)	 	PATH "$.ClientIP"
 					,	UserAgent 				LONGTEXT	 	PATH "$.UserAgent"
 					,	UserAgentCode 			VARCHAR(100) 	PATH "$.UserAgentCode"
 					,	Url 					VARCHAR(100)	PATH "$.Url"
@@ -267,7 +269,8 @@ BEGIN
 		,	tmp.UserAgentInfo->>'$.Device'
 		,	tmp.UserAgentInfo->>'$.Brand'
 		,	tmp.UserAgentInfo->>'$.Model'
-    FROM Temp_Transaction AS tmp;
+    FROM Temp_Transaction AS tmp
+    WHERE tmp.UserAgentCode IS NOT NULL;
     
 	/*******RawUserAgent********************/
     INSERT IGNORE INTO FPS_FingerPrint.RawUserAgent (UserAgentCode, UserAgent, ClientType, ClientName, ClientVersion, OSName, OSShortName, OSVersion, OSPlatform, Device, Brand, Model, CreatedDate, ModifiedDate)
@@ -300,12 +303,13 @@ BEGIN
 	SET tmp.UserAgentId = ua.UserAgentId;
     
     
-    /*******FingerPrintAttributes********************/
-    INSERT INTO Temp_FingerPrintAttributes(TmpTransactionsId, Attribute, FingerPrintCode, BrowserInstanceCode, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion, Platform, UserAgent)
+    /*******FingerPrintAttribute********************/
+    INSERT INTO Temp_FingerPrintAttribute(TmpTransactionsId, Attribute, FingerPrintCode, BrowserInstanceCode, BrowserFamilyCode, Accept, Encoding, Headers, OSName, BrowserName, BrowserVersion, Platform, UserAgent)
     SELECT 	Id AS TmpTransactionsId
 		,	FingerprintAttribute->>'$.Attribute'
 		,	FingerprintAttribute->>'$.FingerPrintCode'
 		,	FingerprintAttribute->>'$.BrowserInstanceCode'
+		,	FingerprintAttribute->>'$.BrowserFamilyCode'
 		,	FingerprintAttribute->>'$.Accept'
 		,	FingerprintAttribute->>'$.Encoding'
 		,	FingerprintAttribute->>'$.Headers'
@@ -316,18 +320,22 @@ BEGIN
 		,	FingerprintAttribute->>'$.UserAgent'
     FROM Temp_Transaction;
     
+    DELETE FROM Temp_FingerPrintAttribute
+    WHERE FingerPrintCode IS NULL;
+    
     /*******RawFingerPrint********************/
     INSERT IGNORE INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
-	SELECT	tmp.FingerPrintCode		
+	SELECT	FingerPrintCode		
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-	FROM Temp_FingerPrintAttributes AS tmp;
+	FROM Temp_FingerPrintAttribute AS tmp
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.RawFingerPrint fp WHERE fp.FingerPrintCode = tmp.FingerPrintCode);
     
     INSERT INTO Temp_RawFingerPrint(TmpTransactionsId, RawFingerPrintId)
     SELECT DISTINCT 
 			tmp.TmpTransactionsId
 		,	rfp.Id AS RawFingerPrintId
-    FROM Temp_FingerPrintAttributes AS tmp
+    FROM Temp_FingerPrintAttribute AS tmp
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode;
     
     UPDATE Temp_Transaction AS tmp
@@ -403,13 +411,13 @@ BEGIN
 		,	tmp.Attribute->>'$.vendor'
 		,	tmp.Attribute->>'$.vendorFlavors'
 		,	tmp.Attribute->>'$.webglPrint'
-	FROM Temp_FingerPrintAttributes AS tmp
+	FROM Temp_FingerPrintAttribute AS tmp
     WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.FingerPrintAttribute fpa WHERE fpa.FingerPrintCode = tmp.FingerPrintCode);
     
     /*******BrowserInstance********************/
 	INSERT IGNORE INTO FPS_FingerPrint.BrowserInstance(BrowserInstanceCode, BrowserFamilyCode, UserAgent, OSName, BrowserName, BrowserVersion, Platform, Accept, Encoding, Headers)
     SELECT	tmp.BrowserInstanceCode
-		,	MD5(CONCAT(tmp.OSName, tmp.BrowserName, tmp.Platform)) AS BrowserFamilyCode
+		,	tmp.BrowserFamilyCode
 		,	tmp.UserAgent
 		,	tmp.OSName
 		,	tmp.BrowserName
@@ -418,23 +426,27 @@ BEGIN
 		,	tmp.Accept
 		,	tmp.Encoding
 		,	tmp.Headers
-	FROM Temp_FingerPrintAttributes AS tmp;
+	FROM Temp_FingerPrintAttribute AS tmp
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInstance bis WHERE bis.BrowserInstanceCode = tmp.BrowserInstanceCode);
     
     INSERT IGNORE INTO FPS_FingerPrint.BrowserInstanceAttribute(FingerPrintAttributeId, BrowserInstanceId)
     SELECT 	fpa.Id AS FingerPrintAttributeId
-		,	bi.Id AS BrowserInstanceId
-    FROM Temp_FingerPrintAttributes AS tmp
+		,	bis.Id AS BrowserInstanceId
+    FROM Temp_FingerPrintAttribute AS tmp
 		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = tmp.FingerPrintCode
-		INNER JOIN FPS_FingerPrint.BrowserInstance AS bi ON bi.BrowserInstanceCode = tmp.BrowserInstanceCode;
+		INNER JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.BrowserInstanceCode = tmp.BrowserInstanceCode
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInstanceAttribute bisa WHERE bisa.FingerPrintAttributeId = fpa.Id AND bisa.BrowserInstanceId = bis.Id);
     
     /*******BrowserInfo********************/
-    INSERT IGNORE INTO Temp_BrowserInfo(TmpTransactionsId, BrowserInfoAttributeCode, OSName, BrowserName, HeadlessScore, HeadlessDetail, SecChUa, SecChUaPlatform, SecChUaMobile, JsBrowserName, JsOSName)
+    INSERT IGNORE INTO Temp_BrowserInfo(TmpTransactionsId, BrowserInfoCode, OSName, BrowserName, HeadlessScore, HeadlessDetail, Flagged, BrowserInfoAttributeCode, SecChUa, SecChUaPlatform, SecChUaMobile, JsBrowserName, JsOSName)
     SELECT 	tmp.Id AS TmpTransactionsId
-		,	MD5(tmp.BrowserInfoAttribute) AS BrowserInfoAttributeCode
+		,	tmp.BrowserInfo->>'$.BrowserInfoCode'
 		,	tmp.BrowserInfo->>'$.OSName'
 		,	tmp.BrowserInfo->>'$.BrowserName'
 		,	tmp.BrowserInfo->>'$.HeadlessScore'
 		,	tmp.BrowserInfo->>'$.HeadlessDetail'
+		,	tmp.BrowserInfo->>'$.Flagged'
+		,	tmp.BrowserInfoAttribute->>'$.BrowserInfoAttributeCode'
 		,	tmp.BrowserInfoAttribute->>'$.SecChUa'
 		,	tmp.BrowserInfoAttribute->>'$.SecChUaPlatform'
 		,	tmp.BrowserInfoAttribute->>'$.SecChUaMobile'
@@ -456,24 +468,24 @@ BEGIN
 		LEFT JOIN FPS_FingerPrint.BrowserInfoAttribute bia ON bia.BrowserInfoAttributeCode = tmp.BrowserInfoAttributeCode
 		INNER JOIN Temp_Transaction AS tmpT ON tmpT.Id = tmp.TmpTransactionsId
     SET tmp.BrowserInfoAttributeId = bia.Id
-	,	tmp.UserAgentId = tmpT.UserAgentId
-    ,	tmp.BrowserInfoCode = MD5(CONCAT(COALESCE(tmpT.UserAgentId, '#'), COALESCE(tmp.BrowserInfoAttributeId, '#'), COALESCE(tmp.HeadlessDetail, '#'), COALESCE(tmp.BrowserName, '#'), COALESCE(tmp.OSName, '#'), COALESCE(tmp.HeadlessScore, 0)));
+	,	tmp.UserAgentId = tmpT.UserAgentId;
     
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(BrowserInfoAttributeId, BrowserName, OSName, HeadlessScore, HeadlessDetail, UserAgentId, CreatedDate, ModifiedDate, BrowserInfoCode)
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(BrowserInfoAttributeId, BrowserInfoCode, BrowserName, OSName, HeadlessScore, HeadlessDetail, Flagged, UserAgentId, CreatedDate, ModifiedDate)
     SELECT 	tmp.BrowserInfoAttributeId
+        ,	tmp.BrowserInfoCode
 		, 	tmp.BrowserName
         , 	tmp.OSName
         , 	tmp.HeadlessScore
         , 	tmp.HeadlessDetail
+        , 	tmp.Flagged
         , 	tmp.UserAgentId
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
-        ,	tmp.BrowserInfoCode
     FROM Temp_BrowserInfo AS tmp
-    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfo bi WHERE bi.BrowserInfoCode = tmp.BrowserInfoCode);
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfo bi WHERE bi.BrowserInfoCode = tmp.BrowserInfoCode AND bi.UserAgentId = tmp.UserAgentId AND bi.BrowserInfoAttributeId = tmp.BrowserInfoAttributeId);
     
     UPDATE Temp_BrowserInfo AS tmp
-		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.BrowserInfoCode = tmp.BrowserInfoCode
+		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.BrowserInfoCode = tmp.BrowserInfoCode AND bi.UserAgentId = tmp.UserAgentId AND bi.BrowserInfoAttributeId = tmp.BrowserInfoAttributeId
 	SET tmp.BrowserInfoId = bi.Id;
     
     UPDATE Temp_Transaction AS tmp
