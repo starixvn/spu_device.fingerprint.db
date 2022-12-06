@@ -58,8 +58,8 @@ BEGIN
 		,	fpa.Timezone
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.Id
-		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
-		INNER JOIN FPS_FingerPrint.BrowserInstanceAttribute AS bisa ON bisa.FingerPrintAttributeId = fpa.Id
+		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.RawFingerPrintId = fp.Id
+		INNER JOIN FPS_FingerPrint.BrowserInstanceRawFingerPrint AS bisa ON bisa.RawFingerPrintId = fp.Id
 		INNER JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.Id = bisa.BrowserInstanceId
 	WHERE bis.BrowserFamilyCode = ip_BrowserFamilyCode
 	ORDER BY tmp.Id DESC;

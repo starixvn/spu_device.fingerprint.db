@@ -85,8 +85,8 @@ BEGIN
 	FROM Temp_TransactionEvolution AS tmp
 		INNER JOIN Temp_GroupFP AS tmpG ON tmpG.Id = tmp.Id
 		LEFT JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.RawFingerPrintId
-		LEFT JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
-		LEFT JOIN FPS_FingerPrint.BrowserInstanceAttribute AS bisa ON bisa.FingerPrintAttributeId = fpa.Id
+		LEFT JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.RawFingerPrintId = fp.Id
+		LEFT JOIN FPS_FingerPrint.BrowserInstanceRawFingerPrint AS bisa ON bisa.RawFingerPrintId = fp.Id
 		LEFT JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.Id = bisa.BrowserInstanceId;
 
 END$$

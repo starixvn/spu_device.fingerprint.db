@@ -35,7 +35,6 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_Cookie;
     DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
     DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrintAttribute;
-    DROP TEMPORARY TABLE IF EXISTS Temp_RawFingerPrint;
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
 	DROP TEMPORARY TABLE IF EXISTS Temp_MapIdRawUserAgent;
 	DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInfo;
@@ -132,6 +131,7 @@ BEGIN
     
 	CREATE TEMPORARY TABLE Temp_FingerPrintAttribute(
 			TmpTransactionsId 			INT 				NOT NULL 
+		,	RawFingerPrintId			BIGINT UNSIGNED 	NULL
 		,	Attribute					LONGTEXT	 		NULL
 		,	FingerPrintCode				VARCHAR(64) 		NULL
 		,	BrowserInstanceCode			VARCHAR(64) 		NULL
@@ -147,15 +147,6 @@ BEGIN
         
         ,	PRIMARY KEY (TmpTransactionsId)
         , 	INDEX IX_Temp_FingerPrintAttribute_FingerPrintCode(FingerPrintCode)
-    );
-    
-	CREATE TEMPORARY TABLE Temp_RawFingerPrint(
-			TmpTransactionsId 			INT 				NOT NULL 
-		,	RawFingerPrintId			BIGINT UNSIGNED 	NULL	
-		,	FingerPrintCode				VARCHAR(64) 		NULL
-        
-        ,	PRIMARY KEY (TmpTransactionsId)	
-        , 	INDEX IX_Temp_RawFingerPrint_FingerPrintCode(FingerPrintCode)
     );
     
 	CREATE TEMPORARY TABLE Temp_BrowserInfo(	
@@ -321,7 +312,8 @@ BEGIN
     FROM Temp_Transaction;
     
     DELETE FROM Temp_FingerPrintAttribute
-    WHERE FingerPrintCode IS NULL;
+    WHERE FingerPrintCode = '' 
+		OR FingerPrintCode = 'null';
     
     /*******RawFingerPrint********************/
     INSERT IGNORE INTO FPS_FingerPrint.RawFingerPrint(FingerPrintCode, CreatedDate, ModifiedDate)
@@ -331,19 +323,16 @@ BEGIN
 	FROM Temp_FingerPrintAttribute AS tmp
     WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.RawFingerPrint fp WHERE fp.FingerPrintCode = tmp.FingerPrintCode);
     
-    INSERT INTO Temp_RawFingerPrint(TmpTransactionsId, RawFingerPrintId)
-    SELECT DISTINCT 
-			tmp.TmpTransactionsId
-		,	rfp.Id AS RawFingerPrintId
-    FROM Temp_FingerPrintAttribute AS tmp
-		INNER JOIN FPS_FingerPrint.RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode;
+	UPDATE Temp_FingerPrintAttribute AS tmp
+		INNER JOIN FPS_FingerPrint.RawFingerPrint AS rfp ON rfp.FingerPrintCode = tmp.FingerPrintCode
+	SET tmp.RawFingerPrintId = rfp.Id;
     
     UPDATE Temp_Transaction AS tmp
-		INNER JOIN Temp_RawFingerPrint AS rfp ON rfp.TmpTransactionsId = tmp.Id
-    SET tmp.RawFingerPrintId = rfp.RawFingerPrintId;
+		INNER JOIN Temp_FingerPrintAttribute AS tmpFpa ON tmpFpa.TmpTransactionsId = tmp.Id
+    SET tmp.RawFingerPrintId = tmpFpa.RawFingerPrintId;
     
-    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(FingerPrintCode, DoNotTrack, GLRenderer, Audio, Canvas, ColorDepth, ColorGamut, Contrast, Cookies, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, Languages, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, Resolution, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
-    SELECT	tmp.FingerPrintCode
+    INSERT IGNORE INTO FPS_FingerPrint.FingerPrintAttribute(RawFingerPrintId, DoNotTrack, GLRenderer, Audio, Canvas, ColorDepth, ColorGamut, Contrast, Cookies, CpuClass, DeviceMemory, DomBlockers, FontPreferencePrint, Fonts, ForcedColors, HardwareConcurrency, HDR, IndexedDB, InvertedColors, Languages, LocalStorage, Math, Monochrome, OpenDatabase, OsCpu, Platform, Plugins, ReducedMotion, Resolution, SessionStorage, Timezone, TouchSupport, Vendor, VendorFlavors, WebglPrint)
+    SELECT	tmp.RawFingerPrintId
 		,	tmp.Attribute->>'$.doNotTrack' AS DoNotTrack
 		,	tmp.Attribute->>'$.webglRenderer' AS GLRenderer
 		,	tmp.Attribute->>'$.audio'
@@ -411,8 +400,7 @@ BEGIN
 		,	tmp.Attribute->>'$.vendor'
 		,	tmp.Attribute->>'$.vendorFlavors'
 		,	tmp.Attribute->>'$.webglPrint'
-	FROM Temp_FingerPrintAttribute AS tmp
-    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.FingerPrintAttribute fpa WHERE fpa.FingerPrintCode = tmp.FingerPrintCode);
+	FROM Temp_FingerPrintAttribute AS tmp;
     
     /*******BrowserInstance********************/
 	INSERT IGNORE INTO FPS_FingerPrint.BrowserInstance(BrowserInstanceCode, BrowserFamilyCode, UserAgent, OSName, BrowserName, BrowserVersion, Platform, Accept, Encoding, Headers)
@@ -427,15 +415,16 @@ BEGIN
 		,	tmp.Encoding
 		,	tmp.Headers
 	FROM Temp_FingerPrintAttribute AS tmp
-    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInstance bis WHERE bis.BrowserInstanceCode = tmp.BrowserInstanceCode);
+    WHERE tmp.BrowserInstanceCode != ''
+		AND tmp.BrowserInstanceCode != 'null'
+		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInstance bis WHERE bis.BrowserInstanceCode = tmp.BrowserInstanceCode);
     
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInstanceAttribute(FingerPrintAttributeId, BrowserInstanceId)
-    SELECT 	fpa.Id AS FingerPrintAttributeId
+    INSERT IGNORE INTO FPS_FingerPrint.BrowserInstanceRawFingerPrint(RawFingerPrintId, BrowserInstanceId)
+    SELECT 	tmp.RawFingerPrintId
 		,	bis.Id AS BrowserInstanceId
     FROM Temp_FingerPrintAttribute AS tmp
-		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = tmp.FingerPrintCode
 		INNER JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.BrowserInstanceCode = tmp.BrowserInstanceCode
-    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInstanceAttribute bisa WHERE bisa.FingerPrintAttributeId = fpa.Id AND bisa.BrowserInstanceId = bis.Id);
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInstanceRawFingerPrint bisa WHERE bisa.RawFingerPrintId = tmp.RawFingerPrintId AND bisa.BrowserInstanceId = bis.Id);
     
     /*******BrowserInfo********************/
     INSERT IGNORE INTO Temp_BrowserInfo(TmpTransactionsId, BrowserInfoCode, OSName, BrowserName, HeadlessScore, HeadlessDetail, Flagged, BrowserInfoAttributeCode, SecChUa, SecChUaPlatform, SecChUaMobile, JsBrowserName, JsOSName)
@@ -462,7 +451,9 @@ BEGIN
 		,	tmp.JsBrowserName
 		,	tmp.JsOSName
     FROM Temp_BrowserInfo tmp
-    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfoAttribute bia WHERE bia.BrowserInfoAttributeCode = tmp.BrowserInfoAttributeCode);
+    WHERE  	tmp.BrowserInfoAttributeCode != ''
+		AND tmp.BrowserInfoAttributeCode != 'null'
+		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfoAttribute bia WHERE bia.BrowserInfoAttributeCode = tmp.BrowserInfoAttributeCode);
     
     UPDATE Temp_BrowserInfo tmp
 		LEFT JOIN FPS_FingerPrint.BrowserInfoAttribute bia ON bia.BrowserInfoAttributeCode = tmp.BrowserInfoAttributeCode
@@ -482,7 +473,9 @@ BEGIN
         ,	lv_CurrentDate AS CreatedDate
         ,	lv_CurrentDate AS ModifiedDate
     FROM Temp_BrowserInfo AS tmp
-    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfo bi WHERE bi.BrowserInfoCode = tmp.BrowserInfoCode AND bi.UserAgentId = tmp.UserAgentId AND bi.BrowserInfoAttributeId = tmp.BrowserInfoAttributeId);
+    WHERE tmp.BrowserInfoCode != ''
+		AND tmp.BrowserInfoCode != 'null'
+		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfo bi WHERE bi.BrowserInfoCode = tmp.BrowserInfoCode AND bi.UserAgentId = tmp.UserAgentId AND bi.BrowserInfoAttributeId = tmp.BrowserInfoAttributeId);
     
     UPDATE Temp_BrowserInfo AS tmp
 		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.BrowserInfoCode = tmp.BrowserInfoCode AND bi.UserAgentId = tmp.UserAgentId AND bi.BrowserInfoAttributeId = tmp.BrowserInfoAttributeId
