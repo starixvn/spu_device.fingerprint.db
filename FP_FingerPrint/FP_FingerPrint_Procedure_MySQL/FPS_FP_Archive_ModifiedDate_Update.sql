@@ -15,6 +15,7 @@ BEGIN
 
 		Revisions:
 			- 20220628@Jonathan.Doan: Created [Redmine ID: #174020]
+			- 20221213@Jonathan.Doan: Update more table [Redmine ID: #180264]
             
 		Param's Explanation (filtered by):
 
@@ -36,32 +37,57 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_Transaction;
 	CREATE TEMPORARY TABLE Temp_Transaction(
         	Id					BIGINT UNSIGNED PRIMARY KEY
-        ,	RawFingerPrintId	BIGINT UNSIGNED
-        ,	CookieId			BIGINT UNSIGNED
-        ,	DeviceId			BIGINT UNSIGNED
-        ,	TransTime			DATETIME(4)
-        , 	INDEX IX_Temp_Transaction_TransTime(TransTime)
+        ,	AccountId			BIGINT UNSIGNED DEFAULT NULL
+        ,	BrowserInfoId		BIGINT UNSIGNED DEFAULT NULL
+        ,	BrowserInstanceId	BIGINT UNSIGNED DEFAULT NULL
+        ,	RawFingerPrintId	BIGINT UNSIGNED DEFAULT NULL
+        ,	RawUserAgentId		BIGINT UNSIGNED DEFAULT NULL
+        ,	CookieId			BIGINT UNSIGNED DEFAULT NULL
+        ,	DeviceId			BIGINT UNSIGNED DEFAULT NULL
+        ,	CreatedDate			DATETIME(4)
+        , 	INDEX IX_Temp_Transaction_CreatedDate(CreatedDate)
+    );
+
+    DROP TEMPORARY TABLE IF EXISTS Temp_Account;
+	CREATE TEMPORARY TABLE Temp_Account(
+        	AccountId			BIGINT UNSIGNED PRIMARY KEY
+        ,	CreatedDate			DATETIME(4)
+    );
+
+    DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInfo;
+	CREATE TEMPORARY TABLE Temp_BrowserInfo(
+        	BrowserInfoId		BIGINT UNSIGNED PRIMARY KEY
+        ,	CreatedDate			DATETIME(4)
+    );
+
+    DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInstance;
+	CREATE TEMPORARY TABLE Temp_BrowserInstance(
+        	BrowserInstanceId	BIGINT UNSIGNED PRIMARY KEY
+        ,	CreatedDate			DATETIME(4)
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_Device;
 	CREATE TEMPORARY TABLE Temp_Device(
         	DeviceId			BIGINT UNSIGNED PRIMARY KEY
-        ,	TransTime			DATETIME(4)
-        , 	INDEX IX_Temp_Device_TransTime(TransTime)
+        ,	CreatedDate			DATETIME(4)
     );
 
-    DROP TEMPORARY TABLE IF EXISTS Temp_DeviceFingerPrint;
-	CREATE TEMPORARY TABLE Temp_DeviceFingerPrint(
-			RawFingerPrintId	BIGINT UNSIGNED PRIMARY KEY
-        ,	TransTime			DATETIME(4)
-        , 	INDEX IX_Temp_DeviceFingerPrint_TransTime(TransTime)
+    DROP TEMPORARY TABLE IF EXISTS Temp_Cookie;
+	CREATE TEMPORARY TABLE Temp_Cookie(
+        	CookieId			BIGINT UNSIGNED PRIMARY KEY
+        ,	CreatedDate			DATETIME(4)
     );
 
-    DROP TEMPORARY TABLE IF EXISTS Temp_DeviceCookie;
-	CREATE TEMPORARY TABLE Temp_DeviceCookie(
-			CookieId			BIGINT UNSIGNED PRIMARY KEY
-        ,	TransTime			DATETIME(4)
-        , 	INDEX IX_Temp_DeviceCookie_TransTime(TransTime)
+    DROP TEMPORARY TABLE IF EXISTS Temp_RawFingerPrint;
+	CREATE TEMPORARY TABLE Temp_RawFingerPrint(
+        	RawFingerPrintId	BIGINT UNSIGNED PRIMARY KEY
+        ,	CreatedDate			DATETIME(4)
+    );
+
+    DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
+	CREATE TEMPORARY TABLE Temp_RawUserAgent(
+        	RawUserAgentId		BIGINT UNSIGNED PRIMARY KEY
+        ,	CreatedDate			DATETIME(4)
     );
 
     /*******INIT DATA********************/
@@ -70,52 +96,101 @@ BEGIN
     FROM FPS_FingerPrint.Offset AS off
     WHERE off.Id = lv_offsetId;
 
-    INSERT INTO Temp_Transaction(Id, RawFingerPrintId, CookieId, DeviceId, TransTime)
+    INSERT INTO Temp_Transaction(Id, AccountId, BrowserInfoId, RawFingerPrintId, RawUserAgentId, CookieId, DeviceId, CreatedDate)
     SELECT 	Id
+        ,	AccountId
+        ,	BrowserInfoId
         ,	RawFingerPrintId
+        ,	UserAgentId AS RawUserAgentId
         ,	CookieId
         ,	DeviceId
-        ,	TransTime
+        ,	CreatedDate
 	FROM FPS_FingerPrint.TransactionCompleted
 	WHERE Id > lv_offsetValue
-		AND DeviceId IS NOT NULL
-		AND CookieId IS NOT NULL
 	LIMIT ip_BatchSize;
-
-    INSERT INTO Temp_Device(DeviceId, TransTime)
-    SELECT 	DeviceId
-		,	MAX(TransTime)
+    
+    INSERT INTO Temp_Account(AccountId, CreatedDate)
+    SELECT 	AccountId
+		,	MAX(CreatedDate)
     FROM Temp_Transaction
+    WHERE AccountId IS NOT NULL
+    GROUP BY AccountId;
+    
+    INSERT INTO Temp_BrowserInfo(BrowserInfoId, CreatedDate)
+    SELECT 	BrowserInfoId
+		,	MAX(CreatedDate)
+    FROM Temp_Transaction
+    WHERE BrowserInfoId IS NOT NULL
+    GROUP BY BrowserInfoId;
+    
+    INSERT INTO Temp_BrowserInstance(BrowserInstanceId, CreatedDate)
+    SELECT 	bifp.BrowserInstanceId
+		,	MAX(tmp.CreatedDate)
+    FROM Temp_Transaction AS tmp
+		INNER JOIN FPS_FingerPrint.BrowserInstanceRawFingerPrint AS bifp ON bifp.RawFingerPrintId = tmp.RawFingerPrintId
+    WHERE bifp.BrowserInstanceId IS NOT NULL
+    GROUP BY bifp.BrowserInstanceId;
+    
+    INSERT INTO Temp_Device(DeviceId, CreatedDate)
+    SELECT 	DeviceId
+		,	MAX(CreatedDate)
+    FROM Temp_Transaction
+    WHERE DeviceId IS NOT NULL
     GROUP BY DeviceId;
 
-    INSERT INTO Temp_DeviceFingerPrint(RawFingerPrintId, TransTime)
-    SELECT 	RawFingerPrintId
-		,	MAX(TransTime)
+    INSERT INTO Temp_Cookie(CookieId, CreatedDate)
+    SELECT 	CookieId
+		,	MAX(CreatedDate)
     FROM Temp_Transaction
+    WHERE CookieId IS NOT NULL
+    GROUP BY CookieId;
+
+    INSERT INTO Temp_RawFingerPrint(RawFingerPrintId, CreatedDate)
+    SELECT 	RawFingerPrintId
+		,	MAX(CreatedDate)
+    FROM Temp_Transaction
+    WHERE RawFingerPrintId IS NOT NULL
     GROUP BY RawFingerPrintId;
 
-    INSERT INTO Temp_DeviceCookie(CookieId, TransTime)
-    SELECT 	CookieId
-		,	MAX(TransTime)
+    INSERT INTO Temp_RawUserAgent(RawUserAgentId, CreatedDate)
+    SELECT 	RawUserAgentId
+		,	MAX(CreatedDate)
     FROM Temp_Transaction
-    GROUP BY CookieId;
+    WHERE RawUserAgentId IS NOT NULL
+    GROUP BY RawUserAgentId;
     
     SELECT MAX(Id)
     INTO lv_maxOffsetValue
     FROM Temp_Transaction;
 
     /*******UPDATE DATA********************/
-	UPDATE FPS_FingerPrint.Device AS dv
-		INNER JOIN Temp_Device AS tmp ON dv.Id = tmp.DeviceId
-	SET dv.ModifiedDate = tmp.TransTime;
-
-	UPDATE FPS_FingerPrint.DeviceFingerPrint AS df
-		INNER JOIN Temp_DeviceFingerPrint AS tmp ON df.RawFingerPrintId = tmp.RawFingerPrintId
-	SET df.ModifiedDate = tmp.TransTime;
-
-	UPDATE FPS_FingerPrint.DeviceCookie AS dc
-		INNER JOIN Temp_DeviceCookie AS tmp ON dc.CookieId = tmp.CookieId
-	SET dc.ModifiedDate = tmp.TransTime;
+	UPDATE FPS_FingerPrint.Account AS main
+		INNER JOIN Temp_Account AS tmp ON main.Id = tmp.AccountId
+	SET main.ModifiedDate = tmp.CreatedDate;
+    
+	UPDATE FPS_FingerPrint.BrowserInfo AS main
+		INNER JOIN Temp_BrowserInfo AS tmp ON main.Id = tmp.BrowserInfoId
+	SET main.ModifiedDate = tmp.CreatedDate;
+    
+	UPDATE FPS_FingerPrint.BrowserInstance AS main
+		INNER JOIN Temp_BrowserInstance AS tmp ON main.Id = tmp.BrowserInstanceId
+	SET main.ModifiedDate = tmp.CreatedDate;
+    
+	UPDATE FPS_FingerPrint.Device AS main
+		INNER JOIN Temp_Device AS tmp ON main.Id = tmp.DeviceId
+	SET main.ModifiedDate = tmp.CreatedDate;
+    
+	UPDATE FPS_FingerPrint.Cookie AS main
+		INNER JOIN Temp_Cookie AS tmp ON main.Id = tmp.CookieId
+	SET main.ModifiedDate = tmp.CreatedDate;
+    
+	UPDATE FPS_FingerPrint.RawFingerPrint AS main
+		INNER JOIN Temp_RawFingerPrint AS tmp ON main.Id = tmp.RawFingerPrintId
+	SET main.ModifiedDate = tmp.CreatedDate;
+    
+	UPDATE FPS_FingerPrint.RawUserAgent AS main
+		INNER JOIN Temp_RawUserAgent AS tmp ON main.Id = tmp.RawUserAgentId
+	SET main.ModifiedDate = tmp.CreatedDate;
     
     IF lv_maxOffsetValue IS NOT NULL
     THEN

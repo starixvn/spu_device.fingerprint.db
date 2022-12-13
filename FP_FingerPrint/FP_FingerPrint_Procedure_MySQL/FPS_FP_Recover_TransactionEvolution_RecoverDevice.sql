@@ -122,45 +122,41 @@ BEGIN
 		, 	tmp.RecoverType
 	FROM Temp_TransactionDevice AS tmp;
 
-	INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(RawFingerPrintId, DeviceId, CreatedDate, ModifiedDate)
-	WITH cte (RawFingerPrintId, DeviceId, TransTime) AS
+	INSERT IGNORE INTO FPS_FingerPrint.DeviceFingerPrint(RawFingerPrintId, DeviceId, CreatedDate)
+	WITH cte (RawFingerPrintId, DeviceId) AS
 	(
-		SELECT 	tmp.RawFingerPrintId
+		SELECT 	DISTINCT
+				tmp.RawFingerPrintId
 			,	tmp.DeviceId
-			,	MAX(tmp.TransTime) AS TransTime
 		FROM Temp_TransactionDevice AS tmp
-		GROUP BY tmp.RawFingerPrintId, tmp.DeviceId
 	)
 	SELECT 	cte.RawFingerPrintId
 		,	cte.DeviceId
 		,	lv_CurrentDate
-		,	cte.TransTime
 	FROM cte
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = cte.RawFingerPrintId);
 	
-	INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieId, DeviceId, CreatedDate, ModifiedDate)
-	WITH cte (CookieId, DeviceId, TransTime) AS
+	INSERT IGNORE INTO FPS_FingerPrint.DeviceCookie(CookieId, DeviceId, CreatedDate)
+	WITH cte (CookieId, DeviceId) AS
 	(
-		SELECT 	tmp.CookieId
+		SELECT 	DISTINCT
+				tmp.CookieId
 			,	tmp.DeviceId
-			,	MAX(tmp.TransTime) AS TransTime
 		FROM Temp_TransactionDevice AS tmp
 		GROUP BY tmp.CookieId, tmp.DeviceId
 	)
 	SELECT 	cte.CookieId
 		,	cte.DeviceId
 		,	lv_CurrentDate
-		,	cte.TransTime
 	FROM cte
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = cte.CookieId);
 	
 	/*****AccountFingerprint******************/
-	INSERT INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
+	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
 	SELECT	AccountId
 		,	RawFingerPrintId
 		,	lv_CurrentDate
-	FROM Temp_TransactionDevice
-	ON DUPLICATE KEY UPDATE ModifiedDate = lv_CurrentDate;
+	FROM Temp_TransactionDevice;
     
 	UPDATE Temp_TransactionDevice AS tmp
 		INNER JOIN FPS_FingerPrint.AccountFingerprint AS af ON tmp.AccountId = af.AccountId AND tmp.RecoverFingerPrintId = af.RawFingerPrintId 

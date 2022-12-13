@@ -6,15 +6,17 @@
 */
 USE FPS_FingerPrint;
 
-DROP TABLE FPS_FingerPrint.ServerTransaction;
-DROP TABLE FPS_FingerPrint.ServerTransactionCompleted;
-DROP TABLE FPS_FingerPrint.ServerTransactionDailySum;
-DROP TABLE FPS_FingerPrint.ServerTransactionN;
-DROP TABLE FPS_FingerPrint.ClientTransaction;
-DROP TABLE FPS_FingerPrint.ClientTransactionCompleted;
-DROP TABLE FPS_FingerPrint.ClientTransactionDailySum;
-DROP TABLE FPS_FingerPrint.ClientTransaction_Logs;
-DROP TABLE FPS_FingerPrint.BrowserInstanceAttribute;
+DROP TABLE IF EXISTS FPS_FingerPrint.ServerTransaction;
+DROP TABLE IF EXISTS FPS_FingerPrint.ServerTransactionCompleted;
+DROP TABLE IF EXISTS FPS_FingerPrint.ServerTransactionDailySum;
+DROP TABLE IF EXISTS FPS_FingerPrint.ServerTransactionN;
+DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransaction;
+DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransactionCompleted;
+DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransactionDailySum;
+DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransaction_Logs;
+DROP TABLE IF EXISTS FPS_FingerPrint.BrowserInstanceAttribute;
+DROP TABLE IF EXISTS FPS_FingerPrint.Addon;
+DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransaction_Logs;
 
 TRUNCATE TABLE `FPS_FingerPrint`.`Transaction`;
 TRUNCATE TABLE `FPS_FingerPrint`.`TransactionCompleted`;
@@ -22,7 +24,6 @@ TRUNCATE TABLE `FPS_FingerPrint`.`TransactionDailySum`;
 TRUNCATE TABLE `FPS_FingerPrint`.`TransactionDevice`;
 TRUNCATE TABLE `FPS_FingerPrint`.`TransactionEvolution`;
 TRUNCATE TABLE `FPS_FingerPrint`.`TransactionEvolutionCompleted`;
-TRUNCATE TABLE `FPS_FingerPrint`.`TransactionMonthlySum`;
 TRUNCATE TABLE `FPS_FingerPrint`.`RecoverDailySum`;
 TRUNCATE TABLE `FPS_FingerPrint`.`RawUserAgent`;
 TRUNCATE TABLE `FPS_FingerPrint`.`RawFingerPrint`;
@@ -53,7 +54,9 @@ ALTER TABLE `FPS_FingerPrint`.`RawFingerPrint`
 CHANGE COLUMN `FingerPrintCode` `FingerPrintCode` VARCHAR(64) NOT NULL ;
 
 ALTER TABLE `FPS_FingerPrint`.`BrowserInstance` 
-CHANGE COLUMN `BrowserInstanceCode` `BrowserInstanceCode` VARCHAR(64) NOT NULL COMMENT 'hash ALL' ;
+CHANGE COLUMN `BrowserInstanceCode` `BrowserInstanceCode` VARCHAR(64) NOT NULL COMMENT 'hash ALL',
+ADD COLUMN `CreatedDate` DATETIME(4) NULL,
+ADD COLUMN `ModifiedDate` DATETIME(4) NULL;
 
 CREATE TABLE `BrowserInstanceRawFingerPrint` (
   `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -79,6 +82,12 @@ DROP PROCEDURE IF EXISTS `FPS_FP_Summary_ClientTransaction_Daily`;
 DROP PROCEDURE IF EXISTS `FPS_FP_Summary_ClientServerTransaction_Monthly`;
 DROP PROCEDURE IF EXISTS `FPS_FP_Monitor_ServerTransactionDailySum_Insert`;
 DROP PROCEDURE IF EXISTS `FPS_FP_Monitor_ClientTransactionDailySum_Insert`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_ClientTransaction_Logs_Insert`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_BrowserInfo_Insert`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_BrowserInfo_Get`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_BrowserInfo_Update`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_BrowserInfoFlaggedDCS_Get`;
+DROP PROCEDURE IF EXISTS `FPS_FP_Transform_BrowserInfoFlaggedDCS_Update`;
 
 
 ALTER TABLE `FPS_FingerPrint`.`Transaction` 
@@ -113,4 +122,15 @@ ALTER TABLE `FPS_FingerPrint`.`BrowserInfo`
 ADD COLUMN `BrowserInfoCode` VARCHAR(64) NULL,
 ADD COLUMN `Flagged` SMALLINT NULL,
 ADD UNIQUE KEY `UX_BrowserInfo_BrowserInfoCode_UAId_BIAId` (`BrowserInfoCode`,`UserAgentId`,`BrowserInfoAttributeId`);
+
+
+ALTER TABLE `FPS_FingerPrint`.`AccountFingerprint` 
+DROP COLUMN `ModifiedDate`;
+
+ALTER TABLE `FPS_FingerPrint`.`DeviceCookie` 
+DROP COLUMN `ModifiedDate`;
+
+ALTER TABLE `FPS_FingerPrint`.`DeviceFingerPrint` 
+DROP COLUMN `ModifiedDate`;
+
 
