@@ -49,6 +49,7 @@ BEGIN
 			, 	LoginName				VARCHAR(100)
 			, 	SubscriberId			INT
 			, 	RawFingerPrintId		BIGINT UNSIGNED
+			, 	BrowserInstanceId		BIGINT UNSIGNED
 			, 	CookieId				BIGINT UNSIGNED
 			, 	DeviceId				BIGINT UNSIGNED
 			, 	RecoverFingerPrintId	BIGINT UNSIGNED
@@ -61,7 +62,6 @@ BEGIN
 			, 	CreatedDate				DATETIME
 			, 	TransKey				VARCHAR(200)
 			, 	RecoverType				TINYINT DEFAULT 0
-			, 	BrowserInstanceId		BIGINT UNSIGNED
     );
     
 	INSERT IGNORE INTO Temp_Recover(Id, RecoverFingerPrintId)
@@ -79,7 +79,7 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmp.RecoverFingerPrintId = df.RawFingerPrintId
 	SET tmp.DeviceId = df.DeviceId;
 		   
-	INSERT IGNORE INTO Temp_TransactionDevice(Id, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType, RecoverFingerPrintId)
+	INSERT IGNORE INTO Temp_TransactionDevice(Id, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType, RecoverFingerPrintId)
 	SELECT  te.Id
 		,	te.TransTime
 		, 	te.CustId
@@ -88,6 +88,7 @@ BEGIN
 		, 	te.LoginName
 		, 	te.SubscriberId
 		, 	te.RawFingerPrintId
+		, 	te.BrowserInstanceId
 		, 	te.CookieId
 		, 	tmp.DeviceId
 		, 	te.ClientIP
@@ -102,7 +103,7 @@ BEGIN
 	FROM Temp_Recover AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 		   
-	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
 	SELECT  tmp.TransTime
 		, 	tmp.CustId
 		, 	tmp.SubAccId
@@ -110,6 +111,7 @@ BEGIN
 		, 	tmp.LoginName
 		, 	tmp.SubscriberId
 		, 	tmp.RawFingerPrintId
+		, 	tmp.BrowserInstanceId
 		, 	tmp.CookieId
 		, 	tmp.DeviceId
 		, 	tmp.ClientIP

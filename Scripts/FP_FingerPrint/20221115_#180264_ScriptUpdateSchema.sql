@@ -93,39 +93,39 @@ DROP PROCEDURE IF EXISTS `FPS_FP_Transform_BrowserInfoFlaggedDCS_Update`;
 ALTER TABLE `FPS_FingerPrint`.`Transaction` 
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
-DROP COLUMN `AddonId`;
+DROP COLUMN `AddonId`,
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
+
 
 ALTER TABLE `FPS_FingerPrint`.`TransactionDevice` 
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
-DROP COLUMN `AddonId`;
+DROP COLUMN `AddonId`,
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
 
 ALTER TABLE `FPS_FingerPrint`.`TransactionEvolution` 
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
-DROP COLUMN `AddonId`;
+DROP COLUMN `AddonId`,
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
 
 ALTER TABLE `FPS_FingerPrint`.`TransactionCompleted` 
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
-DROP COLUMN `AddonId`;
+DROP COLUMN `AddonId`,
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
 
 ALTER TABLE `FPS_FingerPrint`.`BrowserInfo` 
 DROP COLUMN `SessionKey`,
-DROP INDEX `UX_BrowserInfo_SessionKey` ;
-
-ALTER TABLE `FPS_FingerPrint`.`BrowserInfo` 
+DROP INDEX `UX_BrowserInfo_SessionKey`,
 CHANGE COLUMN `HeadlessScore` `HeadlessDetail` LONGTEXT NULL DEFAULT NULL,
-ADD COLUMN `HeadlessScore` DECIMAL(1) NULL;
+ADD COLUMN `HeadlessScore` DECIMAL(3,1) NULL;
 
 ALTER TABLE `FPS_FingerPrint`.`BrowserInfo` 
 ADD COLUMN `BrowserInfoCode` VARCHAR(64) NULL,
 ADD COLUMN `Flagged` SMALLINT NULL,
 ADD UNIQUE KEY `UX_BrowserInfo_BrowserInfoCode_UAId_BIAId` (`BrowserInfoCode`,`UserAgentId`,`BrowserInfoAttributeId`);
 
-
-ALTER TABLE `FPS_FingerPrint`.`AccountFingerprint` 
-DROP COLUMN `ModifiedDate`;
 
 ALTER TABLE `FPS_FingerPrint`.`DeviceCookie` 
 DROP COLUMN `ModifiedDate`;

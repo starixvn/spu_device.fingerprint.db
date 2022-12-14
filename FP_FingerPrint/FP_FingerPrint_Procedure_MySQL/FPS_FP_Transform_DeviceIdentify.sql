@@ -410,7 +410,7 @@ BEGIN
     FROM Temp_InputTrans;
 
 	/*****TransactionDevice******************/
-	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
 	SELECT  ts.TransTime
 		, 	ts.CustId
 		, 	ts.SubAccId
@@ -418,6 +418,7 @@ BEGIN
 		, 	ts.LoginName
 		, 	ts.SubscriberId
 		, 	ts.RawFingerPrintId
+		, 	ts.BrowserInstanceId
 		, 	ts.CookieId
 		, 	tmpIt.DeviceId
 		, 	ts.ClientIP

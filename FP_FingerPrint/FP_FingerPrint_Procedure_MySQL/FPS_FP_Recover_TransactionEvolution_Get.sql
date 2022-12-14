@@ -30,6 +30,7 @@ BEGIN
     CREATE TEMPORARY TABLE Temp_TransactionEvolution(
 				Id 						BIGINT UNSIGNED NOT NULL PRIMARY KEY
 			, 	RawFingerPrintId		BIGINT UNSIGNED
+			, 	BrowserInstanceId		BIGINT UNSIGNED
 			, 	CookieId				BIGINT UNSIGNED
 			, 	TransTime				DATETIME(4)
 			, 	AccountId				BIGINT UNSIGNED
@@ -40,9 +41,10 @@ BEGIN
 			, 	FPIds					LONGTEXT
     );
     
-    INSERT IGNORE INTO Temp_TransactionEvolution(Id, RawFingerPrintId, CookieId, TransTime, AccountId)
+    INSERT IGNORE INTO Temp_TransactionEvolution(Id, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, AccountId)
     SELECT 	Id
 		,	RawFingerPrintId
+		,	BrowserInstanceId
 		,	CookieId
 		,	TransTime
 		,	AccountId
@@ -86,7 +88,7 @@ BEGIN
 		INNER JOIN Temp_GroupFP AS tmpG ON tmpG.Id = tmp.Id
 		LEFT JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.RawFingerPrintId
 		LEFT JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.RawFingerPrintId = fp.Id
-		LEFT JOIN FPS_FingerPrint.BrowserInstanceRawFingerPrint AS bisa ON bisa.RawFingerPrintId = fp.Id
+		LEFT JOIN FPS_FingerPrint.BrowserInstanceRawFingerPrint AS bisa ON bisa.RawFingerPrintId = fp.Id AND bisa.BrowserInstanceId = tmp.BrowserInstanceId
 		LEFT JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.Id = bisa.BrowserInstanceId;
 
 END$$

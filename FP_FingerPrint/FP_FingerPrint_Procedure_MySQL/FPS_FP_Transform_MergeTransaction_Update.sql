@@ -60,6 +60,7 @@ BEGIN
 		,	LoginName 			VARCHAR(100)
 		,	SubscriberId 		INT UNSIGNED
 		,	RawFingerPrintId 	BIGINT UNSIGNED
+		,	BrowserInstanceId 	BIGINT UNSIGNED
 		,	CookieId 			BIGINT UNSIGNED
 		,	DeviceId 			BIGINT UNSIGNED
 		,	TransTime 			DATETIME(4)
@@ -76,7 +77,7 @@ BEGIN
 		,	RecoverType 		TINYINT
     );
     
-    INSERT IGNORE INTO Temp_TransactionsDevice(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsDevice(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
     SELECT  td.Id
 		, 	td.CustId
 		, 	td.SubAccId
@@ -84,6 +85,7 @@ BEGIN
 		, 	td.LoginName
 		, 	td.SubscriberId
 		, 	td.RawFingerPrintId
+		, 	td.BrowserInstanceId
 		, 	td.CookieId
 		, 	td.DeviceId
 		, 	td.TransTime
@@ -109,6 +111,7 @@ BEGIN
 		,	LoginName 			VARCHAR(100)
 		,	SubscriberId 		INT UNSIGNED
 		,	RawFingerPrintId 	BIGINT UNSIGNED
+		,	BrowserInstanceId 	BIGINT UNSIGNED
 		,	CookieId 			BIGINT UNSIGNED
 		,	DeviceId 			BIGINT UNSIGNED
 		,	TransTime 			DATETIME(4)
@@ -128,7 +131,7 @@ BEGIN
     );
     
     /*******UPDATE FLAGGED********************/
-    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
     SELECT  tmp.Id
 		, 	tmp.CustId
 		, 	tmp.SubAccId
@@ -136,6 +139,7 @@ BEGIN
 		, 	tmp.LoginName
 		, 	tmp.SubscriberId
 		, 	tmp.RawFingerPrintId
+		, 	tmp.BrowserInstanceId
 		, 	tmp.CookieId
 		, 	tmp.DeviceId
 		, 	tmp.TransTime
@@ -268,7 +272,7 @@ BEGIN
 	   ,	tmp.TransKey
 	FROM Temp_Transactions2 AS tmp;
       
-   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
+   INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
    SELECT	transF.Id
 		,	transF.CustId
 		,	transF.SubAccId
@@ -276,6 +280,7 @@ BEGIN
 		,	transF.LoginName
 		,	transF.SubscriberId
 		,	transF.RawFingerPrintId
+		,	transF.BrowserInstanceId
 		,	transF.CookieId
 		,	transF.DeviceId
 		,	transF.TransTime
