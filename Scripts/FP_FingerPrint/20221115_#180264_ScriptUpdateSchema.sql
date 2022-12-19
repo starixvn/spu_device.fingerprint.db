@@ -6,6 +6,7 @@
 */
 USE FPS_FingerPrint;
 
+DROP TABLE IF EXISTS FPS_FingerPrint.BrowserInfo;
 DROP TABLE IF EXISTS FPS_FingerPrint.ServerTransaction;
 DROP TABLE IF EXISTS FPS_FingerPrint.ServerTransactionCompleted;
 DROP TABLE IF EXISTS FPS_FingerPrint.ServerTransactionDailySum;
@@ -15,6 +16,7 @@ DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransactionCompleted;
 DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransactionDailySum;
 DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransaction_Logs;
 DROP TABLE IF EXISTS FPS_FingerPrint.BrowserInstanceAttribute;
+DROP TABLE IF EXISTS FPS_FingerPrint.TransactionEvolutionCompleted;
 DROP TABLE IF EXISTS FPS_FingerPrint.Addon;
 DROP TABLE IF EXISTS FPS_FingerPrint.ClientTransaction_Logs;
 
@@ -23,7 +25,6 @@ TRUNCATE TABLE `FPS_FingerPrint`.`TransactionCompleted`;
 TRUNCATE TABLE `FPS_FingerPrint`.`TransactionDailySum`;
 TRUNCATE TABLE `FPS_FingerPrint`.`TransactionDevice`;
 TRUNCATE TABLE `FPS_FingerPrint`.`TransactionEvolution`;
-TRUNCATE TABLE `FPS_FingerPrint`.`TransactionEvolutionCompleted`;
 TRUNCATE TABLE `FPS_FingerPrint`.`RecoverDailySum`;
 TRUNCATE TABLE `FPS_FingerPrint`.`RawUserAgent`;
 TRUNCATE TABLE `FPS_FingerPrint`.`RawFingerPrint`;
@@ -43,10 +44,6 @@ CHANGE COLUMN `FingerPrintCode` `RawFingerPrintId` BIGINT UNSIGNED NOT NULL ,
 DROP INDEX `UX_FingerPrintAttribute_FingerPrintCode` ,
 ADD UNIQUE INDEX `UX_FingerPrintAttribute_RawFingerPrintId` (`RawFingerPrintId`);
 
-ALTER TABLE `FPS_FingerPrint`.`FingerPrintAttribute` 
-CHANGE COLUMN `FingerPrintCode` `RawFingerPrintId` BIGINT UNSIGNED NOT NULL ;
-
-
 ALTER TABLE `FPS_FingerPrint`.`Cookie` 
 CHANGE COLUMN `CookieCode` `CookieCode` VARCHAR(64) NOT NULL ;
 
@@ -64,6 +61,33 @@ CREATE TABLE `BrowserInstanceRawFingerPrint` (
   `BrowserInstanceId` bigint unsigned NOT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `UX_BrowserInstanceRawFingerPrint_FPAId_BrowserInstanceId` (`RawFingerPrintId`,`BrowserInstanceId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `TransactionEvolutionCompleted` (
+  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `RawFingerPrintId` bigint unsigned NOT NULL,
+  `RecoverFingerPrintId` bigint unsigned NOT NULL,
+  `DeviceId` bigint unsigned NOT NULL,
+  `CreatedDate` datetime DEFAULT NULL,
+  `ModifiedDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  KEY `IX_TransactionEvolutionCompleted_DeviceId` (`DeviceId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `BrowserInfo` (
+  `Id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `UserAgentId` bigint unsigned DEFAULT NULL,
+  `BrowserInfoAttributeId` bigint unsigned DEFAULT NULL,
+  `HeadlessDetail` longtext,
+  `BrowserName` varchar(100) DEFAULT NULL,
+  `OSName` varchar(100) DEFAULT NULL,
+  `CreatedDate` datetime(4) DEFAULT NULL,
+  `ModifiedDate` datetime(4) DEFAULT NULL,
+  `HeadlessScore` decimal(3,1) DEFAULT NULL,
+  `BrowserInfoCode` varchar(64) DEFAULT NULL,
+  `Flagged` smallint DEFAULT NULL,
+  PRIMARY KEY (`Id`),
+  UNIQUE KEY `UX_BrowserInfo_BrowserInfoCode_UAId_BIAId` (`BrowserInfoCode`,`UserAgentId`,`BrowserInfoAttributeId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 SET sql_safe_updates = 0;
@@ -96,41 +120,30 @@ DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
 ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
 
-
 ALTER TABLE `FPS_FingerPrint`.`TransactionDevice` 
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
 ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
 
-ALTER TABLE `FPS_FingerPrint`.`TransactionEvolution` 
+ALTER TABLE `FPS_FingerPrint`.`TransactionEvolution`
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
 ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
 
-ALTER TABLE `FPS_FingerPrint`.`TransactionCompleted` 
+ALTER TABLE `FPS_FingerPrint`.`TransactionCompleted`
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
 ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
 
-ALTER TABLE `FPS_FingerPrint`.`BrowserInfo` 
-DROP COLUMN `SessionKey`,
-DROP INDEX `UX_BrowserInfo_SessionKey`,
-CHANGE COLUMN `HeadlessScore` `HeadlessDetail` LONGTEXT NULL DEFAULT NULL,
-ADD COLUMN `HeadlessScore` DECIMAL(3,1) NULL;
-
-ALTER TABLE `FPS_FingerPrint`.`BrowserInfo` 
-ADD COLUMN `BrowserInfoCode` VARCHAR(64) NULL,
-ADD COLUMN `Flagged` SMALLINT NULL,
-ADD UNIQUE KEY `UX_BrowserInfo_BrowserInfoCode_UAId_BIAId` (`BrowserInfoCode`,`UserAgentId`,`BrowserInfoAttributeId`);
 
 
-ALTER TABLE `FPS_FingerPrint`.`DeviceCookie` 
+ALTER TABLE `FPS_FingerPrint`.`DeviceCookie`
 DROP COLUMN `ModifiedDate`;
 
-ALTER TABLE `FPS_FingerPrint`.`DeviceFingerPrint` 
+ALTER TABLE `FPS_FingerPrint`.`DeviceFingerPrint`
 DROP COLUMN `ModifiedDate`;
 
 

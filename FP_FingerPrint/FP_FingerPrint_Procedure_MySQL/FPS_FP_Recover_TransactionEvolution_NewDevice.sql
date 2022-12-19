@@ -107,13 +107,6 @@ BEGIN
 		,	tmp.BrowserInfoId
 	FROM Temp_Transaction AS tmp;
     
-    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, AccountId, IsEvolution, CreatedDate)
-    SELECT	Id
-		,	AccountId
-		,	0 AS IsEvolution
-		,	lv_CurrentDate AS CreatedDate
-    FROM Temp_Transaction;
-    
 	DELETE te
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;

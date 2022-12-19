@@ -160,7 +160,7 @@ BEGIN
 		,	UserAgentId 				BIGINT UNSIGNED 	NULL
 		,	OSName						VARCHAR(50)	 		NULL
 		,	BrowserName					VARCHAR(100)		NULL
-		,	HeadlessScore				DECIMAL(1)			NULL
+		,	HeadlessScore				DECIMAL(3,1)		NULL
 		,	HeadlessDetail				LONGTEXT			NULL
 		,	Flagged						SMALLINT			NULL
 		,	BrowserInfoCode				VARCHAR(64)			NULL
@@ -396,7 +396,8 @@ BEGIN
 		,	tmp.Attribute->>'$.vendor'
 		,	tmp.Attribute->>'$.vendorFlavors'
 		,	tmp.Attribute->>'$.webglPrint'
-	FROM Temp_FingerPrintAttribute AS tmp;
+	FROM Temp_FingerPrintAttribute AS tmp
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.FingerPrintAttribute fpa WHERE fpa.RawFingerPrintId = tmp.RawFingerPrintId);
     
     /*******BrowserInstance********************/
 	INSERT IGNORE INTO FPS_FingerPrint.BrowserInstance(BrowserInstanceCode, BrowserFamilyCode, UserAgent, OSName, BrowserName, BrowserVersion, Platform, Accept, Encoding, Headers, CreatedDate)

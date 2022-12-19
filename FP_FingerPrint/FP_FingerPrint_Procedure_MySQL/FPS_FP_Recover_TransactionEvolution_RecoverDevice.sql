@@ -165,10 +165,11 @@ BEGIN
 	SET af.IsEvolution = 1,
 		af.ModifiedDate = lv_CurrentDate;
     
-    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, AccountId, IsEvolution, CreatedDate)
+    INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, RawFingerPrintId, RecoverFingerPrintId, DeviceId, CreatedDate)
     SELECT	Id
-		,	AccountId
-		,	1 AS IsEvolution
+		,	RawFingerPrintId
+		,	RecoverFingerPrintId
+		,	DeviceId
 		,	lv_CurrentDate AS CreatedDate
     FROM Temp_TransactionDevice;
 
