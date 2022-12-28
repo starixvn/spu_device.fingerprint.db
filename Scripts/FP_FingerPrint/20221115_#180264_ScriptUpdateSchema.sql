@@ -60,7 +60,7 @@ CREATE TABLE `BrowserInstanceRawFingerPrint` (
   `RawFingerPrintId` bigint unsigned NOT NULL,
   `BrowserInstanceId` bigint unsigned NOT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `UX_BrowserInstanceRawFingerPrint_FPAId_BrowserInstanceId` (`RawFingerPrintId`,`BrowserInstanceId`)
+  UNIQUE KEY `UX_BrowserInstanceRawFingerPrint_FPId_BrowserInstanceId` (`RawFingerPrintId`,`BrowserInstanceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `TransactionEvolutionCompleted` (
@@ -87,7 +87,7 @@ CREATE TABLE `BrowserInfo` (
   `BrowserInfoCode` varchar(64) DEFAULT NULL,
   `Flagged` smallint DEFAULT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `UX_BrowserInfo_BrowserInfoCode_UAId_BIAId` (`BrowserInfoCode`,`UserAgentId`,`BrowserInfoAttributeId`)
+  UNIQUE KEY `UX_BrowserInfo_UserAgentId_BIAId_BICode` (`UserAgentId`,`BrowserInfoAttributeId`,`BrowserInfoCode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 SET sql_safe_updates = 0;
@@ -118,27 +118,29 @@ ALTER TABLE `FPS_FingerPrint`.`Transaction`
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
-ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`,
+ADD INDEX `IX_Transaction_CustId` (`CustId`);
 
 ALTER TABLE `FPS_FingerPrint`.`TransactionDevice` 
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
-ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`,
+ADD INDEX `IX_TransactionDevice_CustId` (`CustId`);
 
 ALTER TABLE `FPS_FingerPrint`.`TransactionEvolution`
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
-ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`,
+ADD INDEX `IX_TransactionEvolution_CustId` (`CustId`);
 
 ALTER TABLE `FPS_FingerPrint`.`TransactionCompleted`
 DROP COLUMN `ClientTransId`,
 DROP COLUMN `ServerTransId`,
 DROP COLUMN `AddonId`,
-ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`;
-
-
+ADD COLUMN `BrowserInstanceId` BIGINT UNSIGNED NULL AFTER `RawFingerPrintId`,
+ADD INDEX `IX_TransactionCompleted_CustId` (`CustId`);
 
 ALTER TABLE `FPS_FingerPrint`.`DeviceCookie`
 DROP COLUMN `ModifiedDate`;
