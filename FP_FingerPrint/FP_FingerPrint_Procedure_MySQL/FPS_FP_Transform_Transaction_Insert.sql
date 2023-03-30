@@ -459,7 +459,7 @@ BEGIN
 		,	tmp.JsBrowserName
 		,	tmp.JsOSName
     FROM Temp_BrowserInfo tmp
-    WHERE  	tmp.BrowserInfoAttributeCode != ''
+    WHERE tmp.BrowserInfoAttributeCode != ''
 		AND tmp.BrowserInfoAttributeCode != 'null'
 		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfoAttribute bia WHERE bia.BrowserInfoAttributeCode = tmp.BrowserInfoAttributeCode);
     
@@ -490,7 +490,7 @@ BEGIN
     
     UPDATE Temp_Transaction AS tmp
 		INNER JOIN Temp_BrowserInfo AS tmpBi ON tmpBi.TmpTransactionsId = tmp.Id
-    SET 	tmp.BrowserInfoId = tmpBi.BrowserInfoId;
+    SET tmp.BrowserInfoId = tmpBi.BrowserInfoId;
     
     /*******Evolution********************/
     INSERT INTO Temp_Evolution(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, TransKey, BrowserInfoId)
@@ -541,7 +541,7 @@ BEGIN
         
 		DELETE tmp
 		FROM Temp_Transaction AS tmp
-        INNER JOIN Temp_Evolution AS tmpE ON tmpE.Id = tmp.Id;
+			INNER JOIN Temp_Evolution AS tmpE ON tmpE.Id = tmp.Id;
     END IF;
     
     /*******Transaction********************/

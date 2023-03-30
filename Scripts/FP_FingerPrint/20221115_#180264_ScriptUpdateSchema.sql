@@ -69,7 +69,6 @@ CREATE TABLE `TransactionEvolutionCompleted` (
   `RecoverFingerPrintId` bigint unsigned NOT NULL,
   `DeviceId` bigint unsigned NOT NULL,
   `CreatedDate` datetime DEFAULT NULL,
-  `ModifiedDate` datetime DEFAULT NULL,
   PRIMARY KEY (`Id`),
   KEY `IX_TransactionEvolutionCompleted_DeviceId` (`DeviceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
