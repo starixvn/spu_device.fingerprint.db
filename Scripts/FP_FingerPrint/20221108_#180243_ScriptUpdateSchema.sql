@@ -6,6 +6,8 @@
 */
 USE FPS_FingerPrint;
 
+DROP TABLE IF EXISTS `FPS_FingerPrint`.`BrowserInstanceAttribute`;
+
 CREATE TABLE `BrowserInstanceAttribute` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `FingerPrintAttributeId` BIGINT UNSIGNED NOT NULL,
@@ -13,6 +15,8 @@ CREATE TABLE `BrowserInstanceAttribute` (
   PRIMARY KEY (`Id`),
   UNIQUE KEY `UX_BrowserInstanceAttribute_FPAId_BrowserInstanceId` (`FingerPrintAttributeId`, `BrowserInstanceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP TABLE IF EXISTS `FPS_FingerPrint`.`BrowserInstance`;
 
 CREATE TABLE `BrowserInstance` (
   `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

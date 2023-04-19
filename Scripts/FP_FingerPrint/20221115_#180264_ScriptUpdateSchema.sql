@@ -38,6 +38,7 @@ TRUNCATE TABLE `FPS_FingerPrint`.`BrowserInfoCompleted`;
 TRUNCATE TABLE `FPS_FingerPrint`.`BrowserInfoAttribute`;
 TRUNCATE TABLE `FPS_FingerPrint`.`BrowserInfo`;
 TRUNCATE TABLE `FPS_FingerPrint`.`AccountFingerprint`;
+TRUNCATE TABLE `FPS_FingerPrint`.`Account`;
 
 ALTER TABLE `FPS_FingerPrint`.`FingerPrintAttribute` 
 CHANGE COLUMN `FingerPrintCode` `RawFingerPrintId` BIGINT UNSIGNED NOT NULL ,
