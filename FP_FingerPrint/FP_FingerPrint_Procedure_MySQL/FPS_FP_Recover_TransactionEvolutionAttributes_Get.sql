@@ -4,7 +4,7 @@ DELIMITER $$
 
 CREATE DEFINER=`fpsOwner`@`%` PROCEDURE `FPS_FP_Recover_TransactionEvolutionAttributes_Get`(
 		ip_FingerPrintIds 		LONGTEXT
-	,	ip_BrowserInstanceCode	VARCHAR(64)
+	,	ip_BrowserFamilyCode	VARCHAR(64)
 )
     SQL SECURITY INVOKER
 BEGIN
@@ -36,30 +36,32 @@ BEGIN
 	EXECUTE stmt1;
     
     SELECT 	tmp.Id
-		,	fpa.UserAgent
-		,	fpa.BrowserInstanceCode
-		,	fpa.OSName
-		,	fpa.BrowserName
-		,	fpa.BrowserVersion
-		,	fpa.Platform
-		,	fpa.LocalStorage
-		,	fpa.DoNotTrack
-		,	fpa.Cookies
-		,	fpa.Canvas
-		,	fpa.Fonts
-		,	fpa.Vendor
-		,	fpa.GLRenderer
-		,	fpa.Plugins
-		,	fpa.Languages
-		,	fpa.Accept
-		,	fpa.Encoding
-		,	fpa.Headers
-		,	fpa.Resolution
-		,	fpa.Timezone
+		,	COALESCE(bis.UserAgent, '') AS UserAgent
+		,	COALESCE(bis.BrowserFamilyCode, '') AS BrowserFamilyCode
+		,	COALESCE(bis.OSName, '') AS OSName
+		,	COALESCE(bis.BrowserName, '') AS BrowserName
+		,	COALESCE(bis.BrowserVersion, '') AS BrowserVersion
+		,	COALESCE(bis.Platform, '') AS Platform
+		,	COALESCE(bis.Accept, '') AS Accept
+		,	COALESCE(bis.Encoding, '') AS Encoding
+		,	COALESCE(bis.Headers, '') AS Headers
+		,	COALESCE(fpa.LocalStorage, -1) AS LocalStorage
+		,	COALESCE(fpa.DoNotTrack, '') AS DoNotTrack
+		,	COALESCE(fpa.Cookies, -1) AS Cookies
+		,	COALESCE(fpa.Canvas, '') AS Canvas
+		,	COALESCE(fpa.Fonts, '') AS Fonts
+		,	COALESCE(fpa.Vendor, '') AS Vendor
+		,	COALESCE(fpa.GLRenderer, '') AS GLRenderer
+		,	COALESCE(fpa.Plugins, '') AS Plugins
+		,	COALESCE(fpa.Languages, '') AS Languages
+		,	COALESCE(fpa.Resolution, '') AS Resolution
+		,	COALESCE(fpa.Timezone, '') AS Timezone
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.Id
-		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.FingerPrintCode = fp.FingerPrintCode
-	WHERE fpa.BrowserInstanceCode = ip_BrowserInstanceCode
+		INNER JOIN FPS_FingerPrint.FingerPrintAttribute AS fpa ON fpa.RawFingerPrintId = fp.Id
+		INNER JOIN FPS_FingerPrint.BrowserInstanceRawFingerPrint AS bisa ON bisa.RawFingerPrintId = fp.Id
+		INNER JOIN FPS_FingerPrint.BrowserInstance AS bis ON bis.Id = bisa.BrowserInstanceId
+	WHERE bis.BrowserFamilyCode = ip_BrowserFamilyCode
 	ORDER BY tmp.Id DESC;
 
 END$$

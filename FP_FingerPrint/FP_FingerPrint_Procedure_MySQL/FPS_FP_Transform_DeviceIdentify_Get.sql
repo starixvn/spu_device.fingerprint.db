@@ -62,9 +62,9 @@ BEGIN
         ,	GroupCk				BIGINT UNSIGNED DEFAULT 0
         ,	GroupId				BIGINT UNSIGNED DEFAULT 0
         
-        , 	INDEX IX_Temp_Transaction_RawFingerPrintId(RawFingerPrintId)
-        ,	INDEX IX_Temp_Transaction_CookieId(CookieId)
-        ,	INDEX IX_Temp_Transaction_GroupFp(GroupFp,GroupCk)
+        , 	INDEX IX_Temp_Transaction2_RawFingerPrintId(RawFingerPrintId)
+        ,	INDEX IX_Temp_Transaction2_CookieId(CookieId)
+        ,	INDEX IX_Temp_Transaction2_GroupFp(GroupFp,GroupCk)
     );
     
     DROP TEMPORARY TABLE IF EXISTS Temp_TransGroup;        

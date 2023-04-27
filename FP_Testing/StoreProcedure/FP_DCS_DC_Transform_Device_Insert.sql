@@ -223,7 +223,7 @@ BEGIN
     FROM CTE_Assosiation tts,
     LATERAL (
 		SELECT ass.DeviceID
-        FROM FPSTesting.FP_Association AS ass
+        FROM FPSTesting.FP_Association_Old AS ass
         INNER JOIN	FPSTesting.FP_DeviceFingerprint AS df 
 			ON ass.DeviceID = df.DeviceID
         WHERE ass.AccountID = tts.AccountID
@@ -408,7 +408,7 @@ BEGIN
    
     # INSERT new Association
     SET start_time = CURRENT_TIMESTAMP(4);
-    INSERT IGNORE INTO FPSTesting.FP_Association(DeviceID, AccountID, SubscriberID, CreatedTime, CreatedDate,  InsertTime)
+    INSERT IGNORE INTO FPSTesting.FP_Association_Old(DeviceID, AccountID, SubscriberID, CreatedTime, CreatedDate,  InsertTime)
     SELECT de.DeviceID
 		, tts.AccountID
 		, MIN(tts.SubscriberID) AS SubscriberID
@@ -459,7 +459,7 @@ BEGIN
     SELECT step_name, start_time, diff_time, stats FROM CTE_Stats;
     
     /***************************************/     
-	INSERT IGNORE INTO 	FP_AssociationNew(FPDeviceID,AccountID,CreatedTime,CreatedDate,InsertTime)
+	INSERT IGNORE INTO FPSTesting.FP_Association(FPDeviceID,AccountID,CreatedTime,CreatedDate,InsertTime)
 	SELECT	tmpTs.FPDeviceID
 		,	tmpTs.AccountID
 		,	MIN(tmpTs.TransTime) AS CreatedTime
@@ -469,7 +469,7 @@ BEGIN
 	WHERE tmpTs.FPDeviceID IS NOT NULL
 	GROUP BY tmpTs.FPDeviceID, tmpTs.AccountID;        
 	
-	INSERT IGNORE INTO FP_MappingDevice(FPDeviceID,DeviceID,CreatedTime,CreatedDate,InsertTime)
+	INSERT IGNORE INTO FPSTesting.FP_MappingDevice(FPDeviceID,DeviceID,CreatedTime,CreatedDate,InsertTime)
 	SELECT	tmpTs.FPDeviceID
 		,	tmpTs.DeviceID
 		,	MIN(tmpTs.TransTime) AS CreatedTime
@@ -483,7 +483,7 @@ BEGIN
     /*****MOVE TRans competed to Trans07****************************************************/
     IF err_no = 0 THEN
 		SET start_time = CURRENT_TIMESTAMP(4);
-		INSERT IGNORE INTO  FPSTesting.FP_Transaction07(RawTransID, LoginName, TransTime, SubscriberID, AccountID, URLID
+		INSERT IGNORE INTO FPSTesting.FP_Transaction07(RawTransID, LoginName, TransTime, SubscriberID, AccountID, URLID
 			, DeviceCodeID, DeviceID, FirstDeviceCode, DeviceStatus, DeviceFingerprintID
 			, UserAgentKey, IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, FPDeviceID)
 		SELECT 	IFNULL(ts.RawTransID, ts.TransID), ts.LoginName, ts.TransTime, ts.SubscriberID, ts.AccountID, ts.URLID

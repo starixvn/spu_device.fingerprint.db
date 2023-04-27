@@ -16,6 +16,7 @@ BEGIN
 
 		Revisions: 
 			- 20220819@Jonathan.Doan: Created [Redmine ID: #176851]
+			- 20221128@Jonathan.Doan: Remove ServerTrans & clientTrans [Redmine ID: #1]
             
 		Param's Explanation (filtered by):	
 
@@ -31,45 +32,13 @@ BEGIN
 	END IF;
     /*******LOG TEST********************/
     
-    -- Server monthly sum
-    WITH tmp_SumDaily AS
-    (
-		SELECT 	st.SubscriberId
-			, 	SUM(st.TotalTrans) AS TotalTrans
-			, 	SUM(st.TotalValidTrans) AS TotalValidTrans
-		FROM FPS_FingerPrint.ServerTransactionDailySum AS st 
-		WHERE st.TransDate BETWEEN ip_FromDate AND DATE_ADD(ip_ToDate, INTERVAL 1 DAY)
-		GROUP BY st.SubscriberId
-	)
-    SELECT 	sub.Name AS SubscriberName	
-		,	tmp.TotalTrans	
-		,	tmp.TotalValidTrans	
-    FROM tmp_SumDaily AS tmp
-		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = tmp.SubscriberId;
-
-   -- Client monthly sum
-    WITH tmp_SumDaily AS
-    (
-		SELECT 	ct.SubscriberId
-			, 	SUM(ct.TotalTrans) AS TotalTrans
-			, 	SUM(ct.TotalValidTrans) AS TotalValidTrans
-		FROM FPS_FingerPrint.ClientTransactionDailySum AS ct 
-		WHERE ct.TransDate BETWEEN ip_FromDate AND DATE_ADD(ip_ToDate, INTERVAL 1 DAY)
-		GROUP BY ct.SubscriberId
-	)
-    SELECT 	sub.Name AS SubscriberName
-		,	tmp.TotalTrans
-		,	tmp.TotalValidTrans
-    FROM tmp_SumDaily AS tmp
-		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = tmp.SubscriberId;
-
    -- Transaction sum
     WITH tmp_TransactionSum AS
     (
 		SELECT 	st.SubscriberId
 			, 	SUM(st.TotalTrans) AS TotalTrans
 		FROM FPS_FingerPrint.TransactionDailySum AS st
-		WHERE st.TransDate BETWEEN ip_FromDate AND DATE_ADD(ip_ToDate, INTERVAL 1 DAY)
+		WHERE st.TransDate BETWEEN ip_FromDate AND ip_ToDate
 		GROUP BY st.SubscriberId
 	)
     SELECT 	sub.Name AS SubscriberName
