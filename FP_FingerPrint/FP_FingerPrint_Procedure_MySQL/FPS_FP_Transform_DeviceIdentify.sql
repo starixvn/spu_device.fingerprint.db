@@ -404,10 +404,11 @@ BEGIN
     
     /*****AccountFingerprint******************/
 	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
-    SELECT	AccountId
-        ,	RawFingerPrintId
+    SELECT	tmp.AccountId
+        ,	tmp.RawFingerPrintId
         ,	lv_CreatedDate
-    FROM Temp_InputTrans;
+    FROM Temp_InputTrans AS tmp
+	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId);
 
 	/*****TransactionDevice******************/
 	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
