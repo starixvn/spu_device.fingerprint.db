@@ -56,7 +56,7 @@ BEGIN
 		,	GROUP_CONCAT(af.RawFingerPrintId) AS FPIds
 	FROM Temp_TransactionEvolution AS tmp
 		INNER JOIN FPS_FingerPrint.AccountFingerprint AS af ON af.AccountId = tmp.AccountId
-	WHERE af.IsEvolution IS NULL
+	WHERE af.IsEvolution = 0
     GROUP BY tmp.Id;
     
     SELECT 	tmp.Id

@@ -39,7 +39,7 @@ BEGIN
 	*/
     
     DECLARE lv_GroupDeviceId	BIGINT UNSIGNED;
-    DECLARE lv_CreatedDate		DATETIME(4);
+    DECLARE lv_CreatedDate		DATETIME DEFAULT NOW();
     DECLARE lv_countTrans 		INT DEFAULT 0;
     
 	/*******LOG TEST********************/
@@ -116,8 +116,6 @@ BEGIN
         	Id				BIGINT UNSIGNED PRIMARY KEY
         ,   DeviceId		BIGINT UNSIGNED
      );
-
-	SET lv_CreatedDate = CURRENT_TIMESTAMP(4);
 
     INSERT INTO Temp_InputTrans(Id, TransTime, RawFingerPrintId, CookieId, AccountId, SubscriberId, LoginName, UserAgentId, GroupId)
 	SELECT	tmpJs.Id
@@ -403,9 +401,10 @@ BEGIN
 	WHERE tmpIt.DeviceId IS NULL;
     
     /*****AccountFingerprint******************/
-	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
+	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, IsEvolution, CreatedDate)
     SELECT	tmp.AccountId
         ,	tmp.RawFingerPrintId
+        ,	0 AS IsEvolution
         ,	lv_CreatedDate
     FROM Temp_InputTrans AS tmp
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId);

@@ -44,50 +44,50 @@ BEGIN
         ,	RawUserAgentId		BIGINT UNSIGNED DEFAULT NULL
         ,	CookieId			BIGINT UNSIGNED DEFAULT NULL
         ,	DeviceId			BIGINT UNSIGNED DEFAULT NULL
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
         , 	INDEX IX_Temp_Transaction_CreatedDate(CreatedDate)
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_Account;
 	CREATE TEMPORARY TABLE Temp_Account(
         	AccountId			BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInfo;
 	CREATE TEMPORARY TABLE Temp_BrowserInfo(
         	BrowserInfoId		BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInstance;
 	CREATE TEMPORARY TABLE Temp_BrowserInstance(
         	BrowserInstanceId	BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_Device;
 	CREATE TEMPORARY TABLE Temp_Device(
         	DeviceId			BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_Cookie;
 	CREATE TEMPORARY TABLE Temp_Cookie(
         	CookieId			BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_RawFingerPrint;
 	CREATE TEMPORARY TABLE Temp_RawFingerPrint(
         	RawFingerPrintId	BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
     );
 
     DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
 	CREATE TEMPORARY TABLE Temp_RawUserAgent(
         	RawUserAgentId		BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
+        ,	CreatedDate			DATETIME
     );
 
     /*******INIT DATA********************/

@@ -154,16 +154,20 @@ BEGIN
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = cte.CookieId);
 	
 	/*****AccountFingerprint******************/
-	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, CreatedDate)
-	SELECT	AccountId
-		,	RawFingerPrintId
-		,	lv_CurrentDate
-	FROM Temp_TransactionDevice;
+	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, IsEvolution, CreatedDate, ModifiedDate)
+	SELECT	tmp.AccountId
+		,	tmp.RawFingerPrintId
+		,	1 AS IsEvolution
+		,	lv_CurrentDate AS CreatedDate
+		,	lv_CurrentDate AS ModifiedDate
+	FROM Temp_TransactionDevice AS tmp
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId);
     
 	UPDATE Temp_TransactionDevice AS tmp
 		INNER JOIN FPS_FingerPrint.AccountFingerprint AS af ON tmp.AccountId = af.AccountId AND tmp.RecoverFingerPrintId = af.RawFingerPrintId 
 	SET af.IsEvolution = 1,
-		af.ModifiedDate = lv_CurrentDate;
+		af.ModifiedDate = lv_CurrentDate
+	WHERE af.IsEvolution = 0;
     
     INSERT IGNORE INTO FPS_FingerPrint.TransactionEvolutionCompleted(Id, RawFingerPrintId, RecoverFingerPrintId, DeviceId, CreatedDate)
     SELECT	Id

@@ -514,7 +514,7 @@ BEGIN
 	FROM Temp_Transaction AS tmp 
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = tmp.RawFingerPrintId)
 		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = tmp.CookieId)
-		AND EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.IsEvolution IS NULL);
+		AND EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.IsEvolution = 0 AND af.AccountId = tmp.AccountId);
     
     /*******INSERT INTO TransactionEvolution********************/
     IF EXISTS (
