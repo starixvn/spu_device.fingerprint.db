@@ -511,11 +511,13 @@ BEGIN
 		,	tmp.Action
 		,	tmp.TransKey
 		,	tmp.BrowserInfoId
-	FROM Temp_Transaction AS tmp 
-	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = tmp.RawFingerPrintId)
-		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = tmp.CookieId)
-		AND EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.IsEvolution = 0 AND af.AccountId = tmp.AccountId);
-    
+	FROM Temp_Transaction AS tmp
+		LEFT JOIN FPS_FingerPrint.DeviceFingerPrint df ON df.RawFingerPrintId = tmp.RawFingerPrintId
+		LEFT JOIN FPS_FingerPrint.DeviceCookie dc ON dc.CookieId = tmp.CookieId
+	WHERE df.Id IS NULL
+		AND dc.Id IS NULL
+        AND EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.IsEvolution = 0 AND af.AccountId = tmp.AccountId);
+        
     /*******INSERT INTO TransactionEvolution********************/
     IF EXISTS (
 		SELECT 1

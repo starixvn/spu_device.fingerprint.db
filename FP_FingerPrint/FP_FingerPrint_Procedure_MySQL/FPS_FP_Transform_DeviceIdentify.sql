@@ -407,7 +407,8 @@ BEGIN
         ,	0 AS IsEvolution
         ,	lv_CreatedDate
     FROM Temp_InputTrans AS tmp
-	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId);
+		LEFT JOIN FPS_FingerPrint.AccountFingerprint af ON af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId
+	WHERE af.Id IS NULL;
 
 	/*****TransactionDevice******************/
 	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)

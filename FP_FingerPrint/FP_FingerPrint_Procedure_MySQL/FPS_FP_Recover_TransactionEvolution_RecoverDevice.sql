@@ -161,7 +161,8 @@ BEGIN
 		,	lv_CurrentDate AS CreatedDate
 		,	lv_CurrentDate AS ModifiedDate
 	FROM Temp_TransactionDevice AS tmp
-    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId);
+		LEFT JOIN FPS_FingerPrint.AccountFingerprint af ON af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId
+	WHERE af.AccountId IS NULL;
     
 	UPDATE Temp_TransactionDevice AS tmp
 		INNER JOIN FPS_FingerPrint.AccountFingerprint AS af ON tmp.AccountId = af.AccountId AND tmp.RecoverFingerPrintId = af.RawFingerPrintId 
