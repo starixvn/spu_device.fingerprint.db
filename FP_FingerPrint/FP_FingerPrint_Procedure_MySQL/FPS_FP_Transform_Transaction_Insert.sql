@@ -15,6 +15,7 @@ BEGIN
 
 		Revisions: 
 			- 20221114@Jonathan.Doan: Created [Redmine ID: #180406]
+			- 20230529@Jonathan.Doan: HF Data Field Accept too long [Redmine ID: #188882]
             
 		Param's Explanation (filtered by):	
 
@@ -139,7 +140,7 @@ BEGIN
 		,	FingerPrintCode				VARCHAR(64) 		NULL
 		,	BrowserInstanceCode			VARCHAR(64) 		NULL
 		,	BrowserFamilyCode			VARCHAR(64) 		NULL
-		,	Accept						VARCHAR(100)	 	NULL
+		,	Accept						VARCHAR(200)	 	NULL
 		,	Encoding					VARCHAR(200)	 	NULL
 		,	Headers						VARCHAR(500)	 	NULL
 		,	OSName						VARCHAR(100)	 	NULL
