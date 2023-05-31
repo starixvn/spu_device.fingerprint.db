@@ -24,3 +24,5 @@ MODIFY COLUMN ModifiedDate DATETIME;
 ALTER TABLE FPS_FingerPrint.RawFingerPrint
 MODIFY COLUMN CreatedDate DATETIME,
 MODIFY COLUMN ModifiedDate DATETIME;
+
+DROP PROCEDURE IF EXISTS `FPS_FP_Recover_TransactionEvolutionAttributes_Get`;

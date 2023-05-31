@@ -154,12 +154,11 @@ BEGIN
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = cte.CookieId);
 	
 	/*****AccountFingerprint******************/
-	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, IsEvolution, CreatedDate, ModifiedDate)
+	INSERT IGNORE INTO FPS_FingerPrint.AccountFingerprint(AccountId, RawFingerPrintId, IsEvolution, CreatedDate)
 	SELECT	tmp.AccountId
 		,	tmp.RawFingerPrintId
-		,	1 AS IsEvolution
+		,	0 AS IsEvolution
 		,	lv_CurrentDate AS CreatedDate
-		,	lv_CurrentDate AS ModifiedDate
 	FROM Temp_TransactionDevice AS tmp
 		LEFT JOIN FPS_FingerPrint.AccountFingerprint af ON af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId
 	WHERE af.AccountId IS NULL;
