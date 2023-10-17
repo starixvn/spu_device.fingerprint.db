@@ -16,7 +16,7 @@ BEGIN
 		Revisions: 
 			- 20221114@Jonathan.Doan: Created [Redmine ID: #180406]
 			- 20230529@Jonathan.Doan: HF Data Field Accept too long [Redmine ID: #188882]
-            
+            - 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
 		Param's Explanation (filtered by):	
 
 		Example:
@@ -53,6 +53,7 @@ BEGIN
 		,	SubscriberId 			INT 				DEFAULT NULL
 		,	TransTime 				DATETIME(4) 		DEFAULT NULL
 		,	ClientIP 				VARCHAR(45) 		DEFAULT NULL
+        ,	FakeIP 					VARCHAR(45) 		DEFAULT NULL
 		,	UserAgentId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	UserAgent				LONGTEXT			DEFAULT NULL
 		,	UserAgentCode			VARCHAR(100)		DEFAULT NULL
@@ -83,6 +84,7 @@ BEGIN
 		,	SubscriberId 			INT 				DEFAULT NULL
 		,	TransTime 				DATETIME(4) 		DEFAULT NULL
 		,	ClientIP 				VARCHAR(45) 		DEFAULT NULL
+        ,	FakeIP 					VARCHAR(45) 		DEFAULT NULL
 		,	UserAgentId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	UserAgent				LONGTEXT			DEFAULT NULL
 		,	UserAgentCode			VARCHAR(100)		DEFAULT NULL
@@ -177,7 +179,7 @@ BEGIN
         , 	INDEX IX_Temp_BrowserInfo_BrowserInfoAttributeCode(BrowserInfoAttributeCode)
     );
     
-	INSERT INTO Temp_Transaction(CookieCode, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, UserAgent, UserAgentCode, Url, Action, TransKey, FingerprintAttribute, UserAgentInfo, BrowserInfo, BrowserInfoAttribute)
+	INSERT INTO Temp_Transaction(CookieCode, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, FakeIP, UserAgent, UserAgentCode, Url, Action, TransKey, FingerprintAttribute, UserAgentInfo, BrowserInfo, BrowserInfoAttribute)
 	SELECT	rt.CookieCode
 		,	rt.CustId
 		,	rt.SubAccId
@@ -186,6 +188,7 @@ BEGIN
 		,	rt.SubscriberId
 		,	rt.TransTime
 		,	rt.ClientIP
+        ,	rt.FakeIP
 		,	rt.UserAgent
 		,	rt.UserAgentCode
 		,	rt.Url
@@ -206,6 +209,7 @@ BEGIN
 					,	SubscriberId 			INT			 	PATH "$.SubscriberId"
 					,	TransTime 				DATETIME(4)	 	PATH "$.TransTime"
 					,	ClientIP 				VARCHAR(45)	 	PATH "$.ClientIP"
+                    ,	FakeIP 					VARCHAR(45)	 	PATH "$.FakeIP"
 					,	UserAgent 				LONGTEXT	 	PATH "$.UserAgent"
 					,	UserAgentCode 			VARCHAR(100) 	PATH "$.UserAgentCode"
 					,	Url 					VARCHAR(100)	PATH "$.Url"
@@ -494,7 +498,7 @@ BEGIN
     SET tmp.BrowserInfoId = tmpBi.BrowserInfoId;
     
     /*******Evolution********************/
-    INSERT INTO Temp_Evolution(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, TransKey, BrowserInfoId)
+    INSERT INTO Temp_Evolution(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, TransKey, BrowserInfoId)
 	SELECT 	tmp.Id
 		,	tmp.CustId
 		,	tmp.SubAccId
@@ -506,6 +510,7 @@ BEGIN
 		,	tmp.CookieId
 		,	tmp.TransTime
 		,	tmp.ClientIP
+        ,	tmp.FakeIP
 		,	tmp.UserAgentId
 		,	tmp.Url
 		,	tmp.Action
@@ -521,7 +526,7 @@ BEGIN
 		SELECT 1
 		FROM Temp_Evolution
     ) THEN
-		INSERT INTO FPS_FingerPrint.TransactionEvolution(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+		INSERT INTO FPS_FingerPrint.TransactionEvolution(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
         SELECT 	tmp.CustId
 			,	tmp.SubAccId
 			,	tmp.AccountId
@@ -532,6 +537,7 @@ BEGIN
 			,	tmp.CookieId
 			,	tmp.TransTime
 			,	tmp.ClientIP
+            ,	tmp.FakeIP
 			,	tmp.UserAgentId
 			,	tmp.Url
 			,	tmp.Action
@@ -546,7 +552,7 @@ BEGIN
     END IF;
     
     /*******Transaction********************/
-    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
 	SELECT	tmp.CustId
 		,	tmp.SubAccId
 		,	tmp.AccountId
@@ -557,6 +563,7 @@ BEGIN
 		,	tmp.CookieId
 		,	tmp.TransTime
 		,	tmp.ClientIP
+        ,	tmp.FakeIP
 		,	tmp.UserAgentId
 		,	tmp.Url
 		,	tmp.Action
