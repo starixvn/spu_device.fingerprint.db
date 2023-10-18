@@ -66,6 +66,7 @@ BEGIN
 		,	DeviceId 			BIGINT UNSIGNED
 		,	TransTime 			DATETIME(4) 
 		,	ClientIP 			VARCHAR(45) 
+        ,	FakeIP 				VARCHAR(45) 
 		,	BrowserInfoId		BIGINT UNSIGNED
 		,	UserAgentId			BIGINT UNSIGNED
 		,	UserAgent 			VARCHAR(500) 
@@ -79,7 +80,7 @@ BEGIN
         , 	INDEX IX_Temp_TransactionsDevice_TransKey(TransKey)
     );
     
-    INSERT IGNORE INTO Temp_TransactionsDevice(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsDevice(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, FakeIP, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
 		SELECT  td.Id
 			, 	td.CustId
 			, 	td.SubAccId
@@ -92,6 +93,7 @@ BEGIN
 			, 	td.DeviceId
 			, 	td.TransTime
 			, 	td.ClientIP
+            ,	td.FakeIP
 			, 	td.BrowserInfoId
 			, 	td.UserAgentId
 			, 	ua.UserAgent
@@ -118,6 +120,7 @@ BEGIN
 		,	DeviceId 			BIGINT UNSIGNED
 		,	TransTime 			DATETIME(4)
 		,	ClientIP 			VARCHAR(45)
+        ,	FakeIP 				VARCHAR(45)
 		,	Flagged				TINYINT
 		,	BrowserInfoId		BIGINT UNSIGNED
 		,	UserAgentId			BIGINT UNSIGNED
@@ -133,7 +136,7 @@ BEGIN
     );
     
     /*******UPDATE FLAGGED********************/
-    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
+    INSERT IGNORE INTO Temp_TransactionsFlagged(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, FakeIP, Flagged, BrowserInfoId, UserAgentId, UserAgent, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
     SELECT  tmp.Id
 		, 	tmp.CustId
 		, 	tmp.SubAccId
@@ -146,6 +149,7 @@ BEGIN
 		, 	tmp.DeviceId
 		, 	tmp.TransTime
 		, 	tmp.ClientIP
+        ,	tmp.FakeIP
 		, 	CASE WHEN bi.Flagged IS NULL THEN 6 ELSE bi.Flagged END AS Flagged
 		, 	tmp.BrowserInfoId
 		, 	tmp.UserAgentId
@@ -159,7 +163,7 @@ BEGIN
     FROM Temp_TransactionsDevice AS tmp
 		LEFT JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.Id = tmp.BrowserInfoId;
         
-	INSERT IGNORE INTO FPSTesting.FP_RawTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
+	INSERT IGNORE INTO FPSTesting.FP_RawTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, FingerprintMoreInfo, UserAgent, IP, FakeIP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	transF.LoginName	
 		, 	sub.Name
 		, 	transF.TransTime
@@ -169,6 +173,7 @@ BEGIN
 		, 	NULL AS FingerprintMoreInfo
 		,	transF.UserAgent
 		, 	transF.ClientIP
+        ,	transF.FakeIP
 		, 	NULL AS IPID
 		, 	NULL AS PluginID
 		, 	transF.URL
@@ -192,7 +197,7 @@ BEGIN
 	FROM Temp_TransactionsFlagged AS transF   
 		INNER JOIN FPS_FingerPrint.Subscribers AS sub ON sub.Id = transF.SubscriberId;
     
-	INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
+	INSERT IGNORE INTO FPS_FingerPrint.TransactionCompleted(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, TransTime, ClientIP, FakeIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, Retry, RecoverType)
 	SELECT	transF.Id
 		,	transF.CustId
 		,	transF.SubAccId
@@ -205,6 +210,7 @@ BEGIN
 		,	transF.DeviceId
 		,	transF.TransTime
 		,	transF.ClientIP
+        ,	transF.FakeIP
 		,	transF.BrowserInfoId
 		,	transF.UserAgentId
 		,	transF.Url

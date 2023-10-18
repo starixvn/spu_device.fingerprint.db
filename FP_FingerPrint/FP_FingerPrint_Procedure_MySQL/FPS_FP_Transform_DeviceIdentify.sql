@@ -411,7 +411,7 @@ BEGIN
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId);
 
 	/*****TransactionDevice******************/
-	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, FakeIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
 	SELECT  ts.TransTime
 		, 	ts.CustId
 		, 	ts.SubAccId
@@ -423,6 +423,7 @@ BEGIN
 		, 	ts.CookieId
 		, 	tmpIt.DeviceId
 		, 	ts.ClientIP
+        ,	ts.FakeIP
 		, 	ts.BrowserInfoId
 		, 	ts.UserAgentId
 		, 	ts.Url

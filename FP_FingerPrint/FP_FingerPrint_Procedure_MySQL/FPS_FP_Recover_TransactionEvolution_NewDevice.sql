@@ -54,6 +54,7 @@ BEGIN
 			, 	RecoverFingerPrintId	BIGINT UNSIGNED
 			, 	TransTime				DATETIME(4)
 			, 	ClientIP				VARCHAR(45)
+            , 	FakeIP					VARCHAR(45)
 			, 	BrowserInfoId			BIGINT UNSIGNED
 			, 	UserAgentId				BIGINT UNSIGNED
 			, 	Url						VARCHAR(100)
@@ -67,7 +68,7 @@ BEGIN
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
 
-	INSERT INTO Temp_Transaction(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+	INSERT INTO Temp_Transaction(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
 	SELECT	tmp.Id
 		,	te.CustId
 		,	te.SubAccId
@@ -79,6 +80,7 @@ BEGIN
 		,	te.CookieId
 		,	te.TransTime
 		,	te.ClientIP
+        ,	te.FakeIP
 		,	te.UserAgentId
 		,	te.Url
 		,	te.Action
@@ -88,7 +90,7 @@ BEGIN
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 	
-    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
 	SELECT	tmp.CustId
 		,	tmp.SubAccId
 		,	tmp.AccountId
@@ -99,6 +101,7 @@ BEGIN
 		,	tmp.CookieId
 		,	tmp.TransTime
 		,	tmp.ClientIP
+        ,	tmp.FakeIP
 		,	tmp.UserAgentId
 		,	tmp.Url
 		,	tmp.Action

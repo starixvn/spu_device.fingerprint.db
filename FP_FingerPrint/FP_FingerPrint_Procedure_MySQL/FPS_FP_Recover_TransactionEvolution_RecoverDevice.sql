@@ -55,6 +55,7 @@ BEGIN
 			, 	RecoverFingerPrintId	BIGINT UNSIGNED
 			, 	TransTime				DATETIME(4)
 			, 	ClientIP				VARCHAR(45)
+            , 	FakeIP					VARCHAR(45)
 			, 	BrowserInfoId			BIGINT UNSIGNED
 			, 	UserAgentId				BIGINT UNSIGNED
 			, 	Url						VARCHAR(100)
@@ -79,7 +80,7 @@ BEGIN
 		INNER JOIN FPS_FingerPrint.DeviceFingerPrint AS df ON tmp.RecoverFingerPrintId = df.RawFingerPrintId
 	SET tmp.DeviceId = df.DeviceId;
 		   
-	INSERT IGNORE INTO Temp_TransactionDevice(Id, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType, RecoverFingerPrintId)
+	INSERT IGNORE INTO Temp_TransactionDevice(Id, TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, FakeIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType, RecoverFingerPrintId)
 	SELECT  te.Id
 		,	te.TransTime
 		, 	te.CustId
@@ -92,6 +93,7 @@ BEGIN
 		, 	te.CookieId
 		, 	tmp.DeviceId
 		, 	te.ClientIP
+        ,	te.FakeIP
 		, 	te.BrowserInfoId
 		, 	te.UserAgentId
 		, 	te.Url
@@ -103,7 +105,7 @@ BEGIN
 	FROM Temp_Recover AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 		   
-	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, FakeIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
 	SELECT  tmp.TransTime
 		, 	tmp.CustId
 		, 	tmp.SubAccId
@@ -115,6 +117,7 @@ BEGIN
 		, 	tmp.CookieId
 		, 	tmp.DeviceId
 		, 	tmp.ClientIP
+        ,	tmp.FakeIP
 		, 	tmp.BrowserInfoId
 		, 	tmp.UserAgentId
 		, 	tmp.Url
