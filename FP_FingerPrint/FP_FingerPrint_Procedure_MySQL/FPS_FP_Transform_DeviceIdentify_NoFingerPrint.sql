@@ -17,7 +17,7 @@ BEGIN
 			- 20220307@Terry.Nguyen: Created [Redmine ID: #162668]
             - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
 			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
-            
+			- 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
 		Param's Explanation (filtered by):	
 
 		Example:

@@ -16,7 +16,7 @@ BEGIN
 		Revisions:
 			- 20220913@Jonathan.Doan: Created [Redmine ID: #176820]
 			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
-            
+			- 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
 		Param's Explanation (filtered by):	
 
 		Example:
@@ -55,7 +55,7 @@ BEGIN
 			, 	RecoverFingerPrintId	BIGINT UNSIGNED
 			, 	TransTime				DATETIME(4)
 			, 	ClientIP				VARCHAR(45)
-            , 	FakeIP					VARCHAR(45)
+            , 	FakeIP					VARCHAR(50)
 			, 	BrowserInfoId			BIGINT UNSIGNED
 			, 	UserAgentId				BIGINT UNSIGNED
 			, 	Url						VARCHAR(100)

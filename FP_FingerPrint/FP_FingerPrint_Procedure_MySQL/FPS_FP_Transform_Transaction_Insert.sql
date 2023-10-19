@@ -53,7 +53,7 @@ BEGIN
 		,	SubscriberId 			INT 				DEFAULT NULL
 		,	TransTime 				DATETIME(4) 		DEFAULT NULL
 		,	ClientIP 				VARCHAR(45) 		DEFAULT NULL
-        ,	FakeIP 					VARCHAR(45) 		DEFAULT NULL
+        ,	FakeIP 					VARCHAR(50) 		DEFAULT NULL
 		,	UserAgentId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	UserAgent				LONGTEXT			DEFAULT NULL
 		,	UserAgentCode			VARCHAR(100)		DEFAULT NULL
@@ -84,7 +84,7 @@ BEGIN
 		,	SubscriberId 			INT 				DEFAULT NULL
 		,	TransTime 				DATETIME(4) 		DEFAULT NULL
 		,	ClientIP 				VARCHAR(45) 		DEFAULT NULL
-        ,	FakeIP 					VARCHAR(45) 		DEFAULT NULL
+        ,	FakeIP 					VARCHAR(50) 		DEFAULT NULL
 		,	UserAgentId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	UserAgent				LONGTEXT			DEFAULT NULL
 		,	UserAgentCode			VARCHAR(100)		DEFAULT NULL

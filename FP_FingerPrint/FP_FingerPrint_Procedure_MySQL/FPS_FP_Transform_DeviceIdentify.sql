@@ -19,7 +19,7 @@ BEGIN
             - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
             - 20221025@Jonathan.Doan: Monitor RecoverDailySum [Redmine ID: #179362]
 			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
-            
+            - 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
 		Param's Explanation (filtered by):	
 			ip_GroupType: 0- Not a group, 1- Trans Group(the same RawFingerPrintId or Cookie);
 
