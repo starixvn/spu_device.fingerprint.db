@@ -15,7 +15,7 @@ BEGIN
 		 
 	    Revisions:
 		    - 20220106@CaseyHuynh: Created [RedmineID: #166727]
-            
+			- 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
 	    Param's Explanation (filtered by):
         
         Example:
@@ -485,10 +485,10 @@ BEGIN
 		SET start_time = CURRENT_TIMESTAMP(4);
 		INSERT IGNORE INTO FPSTesting.FP_Transaction07(RawTransID, LoginName, TransTime, SubscriberID, AccountID, URLID
 			, DeviceCodeID, DeviceID, FirstDeviceCode, DeviceStatus, DeviceFingerprintID
-			, UserAgentKey, IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, FPDeviceID)
+			, UserAgentKey, IP, FakeIP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, FPDeviceID)
 		SELECT 	IFNULL(ts.RawTransID, ts.TransID), ts.LoginName, ts.TransTime, ts.SubscriberID, ts.AccountID, ts.URLID
 			, tmpTs.DeviceCodeID, tmpTs.DeviceID, tmpTs.FirstDeviceCode, tmpTs.DeviceStatus, tmpTs.DeviceFingerprintID
-			, ts.UserAgentKey, ts.IP, ts.IPID, ts.ActionResultID, ts.Flagged, ts.PluginID, ts.TransStatus, ts.CreatedDate, ts.InsertTime , ts.FPDeviceID
+			, ts.UserAgentKey, ts.IP, ts.FakeIP, ts.IPID, ts.ActionResultID, ts.Flagged, ts.PluginID, ts.TransStatus, ts.CreatedDate, ts.InsertTime , ts.FPDeviceID
 		FROM FPSTesting.FP_Transaction AS ts
 		INNER JOIN Temp_Transaction AS tmpTs
 			ON	ts.TransID = tmpTs.TransID

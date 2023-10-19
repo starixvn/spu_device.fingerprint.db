@@ -15,7 +15,7 @@ BEGIN
 
 		Revisions:
 			- - 20220106@CaseyHuynh: Created [RedmineID: #166727]
-
+			- - 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
 		Param's Explanation (filtered by):
 			
 		Example:

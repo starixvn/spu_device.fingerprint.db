@@ -16,7 +16,7 @@ BEGIN
 
 	    Revisions:
 		    - 20220106@CaseyHuynh: Created [RedmineID: #166727]
-            
+			- 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
 	    Param's Explanation (filtered by):
 		
         Example:
@@ -44,7 +44,8 @@ BEGIN
 		,   URLID					INT					
 		,   DeviceCode			    VARCHAR(32) COMMENT 'Trans Device Code'
         ,   UserAgentKey			VARCHAR(32)			
-		,   IP					    VARCHAR(50) 		
+		,   IP					    VARCHAR(50) 
+		,   FakeIP					VARCHAR(50)
         ,   IPID					DECIMAL(50,0)			
 		,   ActionResultID		    INT					
 		,   Flagged				    SMALLINT COMMENT 'captcha & browserless'
@@ -101,7 +102,7 @@ BEGIN
    # WHERE VGroup = "DCS_Device_Transform" AND VName = "MinCreatedDate";
 	WHERE Id = 2;
     
-	INSERT INTO Temp_RawTransaction(TransID, LoginName, TransTime, SubscriberType, DeviceCode , URLDetails, UserAgentKey, IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, FingerprintCode, FPDeviceID, SubscriberID,CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old,UserAgent_Old, URL_Old,Flagged_Old)
+	INSERT INTO Temp_RawTransaction(TransID, LoginName, TransTime, SubscriberType, DeviceCode , URLDetails, UserAgentKey, IP, FakeIP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, FingerprintCode, FPDeviceID, SubscriberID,CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old,UserAgent_Old, URL_Old,Flagged_Old)
 	SELECT  rt.TransID
 	    ,   rt.LoginName
         ,   rt.TransTime
@@ -110,6 +111,7 @@ BEGIN
         ,   rt.URL
         ,   MD5(LOWER(rt.UserAgent))
         ,   rt.IP
+        ,	rt.FakeIP
         ,   rt.IPID
         ,   ar.ActionResultID
         ,   rt.Flagged
@@ -190,7 +192,7 @@ BEGIN
         ,   tll.LastLoginTime
     FROM Temp_LastLoginTime AS tll;
 	*/
-    INSERT IGNORE INTO  FPSTesting.FP_Transaction(RawTransID, LoginName, TransTime,  AccountID, URLID, UserAgentKey , IP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, DeviceCode, FingerprintCode
+    INSERT IGNORE INTO  FPSTesting.FP_Transaction(RawTransID, LoginName, TransTime,  AccountID, URLID, UserAgentKey , IP, FakeIP, IPID, ActionResultID, Flagged, PluginID, TransStatus, CreatedDate, InsertTime, DeviceCode, FingerprintCode
     , FPDeviceID, SubscriberID)
    	SELECT  trt.TransID
 	    ,   trt.LoginName
@@ -199,6 +201,7 @@ BEGIN
 	    ,   trt.URLID
         ,   trt.UserAgentKey
         ,   trt.IP
+        ,	trt.FakeIP
         ,   trt.IPID
         ,   trt.ActionResultID
 	    ,   trt.Flagged
@@ -214,7 +217,7 @@ BEGIN
     
     #================================================================
     
-	INSERT IGNORE INTO FPSTesting.FP_ProcessedTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, UserAgent , IP, IPID, Flagged, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, IsProcessed, TransID
+	INSERT IGNORE INTO FPSTesting.FP_ProcessedTransaction(LoginName, SubscriberName, TransTime, CreatedDate, DeviceCode, FingerprintCode, UserAgent , IP, FakeIP, IPID, Flagged, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus, IsProcessed, TransID
     , FPDeviceID, SubscriberID,CustID, CustSubID, LoginName_Old, TransTime_Old, IP_Old,UserAgent_Old, URL_Old,Flagged_Old, TransKey)
 	SELECT  rt.LoginName
         ,   rt.SubscriberName
@@ -224,6 +227,7 @@ BEGIN
         ,   rt.FingerprintCode
         ,   rt.UserAgent
 	    ,   rt.IP
+        ,	rt.FakeIP
         ,   rt.IPID
         ,   rt.Flagged
         ,   rt.PluginID
