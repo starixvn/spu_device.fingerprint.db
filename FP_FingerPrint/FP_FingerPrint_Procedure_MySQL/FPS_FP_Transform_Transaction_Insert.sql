@@ -209,7 +209,7 @@ BEGIN
 					,	SubscriberId 			INT			 	PATH "$.SubscriberId"
 					,	TransTime 				DATETIME(4)	 	PATH "$.TransTime"
 					,	ClientIP 				VARCHAR(45)	 	PATH "$.ClientIP"
-                    ,	FakeIP 					VARCHAR(45)	 	PATH "$.FakeIP"
+                    ,	FakeIP 					VARCHAR(50)	 	PATH "$.FakeIP"
 					,	UserAgent 				LONGTEXT	 	PATH "$.UserAgent"
 					,	UserAgentCode 			VARCHAR(100) 	PATH "$.UserAgentCode"
 					,	Url 					VARCHAR(100)	PATH "$.Url"
