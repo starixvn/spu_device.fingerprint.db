@@ -176,7 +176,8 @@ BEGIN
 		,	FingerprintMoreInfo VARCHAR(250) 
 		,	UserAgentId			BIGINT UNSIGNED
 		,	UserAgent 			VARCHAR(500) 
-		,	IP 					VARCHAR(50) 
+		,	IP 					VARCHAR(50)
+        ,	FakeIP 				VARCHAR(50) 
 		,	IPID 				DECIMAL(50,0) 
 		,	PluginID 			BIGINT UNSIGNED
 		,	URL 				VARCHAR(500) 
@@ -245,7 +246,7 @@ BEGIN
 	FROM Temp_TransactionsFlagged AS transF
 		INNER JOIN FPSTesting.FP_RawTransaction_Old AS transO ON transF.TransKey = transO.TransKey;
     
-	INSERT IGNORE INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
+	INSERT IGNORE INTO FPSTesting.FP_RawTransaction(LoginName,	SubscriberName,	TransTime, CreatedDate,	DeviceCode,	FingerprintCode, FingerprintMoreInfo, UserAgent, IP, FakeIP, IPID, PluginID, URL, Action, ActionResult, InvalidDevice, TransStatus,	FPSTransID,	Flagged, FPDeviceID, SubscriberID, CustID,	CustSubID, LoginName_Old, TransTime_Old, IP_Old, UserAgent_Old, URL_Old, Flagged_Old, TransKey)
 	SELECT	tmp.LoginName	
 	   , 	tmp.SubscriberName
 	   , 	tmp.TransTime
@@ -255,6 +256,7 @@ BEGIN
 	   , 	tmp.FingerprintMoreInfo
 	   ,	tmp.UserAgent
 	   , 	tmp.IP
+       ,	tmp.FakeIP
 	   , 	tmp.IPID
 	   , 	tmp.PluginID
 	   , 	tmp.URL
