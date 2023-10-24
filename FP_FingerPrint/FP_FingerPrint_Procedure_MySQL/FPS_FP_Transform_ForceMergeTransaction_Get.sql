@@ -20,7 +20,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_ForceMergeTransaction_Get(100,1);
+			CALL FPS_FP_Transform_ForceMergeTransaction_Get(100,3);
 			
 	*/
     
@@ -34,7 +34,7 @@ BEGIN
     SELECT	trans.Id
 		,	trans.TransKey 
     FROM FPS_FingerPrint.TransactionDevice AS trans 
-	WHERE trans.Retry > ip_Retry
+	WHERE trans.Retry >= ip_Retry
     ORDER BY trans.Id
     LIMIT ip_Size;
    

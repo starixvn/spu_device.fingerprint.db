@@ -19,6 +19,7 @@ BEGIN
             - 20220808@Jonathan.Doan: Add AddonId [Redmine ID: #175155]
             - 20221025@Jonathan.Doan: Monitor RecoverDailySum [Redmine ID: #179362]
 			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
+			- 20231023@Jonathan.Doan: Apply BotD [Redmine ID: #195880]
             
 		Param's Explanation (filtered by):	
 			ip_GroupType: 0- Not a group, 1- Trans Group(the same RawFingerPrintId or Cookie);
@@ -411,7 +412,7 @@ BEGIN
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.RawFingerPrintId = tmp.RawFingerPrintId);
 
 	/*****TransactionDevice******************/
-	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, BrowserInfoId, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType)
+	INSERT INTO FPS_FingerPrint.TransactionDevice(TransTime, CustId , SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, DeviceId, ClientIP, UserAgentId, Url, Action, CreatedDate, TransKey, RecoverType, Flagged, BotDetectionValue, BotComponentID)
 	SELECT  ts.TransTime
 		, 	ts.CustId
 		, 	ts.SubAccId
@@ -423,13 +424,15 @@ BEGIN
 		, 	ts.CookieId
 		, 	tmpIt.DeviceId
 		, 	ts.ClientIP
-		, 	ts.BrowserInfoId
 		, 	ts.UserAgentId
 		, 	ts.Url
 		, 	ts.Action
 		, 	lv_CreatedDate
 		, 	ts.TransKey
 		, 	tmpIt.RecoverType
+		, 	ts.Flagged
+		, 	ts.BotDetectionValue
+		, 	ts.BotComponentID
 	FROM Temp_InputTrans AS tmpIt
 		INNER JOIN FPS_FingerPrint.Transaction AS ts ON tmpIt.Id = ts.Id;
 

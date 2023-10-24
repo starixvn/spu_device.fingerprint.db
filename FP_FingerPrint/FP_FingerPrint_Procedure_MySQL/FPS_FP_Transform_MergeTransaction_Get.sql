@@ -20,7 +20,7 @@ BEGIN
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Transform_MergeTransaction_Get(100,1);
+			CALL FPS_FP_Transform_MergeTransaction_Get(100,3);
 			
 	*/
     
