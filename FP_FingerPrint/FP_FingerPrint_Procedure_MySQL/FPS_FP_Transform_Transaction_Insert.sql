@@ -17,6 +17,8 @@ BEGIN
 			- 20221114@Jonathan.Doan: Created [Redmine ID: #180406]
 			- 20230529@Jonathan.Doan: HF Data Field Accept too long [Redmine ID: #188882]
             - 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
+			- 20231023@Jonathan.Doan: Apply BotD [Redmine ID: #195880]
+            
 		Param's Explanation (filtered by):	
 
 		Example:
@@ -38,8 +40,8 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_FingerPrintAttribute;
 	DROP TEMPORARY TABLE IF EXISTS Temp_RawUserAgent;
 	DROP TEMPORARY TABLE IF EXISTS Temp_MapIdRawUserAgent;
-	DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInfo;
 	DROP TEMPORARY TABLE IF EXISTS Temp_Evolution;
+	DROP TEMPORARY TABLE IF EXISTS Temp_BotDetection;
     
     
 	CREATE TEMPORARY TABLE Temp_Transaction(
@@ -62,11 +64,14 @@ BEGIN
 		,	TransKey 				VARCHAR(200) 		DEFAULT NULL
 		,	RawFingerPrintId 		BIGINT UNSIGNED 	DEFAULT NULL
 		,	BrowserInstanceId 		BIGINT UNSIGNED 	DEFAULT NULL
-		,	BrowserInfoId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	FingerprintAttribute 	JSON 				DEFAULT NULL
 		,	UserAgentInfo		 	JSON 				DEFAULT NULL
-		,	BrowserInfo			 	JSON 				DEFAULT NULL
-		,	BrowserInfoAttribute 	JSON 				DEFAULT NULL
+        ,	FlaggedCode				VARCHAR(100)		DEFAULT NULL
+        ,	BotDetection			LONGTEXT			DEFAULT NULL
+        ,	BotDetectionValue		BIT(32)				DEFAULT NULL		DEFAULT 0
+        ,	BotComponentId			BIGINT UNSIGNED		DEFAULT NULL
+        ,	BotComponent			LONGTEXT			DEFAULT NULL
+        ,	BotComponentCode		VARCHAR(100)		DEFAULT NULL
         
         ,	PRIMARY KEY (Id)
         , 	INDEX IX_Temp_Transaction_CookieCode(CookieCode)
@@ -93,11 +98,12 @@ BEGIN
 		,	TransKey 				VARCHAR(200) 		DEFAULT NULL
 		,	RawFingerPrintId 		BIGINT UNSIGNED 	DEFAULT NULL
 		,	BrowserInstanceId 		BIGINT UNSIGNED 	DEFAULT NULL
-		,	BrowserInfoId 			BIGINT UNSIGNED 	DEFAULT NULL
 		,	FingerprintAttribute 	JSON 				DEFAULT NULL
 		,	UserAgentInfo		 	JSON 				DEFAULT NULL
-		,	BrowserInfo			 	JSON 				DEFAULT NULL
-		,	BrowserInfoAttribute 	JSON 				DEFAULT NULL
+        ,	Flagged					SMALLINT			DEFAULT NULL
+        ,	FlaggedCode				VARCHAR(100)		DEFAULT NULL
+        ,	BotDetectionValue		BIT(32)				DEFAULT NULL		DEFAULT 0
+        ,	BotComponentId			BIGINT UNSIGNED		DEFAULT NULL
         
         ,	PRIMARY KEY (Id)
     );
@@ -155,31 +161,14 @@ BEGIN
         , 	INDEX IX_Temp_FingerPrintAttribute_FingerPrintCode(FingerPrintCode)
     );
     
-	CREATE TEMPORARY TABLE Temp_BrowserInfo(	
-			TmpTransactionsId 			INT 				NOT NULL 
-		,	BrowserInfoId				BIGINT UNSIGNED 	NULL
-		,	BrowserInfoAttributeCode	VARCHAR(64) 		NOT NULL
-		,	BrowserInfoAttributeId		BIGINT UNSIGNED 	NULL
-		,	UserAgentId 				BIGINT UNSIGNED 	NULL
-		,	OSName						VARCHAR(50)	 		NULL
-		,	BrowserName					VARCHAR(100)		NULL
-		,	HeadlessScore				DECIMAL(3,1)		NULL
-		,	HeadlessDetail				LONGTEXT			NULL
-		,	Flagged						SMALLINT			NULL
-		,	BrowserInfoCode				VARCHAR(64)			NULL
-		,	SecChUa						VARCHAR(100)	 	NULL
-		,	SecChUaPlatform				VARCHAR(100)		NULL
-		,	SecChUaMobile				VARCHAR(50) 		NULL
-		,	JsBrowserName				VARCHAR(100)		NULL
-		,	JsOSName					VARCHAR(50)			NULL
         
-        ,	PRIMARY KEY (TmpTransactionsId)
-        , 	INDEX IX_Temp_BrowserInfo_BrowserInfoId(BrowserInfoId)
-        , 	INDEX IX_Temp_BrowserInfo_BrowserInfoCode(BrowserInfoCode)
-        , 	INDEX IX_Temp_BrowserInfo_BrowserInfoAttributeCode(BrowserInfoAttributeCode)
-    );
-    
-	INSERT INTO Temp_Transaction(CookieCode, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, FakeIP, UserAgent, UserAgentCode, Url, Action, TransKey, FingerprintAttribute, UserAgentInfo, BrowserInfo, BrowserInfoAttribute)
+	DROP TEMPORARY TABLE IF EXISTS Temp_BotDetection;
+	CREATE TEMPORARY TABLE Temp_BotDetection(
+			Id							INT UNSIGNED PRIMARY KEY
+        ,	BotDetectionValue			BIT(32)		NULL		DEFAULT 0		
+    );     
+		
+	INSERT INTO Temp_Transaction(CookieCode, CustId, SubAccId, AccountId, LoginName, SubscriberId, TransTime, ClientIP, FakeIP, UserAgent, UserAgentCode, Url, Action, TransKey, FingerprintAttribute, UserAgentInfo, FlaggedCode, BotDetection, BotComponent, BotComponentCode)
 	SELECT	rt.CookieCode
 		,	rt.CustId
 		,	rt.SubAccId
@@ -188,7 +177,7 @@ BEGIN
 		,	rt.SubscriberId
 		,	rt.TransTime
 		,	rt.ClientIP
-        ,	rt.FakeIP
+		,	rt.FakeIP
 		,	rt.UserAgent
 		,	rt.UserAgentCode
 		,	rt.Url
@@ -196,8 +185,10 @@ BEGIN
 		,	rt.TransKey
 		,	rt.FingerprintAttribute
 		,	rt.UserAgentInfo
-		,	rt.BrowserInfo
-		,	rt.BrowserInfoAttribute
+		,	rt.FlaggedCode
+		,	rt.BotDetection
+		,	rt.BotComponent
+		,	MD5(rt.BotComponent) AS BotComponentCode
 	FROM	JSON_TABLE(
 			ip_Transaction,
 			 "$[*]" COLUMNS(
@@ -217,8 +208,9 @@ BEGIN
 					,	TransKey 				VARCHAR(200) 	PATH "$.TransKey"
 					,	FingerprintAttribute	JSON			PATH "$.FingerprintAttribute"
 					,	UserAgentInfo			JSON			PATH "$.UserAgentInfo"
-					,	BrowserInfo				JSON			PATH "$.BrowserInfo"
-					,	BrowserInfoAttribute	JSON			PATH "$.BrowserInfoAttribute"
+					,	FlaggedCode				VARCHAR(100)	PATH "$.FlaggedCode"
+					,	BotDetection			LONGTEXT		PATH "$.BotDetection"
+					,	BotComponent			LONGTEXT		PATH "$.BotComponent"
 				)
 		   ) AS  rt;
            
@@ -439,66 +431,42 @@ BEGIN
     SET 	tmp.RawFingerPrintId = tmpFpa.RawFingerPrintId
 		,	tmp.BrowserInstanceId = tmpFpa.BrowserInstanceId;
     
-    /*******BrowserInfo********************/
-    INSERT IGNORE INTO Temp_BrowserInfo(TmpTransactionsId, BrowserInfoCode, OSName, BrowserName, HeadlessScore, HeadlessDetail, Flagged, BrowserInfoAttributeCode, SecChUa, SecChUaPlatform, SecChUaMobile, JsBrowserName, JsOSName)
-    SELECT 	tmp.Id AS TmpTransactionsId
-		,	tmp.BrowserInfo->>'$.BrowserInfoCode'
-		,	tmp.BrowserInfo->>'$.OSName'
-		,	tmp.BrowserInfo->>'$.BrowserName'
-		,	tmp.BrowserInfo->>'$.HeadlessScore'
-		,	tmp.BrowserInfo->>'$.HeadlessDetail'
-		,	tmp.BrowserInfo->>'$.Flagged'
-		,	tmp.BrowserInfoAttribute->>'$.BrowserInfoAttributeCode'
-		,	tmp.BrowserInfoAttribute->>'$.SecChUa'
-		,	tmp.BrowserInfoAttribute->>'$.SecChUaPlatform'
-		,	tmp.BrowserInfoAttribute->>'$.SecChUaMobile'
-		,	tmp.BrowserInfoAttribute->>'$.JsBrowserName'
-		,	tmp.BrowserInfoAttribute->>'$.JsOSName'
-    FROM Temp_Transaction AS tmp;
+           
+    /******* BotDetection ********************/
+	INSERT INTO Temp_BotDetection(Id, BotDetectionValue)
+    SELECT 	tmp.Id
+		, 	SUM(bd.Value) as Value
+	FROM Temp_Transaction AS tmp
+		INNER JOIN FPS_FingerPrint.BotDetection bd ON FIND_IN_SET(bd.Name, tmp.BotDetection)
+	GROUP BY tmp.Id;
     
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfoAttribute(BrowserInfoAttributeCode, SecChUa, SecChUaPlatform, SecChUaMobile, JsBrowserName, JsOSName)
-    SELECT 	tmp.BrowserInfoAttributeCode
-		,	tmp.SecChUa
-		,	tmp.SecChUaPlatform
-		,	tmp.SecChUaMobile
-		,	tmp.JsBrowserName
-		,	tmp.JsOSName
-    FROM Temp_BrowserInfo tmp
-    WHERE tmp.BrowserInfoAttributeCode != ''
-		AND tmp.BrowserInfoAttributeCode != 'null'
-		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfoAttribute bia WHERE bia.BrowserInfoAttributeCode = tmp.BrowserInfoAttributeCode);
+	UPDATE Temp_Transaction AS tmp
+		INNER JOIN Temp_BotDetection tmpBD ON tmpBD.Id = tmp.Id
+	SET tmp.BotDetectionValue = tmpBD.BotDetectionValue;
     
-    UPDATE Temp_BrowserInfo tmp
-		LEFT JOIN FPS_FingerPrint.BrowserInfoAttribute bia ON bia.BrowserInfoAttributeCode = tmp.BrowserInfoAttributeCode
-		INNER JOIN Temp_Transaction AS tmpT ON tmpT.Id = tmp.TmpTransactionsId
-    SET tmp.BrowserInfoAttributeId = bia.Id
-	,	tmp.UserAgentId = tmpT.UserAgentId;
-    
-    INSERT IGNORE INTO FPS_FingerPrint.BrowserInfo(BrowserInfoAttributeId, BrowserInfoCode, BrowserName, OSName, HeadlessScore, HeadlessDetail, Flagged, UserAgentId, CreatedDate)
-    SELECT 	tmp.BrowserInfoAttributeId
-        ,	tmp.BrowserInfoCode
-		, 	tmp.BrowserName
-        , 	tmp.OSName
-        , 	tmp.HeadlessScore
-        , 	tmp.HeadlessDetail
-        , 	tmp.Flagged
-        , 	tmp.UserAgentId
-        ,	lv_CurrentDate AS CreatedDate
-    FROM Temp_BrowserInfo AS tmp
-    WHERE tmp.BrowserInfoCode != ''
-		AND tmp.BrowserInfoCode != 'null'
-		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BrowserInfo bi WHERE bi.BrowserInfoCode = tmp.BrowserInfoCode AND bi.UserAgentId = tmp.UserAgentId AND bi.BrowserInfoAttributeId = tmp.BrowserInfoAttributeId);
-    
-    UPDATE Temp_BrowserInfo AS tmp
-		INNER JOIN FPS_FingerPrint.BrowserInfo AS bi ON bi.BrowserInfoCode = tmp.BrowserInfoCode AND bi.UserAgentId = tmp.UserAgentId AND bi.BrowserInfoAttributeId = tmp.BrowserInfoAttributeId
-	SET tmp.BrowserInfoId = bi.Id;
+    /******* BotComponent ********************/
+    INSERT IGNORE INTO FPS_FingerPrint.BotComponent(Code, Component, IsHuman, CreatedDate, ModifiedDate)
+    WITH cte_BotComponent AS (
+		SELECT 	DISTINCT 
+				BotComponentCode AS Code
+			,	BotComponent AS Component
+			,	FlaggedCode
+		FROM Temp_Transaction
+    )
+    SELECT 	cte.Code
+		,	cte.Component
+		,	CASE WHEN cte.FlaggedCode = 'Human' THEN 1 ELSE 0 END AS IsHuman
+		,	lv_CurrentDate AS CreatedDate
+		,	DATE(lv_CurrentDate) AS ModifiedDate
+    FROM cte_BotComponent AS cte
+    WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.BotComponent bc WHERE bc.Code = cte.Code);
     
     UPDATE Temp_Transaction AS tmp
-		INNER JOIN Temp_BrowserInfo AS tmpBi ON tmpBi.TmpTransactionsId = tmp.Id
-    SET tmp.BrowserInfoId = tmpBi.BrowserInfoId;
+		INNER JOIN FPS_FingerPrint.BotComponent AS bds ON bds.Code = tmp.BotComponentCode
+	SET tmp.BotComponentId = bds.Id;
     
     /*******Evolution********************/
-    INSERT INTO Temp_Evolution(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, TransKey, BrowserInfoId)
+    INSERT INTO Temp_Evolution(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, TransKey, FlaggedCode, BotComponentId, BotDetectionValue)
 	SELECT 	tmp.Id
 		,	tmp.CustId
 		,	tmp.SubAccId
@@ -510,12 +478,14 @@ BEGIN
 		,	tmp.CookieId
 		,	tmp.TransTime
 		,	tmp.ClientIP
-        ,	tmp.FakeIP
+		,	tmp.FakeIP
 		,	tmp.UserAgentId
 		,	tmp.Url
 		,	tmp.Action
 		,	tmp.TransKey
-		,	tmp.BrowserInfoId
+		,	tmp.FlaggedCode
+		,	tmp.BotComponentId
+		,	tmp.BotDetectionValue
 	FROM Temp_Transaction AS tmp 
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = tmp.RawFingerPrintId)
 		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = tmp.CookieId)
@@ -526,7 +496,7 @@ BEGIN
 		SELECT 1
 		FROM Temp_Evolution
     ) THEN
-		INSERT INTO FPS_FingerPrint.TransactionEvolution(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+		INSERT INTO FPS_FingerPrint.TransactionEvolution(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, Flagged, BotDetectionValue, BotComponentId)
         SELECT 	tmp.CustId
 			,	tmp.SubAccId
 			,	tmp.AccountId
@@ -537,14 +507,18 @@ BEGIN
 			,	tmp.CookieId
 			,	tmp.TransTime
 			,	tmp.ClientIP
-            ,	tmp.FakeIP
+			,	tmp.FakeIP
 			,	tmp.UserAgentId
 			,	tmp.Url
 			,	tmp.Action
 			,	lv_CurrentDate AS CreatedDate
 			,	tmp.TransKey
-			,	tmp.BrowserInfoId
-        FROM Temp_Evolution AS tmp;
+			,	sl.ItemId AS Flagged
+			,	tmp.BotDetectionValue
+			,	tmp.BotComponentId
+        FROM Temp_Evolution AS tmp
+			LEFT JOIN FPS_FingerPrint.StaticList AS sl 	ON sl.ListId = 1
+														AND sl.ItemCode = tmp.FlaggedCode;
         
 		DELETE tmp
 		FROM Temp_Transaction AS tmp
@@ -552,7 +526,7 @@ BEGIN
     END IF;
     
     /*******Transaction********************/
-    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, Flagged, BotDetectionValue, BotComponentId)
 	SELECT	tmp.CustId
 		,	tmp.SubAccId
 		,	tmp.AccountId
@@ -563,14 +537,18 @@ BEGIN
 		,	tmp.CookieId
 		,	tmp.TransTime
 		,	tmp.ClientIP
-        ,	tmp.FakeIP
+		,	tmp.FakeIP
 		,	tmp.UserAgentId
 		,	tmp.Url
 		,	tmp.Action
 		,	lv_CurrentDate AS CreatedDate
 		,	tmp.TransKey
-		,	tmp.BrowserInfoId
-	FROM Temp_Transaction AS tmp;
+		,	sl.ItemID AS Flagged
+		,	tmp.BotDetectionValue
+		,	tmp.BotComponentId
+	FROM Temp_Transaction AS tmp
+		LEFT JOIN FPS_FingerPrint.StaticList AS sl 	ON sl.ListId = 1
+													AND sl.ItemCode = tmp.FlaggedCode;
     
 END$$
 DELIMITER ;

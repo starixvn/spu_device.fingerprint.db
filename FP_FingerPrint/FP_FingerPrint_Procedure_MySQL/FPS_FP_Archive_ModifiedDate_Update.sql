@@ -16,6 +16,7 @@ BEGIN
 		Revisions:
 			- 20220628@Jonathan.Doan: Created [Redmine ID: #174020]
 			- 20221213@Jonathan.Doan: Update more table [Redmine ID: #180264]
+			- 20231023@Jonathan.Doan: Apply BotD [Redmine ID: #195880]
             
 		Param's Explanation (filtered by):
 
@@ -38,12 +39,12 @@ BEGIN
 	CREATE TEMPORARY TABLE Temp_Transaction(
         	Id					BIGINT UNSIGNED PRIMARY KEY
         ,	AccountId			BIGINT UNSIGNED DEFAULT NULL
-        ,	BrowserInfoId		BIGINT UNSIGNED DEFAULT NULL
         ,	BrowserInstanceId	BIGINT UNSIGNED DEFAULT NULL
         ,	RawFingerPrintId	BIGINT UNSIGNED DEFAULT NULL
         ,	RawUserAgentId		BIGINT UNSIGNED DEFAULT NULL
         ,	CookieId			BIGINT UNSIGNED DEFAULT NULL
         ,	DeviceId			BIGINT UNSIGNED DEFAULT NULL
+        ,	BotComponentId		BIGINT UNSIGNED DEFAULT NULL
         ,	CreatedDate			DATETIME(4)
         , 	INDEX IX_Temp_Transaction_CreatedDate(CreatedDate)
     );
@@ -51,12 +52,6 @@ BEGIN
     DROP TEMPORARY TABLE IF EXISTS Temp_Account;
 	CREATE TEMPORARY TABLE Temp_Account(
         	AccountId			BIGINT UNSIGNED PRIMARY KEY
-        ,	CreatedDate			DATETIME(4)
-    );
-
-    DROP TEMPORARY TABLE IF EXISTS Temp_BrowserInfo;
-	CREATE TEMPORARY TABLE Temp_BrowserInfo(
-        	BrowserInfoId		BIGINT UNSIGNED PRIMARY KEY
         ,	CreatedDate			DATETIME(4)
     );
 
@@ -89,6 +84,12 @@ BEGIN
         	RawUserAgentId		BIGINT UNSIGNED PRIMARY KEY
         ,	CreatedDate			DATETIME(4)
     );
+    
+    DROP TEMPORARY TABLE IF EXISTS Temp_BotComponent;
+	CREATE TEMPORARY TABLE Temp_BotComponent(
+        	BotComponentId		BIGINT UNSIGNED PRIMARY KEY
+        ,	CreatedDate			DATETIME(4)
+    );
 
     /*******INIT DATA********************/
     SELECT off.OffsetValue
@@ -96,14 +97,14 @@ BEGIN
     FROM FPS_FingerPrint.Offset AS off
     WHERE off.Id = lv_offsetId;
 
-    INSERT INTO Temp_Transaction(Id, AccountId, BrowserInfoId, RawFingerPrintId, RawUserAgentId, CookieId, DeviceId, CreatedDate)
+    INSERT INTO Temp_Transaction(Id, AccountId, RawFingerPrintId, RawUserAgentId, CookieId, DeviceId, BotComponentId, CreatedDate)
     SELECT 	Id
         ,	AccountId
-        ,	BrowserInfoId
         ,	RawFingerPrintId
         ,	UserAgentId AS RawUserAgentId
         ,	CookieId
         ,	DeviceId
+        ,	BotComponentId
         ,	CreatedDate
 	FROM FPS_FingerPrint.TransactionCompleted
 	WHERE Id > lv_offsetValue
@@ -115,13 +116,6 @@ BEGIN
     FROM Temp_Transaction
     WHERE AccountId IS NOT NULL
     GROUP BY AccountId;
-    
-    INSERT INTO Temp_BrowserInfo(BrowserInfoId, CreatedDate)
-    SELECT 	BrowserInfoId
-		,	MAX(CreatedDate)
-    FROM Temp_Transaction
-    WHERE BrowserInfoId IS NOT NULL
-    GROUP BY BrowserInfoId;
     
     INSERT INTO Temp_BrowserInstance(BrowserInstanceId, CreatedDate)
     SELECT 	bifp.BrowserInstanceId
@@ -159,6 +153,13 @@ BEGIN
     WHERE RawUserAgentId IS NOT NULL
     GROUP BY RawUserAgentId;
     
+    INSERT INTO Temp_BotComponent(BotComponentId, CreatedDate)
+    SELECT 	BotComponentId
+		,	MAX(CreatedDate)
+    FROM Temp_Transaction
+    WHERE BotComponentId IS NOT NULL
+    GROUP BY BotComponentId;
+    
     SELECT MAX(Id)
     INTO lv_maxOffsetValue
     FROM Temp_Transaction;
@@ -166,10 +167,6 @@ BEGIN
     /*******UPDATE DATA********************/
 	UPDATE FPS_FingerPrint.Account AS main
 		INNER JOIN Temp_Account AS tmp ON main.Id = tmp.AccountId
-	SET main.ModifiedDate = tmp.CreatedDate;
-    
-	UPDATE FPS_FingerPrint.BrowserInfo AS main
-		INNER JOIN Temp_BrowserInfo AS tmp ON main.Id = tmp.BrowserInfoId
 	SET main.ModifiedDate = tmp.CreatedDate;
     
 	UPDATE FPS_FingerPrint.BrowserInstance AS main
@@ -190,6 +187,10 @@ BEGIN
     
 	UPDATE FPS_FingerPrint.RawUserAgent AS main
 		INNER JOIN Temp_RawUserAgent AS tmp ON main.Id = tmp.RawUserAgentId
+	SET main.ModifiedDate = tmp.CreatedDate;
+    
+	UPDATE FPS_FingerPrint.BotComponent AS main
+		INNER JOIN Temp_BotComponent AS tmp ON main.Id = tmp.BotComponentId
 	SET main.ModifiedDate = tmp.CreatedDate;
     
     IF lv_maxOffsetValue IS NOT NULL

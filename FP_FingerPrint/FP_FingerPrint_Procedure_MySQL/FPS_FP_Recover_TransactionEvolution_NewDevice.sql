@@ -17,10 +17,11 @@ BEGIN
 			- 20220913@Jonathan.Doan: Created [Redmine ID: #176820]
 			- 20221123@Jonathan.Doan: Remove field SeverTransId, ClientTransId, AddonId [Redmine ID: #180406]
 			- 20231017@Teddy.Le: Detect real ip and fake ip via x-real-ip [Redmine ID: #195602]
+			- 20231023@Jonathan.Doan: Apply BotD [Redmine ID: #195880]
 		Param's Explanation (filtered by):	
 
 		Example:
-			- CALL FPS_FP_Recover_TransactionEvolution_NewDevice('1,2,3', 0);
+			- CALL FPS_FP_Recover_TransactionEvolution_NewDevice('1,2,3');
 			
 	*/
     
@@ -62,13 +63,16 @@ BEGIN
 			, 	CreatedDate				DATETIME
 			, 	TransKey				VARCHAR(200)
 			, 	RecoverType				TINYINT DEFAULT 0
+			,	Flagged					SMALLINT
+			,	BotDetectionValue		BIT(32)	DEFAULT 0
+			,	BotComponentId			BIGINT UNSIGNED
     );
     
 	SET @sql = CONCAT("INSERT INTO Temp_InputTrans (Id) VALUES ('", REPLACE(ip_TransJson, ",", "'),('"),"');");
 	PREPARE stmt1 FROM @sql;
 	EXECUTE stmt1;
 
-	INSERT INTO Temp_Transaction(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+	INSERT INTO Temp_Transaction(Id, CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, Flagged, BotDetectionValue, BotComponentId)
 	SELECT	tmp.Id
 		,	te.CustId
 		,	te.SubAccId
@@ -86,11 +90,13 @@ BEGIN
 		,	te.Action
 		,	te.CreatedDate
 		,	te.TransKey
-		,	te.BrowserInfoId
+		,	te.Flagged
+		,	te.BotDetectionValue
+		,	te.BotComponentId
 	FROM Temp_InputTrans AS tmp
 		INNER JOIN FPS_FingerPrint.TransactionEvolution AS te ON tmp.Id = te.Id;
 	
-    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, BrowserInfoId)
+    INSERT INTO FPS_FingerPrint.Transaction(CustId, SubAccId, AccountId, LoginName, SubscriberId, RawFingerPrintId, BrowserInstanceId, CookieId, TransTime, ClientIP, FakeIP, UserAgentId, Url, Action, CreatedDate, TransKey, Flagged, BotDetectionValue, BotComponentId)
 	SELECT	tmp.CustId
 		,	tmp.SubAccId
 		,	tmp.AccountId
@@ -107,7 +113,9 @@ BEGIN
 		,	tmp.Action
 		,	tmp.CreatedDate
 		,	tmp.TransKey
-		,	tmp.BrowserInfoId
+		,	tmp.Flagged
+		,	tmp.BotDetectionValue
+		,	tmp.BotComponentId
 	FROM Temp_Transaction AS tmp;
     
 	DELETE te
