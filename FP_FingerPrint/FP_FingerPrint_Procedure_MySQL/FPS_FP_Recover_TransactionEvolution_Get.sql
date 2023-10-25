@@ -56,7 +56,7 @@ BEGIN
 		,	GROUP_CONCAT(af.RawFingerPrintId) AS FPIds
 	FROM Temp_TransactionEvolution AS tmp
 		INNER JOIN FPS_FingerPrint.AccountFingerprint AS af ON af.AccountId = tmp.AccountId
-	WHERE af.IsEvolution IS NULL
+	WHERE af.IsEvolution = 0
     GROUP BY tmp.Id;
     
     SELECT 	tmp.Id
@@ -64,26 +64,26 @@ BEGIN
 		,	tmp.CookieId
 		,	tmp.TransTime
 		,	tmpG.FPIds
-		,	COALESCE(bis.UserAgent, '') AS UserAgent
-		,	COALESCE(bis.BrowserFamilyCode, '') AS BrowserFamilyCode
-		,	COALESCE(bis.OSName, '') AS OSName
-		,	COALESCE(bis.BrowserName, '') AS BrowserName
-		,	COALESCE(bis.BrowserVersion, '') AS BrowserVersion
-		,	COALESCE(bis.Platform, '') AS Platform
-		,	COALESCE(bis.Accept, '') AS Accept
-		,	COALESCE(bis.Encoding, '') AS Encoding
-		,	COALESCE(bis.Headers, '') AS Headers
-		,	COALESCE(fpa.LocalStorage, -1) AS LocalStorage
-		,	COALESCE(fpa.DoNotTrack, '') AS DoNotTrack
-		,	COALESCE(fpa.Cookies, -1) AS Cookies
-		,	COALESCE(fpa.Canvas, '') AS Canvas
-		,	COALESCE(fpa.Fonts, '') AS Fonts
-		,	COALESCE(fpa.Vendor, '') AS Vendor
-		,	COALESCE(fpa.GLRenderer, '') AS GLRenderer
-		,	COALESCE(fpa.Plugins, '') AS Plugins
-		,	COALESCE(fpa.Languages, '') AS Languages
-		,	COALESCE(fpa.Resolution, '') AS Resolution
-		,	COALESCE(fpa.Timezone, '') AS Timezone
+		,	IFNULL(bis.UserAgent, '') AS UserAgent
+		,	IFNULL(bis.BrowserFamilyCode, '') AS BrowserFamilyCode
+		,	IFNULL(bis.OSName, '') AS OSName
+		,	IFNULL(bis.BrowserName, '') AS BrowserName
+		,	IFNULL(bis.BrowserVersion, '') AS BrowserVersion
+		,	IFNULL(bis.Platform, '') AS Platform
+		,	IFNULL(bis.Accept, '') AS Accept
+		,	IFNULL(bis.Encoding, '') AS Encoding
+		,	IFNULL(bis.Headers, '') AS Headers
+		,	IFNULL(fpa.LocalStorage, -1) AS LocalStorage
+		,	IFNULL(fpa.DoNotTrack, '') AS DoNotTrack
+		,	IFNULL(fpa.Cookies, -1) AS Cookies
+		,	IFNULL(fpa.Canvas, '') AS Canvas
+		,	IFNULL(fpa.Fonts, '') AS Fonts
+		,	IFNULL(fpa.Vendor, '') AS Vendor
+		,	IFNULL(fpa.GLRenderer, '') AS GLRenderer
+		,	IFNULL(fpa.Plugins, '') AS Plugins
+		,	IFNULL(fpa.Languages, '') AS Languages
+		,	IFNULL(fpa.Resolution, '') AS Resolution
+		,	IFNULL(fpa.Timezone, '') AS Timezone
 	FROM Temp_TransactionEvolution AS tmp
 		INNER JOIN Temp_GroupFP AS tmpG ON tmpG.Id = tmp.Id
 		LEFT JOIN FPS_FingerPrint.RawFingerPrint AS fp ON fp.Id = tmp.RawFingerPrintId

@@ -437,7 +437,7 @@ BEGIN
     SELECT 	tmp.Id
 		, 	SUM(bd.Value) as Value
 	FROM Temp_Transaction AS tmp
-		INNER JOIN FPS_FingerPrint.BotDetection bd ON FIND_IN_SET(bd.Name, tmp.BotDetection)
+		INNER JOIN DCS_DataCenter.BotDetection bd ON FIND_IN_SET(bd.Name, tmp.BotDetection)
 	GROUP BY tmp.Id;
     
 	UPDATE Temp_Transaction AS tmp
@@ -489,7 +489,7 @@ BEGIN
 	FROM Temp_Transaction AS tmp 
 	WHERE NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceFingerPrint df WHERE df.RawFingerPrintId = tmp.RawFingerPrintId)
 		AND NOT EXISTS (SELECT 1 FROM FPS_FingerPrint.DeviceCookie dc WHERE dc.CookieId = tmp.CookieId)
-		AND EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.IsEvolution IS NULL);
+		AND EXISTS (SELECT 1 FROM FPS_FingerPrint.AccountFingerprint af WHERE af.AccountId = tmp.AccountId AND af.IsEvolution = 0);
     
     /*******INSERT INTO TransactionEvolution********************/
     IF EXISTS (
@@ -517,7 +517,7 @@ BEGIN
 			,	tmp.BotDetectionValue
 			,	tmp.BotComponentId
         FROM Temp_Evolution AS tmp
-			LEFT JOIN FPS_FingerPrint.StaticList AS sl 	ON sl.ListId = 1
+			LEFT JOIN DCS_DataCenter.StaticList AS sl 	ON sl.ListId = 1
 														AND sl.ItemCode = tmp.FlaggedCode;
         
 		DELETE tmp
@@ -547,7 +547,7 @@ BEGIN
 		,	tmp.BotDetectionValue
 		,	tmp.BotComponentId
 	FROM Temp_Transaction AS tmp
-		LEFT JOIN FPS_FingerPrint.StaticList AS sl 	ON sl.ListId = 1
+		LEFT JOIN DCS_DataCenter.StaticList AS sl 	ON sl.ListId = 1
 													AND sl.ItemCode = tmp.FlaggedCode;
     
 END$$
