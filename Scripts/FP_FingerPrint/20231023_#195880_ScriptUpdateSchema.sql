@@ -42,6 +42,16 @@ CREATE TABLE `BotComponent` (
   KEY `IX_BotComponent_ModifiedDate` (`ModifiedDate`)
 ) ENGINE=InnoDB;
 
+ALTER TABLE `FPS_FingerPrint`.`FingerPrintAttribute` 
+ADD COLUMN `ApplePay` SMALLINT DEFAULT NULL 
+	COMMENT 'Disabled = 0, Enabled = 1, NoAPI = -1, NotAvailableInInsecureContext = -2, NotAvailableInFrame = -3',
+ADD COLUMN `Architecture` INT DEFAULT NULL,
+ADD COLUMN `PDFViewerEnabled` TINYINT DEFAULT NULL,
+ADD COLUMN `PrivateClickMeasurement` VARCHAR(100) DEFAULT NULL,
+ADD COLUMN `ReducedTransparency` TINYINT DEFAULT NULL,
+ADD COLUMN `WebGlBasics` VARCHAR(64) DEFAULT NULL,
+ADD COLUMN `WebGlExtensions` VARCHAR(64) DEFAULT NULL;
+
 ALTER TABLE `FPS_FingerPrint`.`AccountFingerprint` 
 CHANGE COLUMN `IsEvolution` `IsEvolution` TINYINT(1) NULL DEFAULT 0 ;
 
