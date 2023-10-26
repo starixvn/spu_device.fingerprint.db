@@ -1,0 +1,25 @@
+/*<info serverAlias="DCS_DataTrace" databaseType="2"></info>*/
+/*
+	Created: 20232610@Teddy.le [Redmine ID: #195968]
+	Task: Init Schema
+	DB: DCS_DataTrace
+*/
+
+CREATE SCHEMA `DCS_DataTrace` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin; 
+USE DCS_DataTrace;
+
+CREATE TABLE `DCS_DataTrace`.`DailyLogTrailSummary` (
+  `ID` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `Date` DATE NOT NULL,
+  `SubscriberID` INT UNSIGNED NULL DEFAULT NULL,
+  `Source` VARCHAR(100) NULL DEFAULT NULL,
+  `Method` VARCHAR(100) NULL DEFAULT NULL,
+  `SystemName` VARCHAR(45) NULL DEFAULT NULL,
+  `Total` INT UNSIGNED NULL DEFAULT NULL,
+  `CreatedTime` DATETIME NULL DEFAULT NULL,
+  `ModifiedTime` DATETIME NULL DEFAULT NULL,
+  PRIMARY KEY (`ID`, `Date`),
+  UNIQUE INDEX `UX_DailyLogTrailSummary_SubscriberID_Source_Method` (`Date` ASC, `SubscriberID` ASC, `Source` ASC, `Method` ASC, `SystemName` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8
+COLLATE = utf8_bin;
