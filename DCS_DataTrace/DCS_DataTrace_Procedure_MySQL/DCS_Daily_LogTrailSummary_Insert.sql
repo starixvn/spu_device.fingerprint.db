@@ -20,7 +20,7 @@ BEGIN
 
 	Example:
 		SET sql_safe_updates = 0;
-        CALL DCS_DataTrace.DCS_DT_Summary_LogTrail_Insert('[{"Date":"2023-10-26","SubscriberID":101,"Source":"https://spu-fps-api.nexdev.net","Method":"/api/transaction","Total":10, "SystemName":"new fps"}]');
+        CALL DCS_DataTrace.DCS_DT_Summary_LogTrail_Insert('[{"EventDate":"2023-10-26","SubscriberID":101,"SystemName":"new fps","Source":"https://spu-fps-api.nexdev.net",Destination:'spu-fps-portal-api.nexdev.net',"Method":"/api/transaction","Total":10}]');
 	*/
     
 	DECLARE lv_CurrentDatetime DATETIME DEFAULT CURRENT_TIMESTAMP();
@@ -29,55 +29,59 @@ BEGIN
 
 	CREATE TEMPORARY TABLE Temp_InputLogTrail(
 			ID 							BIGINT UNSIGNED NOT NULL AUTO_INCREMENT
-		, 	Date						DATE NOT NULL
+		, 	EventDate					DATE NOT NULL
 		, 	SubscriberID				INT UNSIGNED DEFAULT 0
+        , 	SystemName					VARCHAR(45) DEFAULT NULL
 		, 	Source						VARCHAR(100) DEFAULT NULL
+        ,   Destination					VARCHAR(100) DEFAULT NULL
 		, 	Method						VARCHAR(100) DEFAULT NULL
-		, 	SystemName					VARCHAR(45) DEFAULT NULL
         , 	Total						INT UNSIGNED DEFAULT 0
         , 	CreatedTime					DATETIME DEFAULT NULL
         , 	ModifiedTime				DATETIME DEFAULT NULL
 		, 	IsUpdate					BOOL DEFAULT 0
         ,   PRIMARY KEY (`ID`)
-		,	KEY `IX_DailyLogTrailSummary_SubscriberID_Source_Method` (`Date`, `SubscriberID`, `Source`, `Method`, `SystemName`)
+		,	KEY `IX_DailyLogTrailSummary_SubscriberID_Source_Method` (`EventDate`, `SubscriberID`, `SystemName`, `Source`, `Destination`, `Method`)
 	);
 	
-    INSERT INTO Temp_InputLogTrail(Date, SubscriberID, Source, Method, SystemName, Total)
-	SELECT	tmp.Date
+    INSERT INTO Temp_InputLogTrail(EventDate, SubscriberID, SystemName, Source, Destination, Method, Total)
+	SELECT	tmp.EventDate
 		,	tmp.SubscriberID
-		,	tmp.Source
-		,	tmp.Method
         ,	tmp.SystemName
+		,	tmp.Source
+        ,	tmp.Destination
+		,	tmp.Method
         ,	tmp.Total
 	FROM JSON_TABLE(
 			ip_LogTrailJson,
 			 "$[*]" COLUMNS(
-					Date						DATE			PATH "$.Date"
+					EventDate					DATE				PATH "$.EventDate"
 				,	SubscriberID				INT UNSIGNED		PATH "$.SubscriberID"
-				,	Source						VARCHAR(100)		PATH "$.Source"
-				,	Method						VARCHAR(100) 		PATH "$.Method"
                 ,   SystemName					VARCHAR(45)			PATH "$.SystemName"
+				,	Source						VARCHAR(100)		PATH "$.Source"
+                ,	Destination					VARCHAR(100)		PATH "$.Destination"
+				,	Method						VARCHAR(100) 		PATH "$.Method"
 				,	Total						INT UNSIGNED		PATH "$.Total"
 			)
 		) AS tmp;
-
 	
     UPDATE DCS_DataTrace.DailyLogTrailSummary AS dl
-		INNER JOIN Temp_InputLogTrail AS tmp ON 	dl.Date = tmp.Date
+		INNER JOIN Temp_InputLogTrail AS tmp ON 	dl.EventDate = tmp.EventDate
 											AND dl.SubscriberID = tmp.SubscriberID
-											AND dl.Source = tmp.Source
-											AND dl.Method = tmp.Method
                                             AND dl.SystemName = tmp.SystemName
+											AND dl.Source = tmp.Source
+                                            AND dl.Destination = tmp.Destination
+											AND dl.Method = tmp.Method
 	SET dl.Total 			= dl.Total + tmp.Total,
 		dl.ModifiedTime 	= lv_CurrentDatetime,
 		tmp.IsUpdate 		= 1;
     
-    INSERT INTO DCS_DataTrace.DailyLogTrailSummary(Date, SubscriberID, Source, Method, SystemName, Total, CreatedTime, ModifiedTime)
-    SELECT 	tmp.Date
+    INSERT INTO DCS_DataTrace.DailyLogTrailSummary(EventDate, SubscriberID, SystemName, Source, Destination, Method, Total, CreatedTime, ModifiedTime)
+    SELECT 	tmp.EventDate
         ,	tmp.SubscriberID
-		,	tmp.Source
-		,	tmp.Method
         ,	tmp.SystemName
+		,	tmp.Source
+        ,   tmp.Destination
+		,	tmp.Method
         ,	tmp.Total
         ,	lv_CurrentDatetime AS CreatedTime
         ,	lv_CurrentDatetime AS ModifiedTime
