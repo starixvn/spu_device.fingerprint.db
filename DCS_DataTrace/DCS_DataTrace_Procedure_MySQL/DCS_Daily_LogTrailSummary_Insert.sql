@@ -31,19 +31,20 @@ BEGIN
 			ID 							BIGINT UNSIGNED NOT NULL AUTO_INCREMENT
 		, 	EventDate					DATE NOT NULL
 		, 	SubscriberID				INT UNSIGNED DEFAULT 0
-        , 	SystemName					VARCHAR(45) DEFAULT NULL
-		, 	Source						VARCHAR(100) DEFAULT NULL
-        ,   Destination					VARCHAR(100) DEFAULT NULL
-		, 	Method						VARCHAR(100) DEFAULT NULL
+        , 	SystemName					VARCHAR(45) DEFAULT ''
+		, 	Source						VARCHAR(100) DEFAULT ''
+        ,   Destination					VARCHAR(100) DEFAULT ''
+		, 	Method						VARCHAR(100) DEFAULT ''
         , 	Total						INT UNSIGNED DEFAULT 0
         , 	CreatedTime					DATETIME DEFAULT NULL
         , 	ModifiedTime				DATETIME DEFAULT NULL
 		, 	IsUpdate					BOOL DEFAULT 0
+        ,	Hash 						VARCHAR(100) NULL DEFAULT NULL
         ,   PRIMARY KEY (`ID`)
-		,	KEY `IX_DailyLogTrailSummary_SubscriberID_Source_Method` (`EventDate`, `SubscriberID`, `SystemName`, `Source`, `Destination`, `Method`)
+		,	KEY `UX_DailyLogTrailSummary_Hash` (`Hash`)
 	);
 	
-    INSERT INTO Temp_InputLogTrail(EventDate, SubscriberID, SystemName, Source, Destination, Method, Total)
+    INSERT INTO Temp_InputLogTrail(EventDate, SubscriberID, SystemName, Source, Destination, Method, Total, Hash)
 	SELECT	tmp.EventDate
 		,	tmp.SubscriberID
         ,	tmp.SystemName
@@ -51,6 +52,7 @@ BEGIN
         ,	tmp.Destination
 		,	tmp.Method
         ,	tmp.Total
+        ,   MD5(CONCAT(EventDate, SubscriberID, SystemName, Source, Destination, Method)) AS Hash
 	FROM JSON_TABLE(
 			ip_LogTrailJson,
 			 "$[*]" COLUMNS(
@@ -75,7 +77,7 @@ BEGIN
 		dl.ModifiedTime 	= lv_CurrentDatetime,
 		tmp.IsUpdate 		= 1;
     
-    INSERT INTO DCS_DataTrace.DailyLogTrailSummary(EventDate, SubscriberID, SystemName, Source, Destination, Method, Total, CreatedTime, ModifiedTime)
+    INSERT INTO DCS_DataTrace.DailyLogTrailSummary(EventDate, SubscriberID, SystemName, Source, Destination, Method, Total, CreatedTime, ModifiedTime, Hash)
     SELECT 	tmp.EventDate
         ,	tmp.SubscriberID
         ,	tmp.SystemName
@@ -85,6 +87,7 @@ BEGIN
         ,	tmp.Total
         ,	lv_CurrentDatetime AS CreatedTime
         ,	lv_CurrentDatetime AS ModifiedTime
+        ,   tmp.Hash
 	FROM Temp_InputLogTrail AS tmp
     WHERE tmp.IsUpdate = 0;
 END$$
