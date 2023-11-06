@@ -19,6 +19,6 @@ CREATE TABLE `DCS_DataTrace`.`DailyLogTrailSummary` (
   `CreatedTime` DATETIME NULL DEFAULT NULL,
   `ModifiedTime` DATETIME NULL DEFAULT NULL,
   `Hash` VARCHAR(100) NULL DEFAULT NULL,
-  PRIMARY KEY (`ID`),
+  PRIMARY KEY (`ID`, `EventDate`, `SubscriberID`),
   UNIQUE KEY `UX_DailyLogTrailSummary_Hash` (`Hash`))
 ENGINE = InnoDB;
