@@ -1,4 +1,4 @@
-/*<info serverAlias="DCS_DataTrace" databaseType="2"></info>*/
+/*<info serverAlias="CTSMain-DCS_DataTrace" databaseType="2"></info>*/
 /*
 	Created: 20232610@Teddy.le [Redmine ID: #195968]
 	Task: Init Schema
